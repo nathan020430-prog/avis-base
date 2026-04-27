@@ -2352,7 +2352,28 @@ function isMobile() {
 function applyMobileMode() {
   const mob = isMobile();
   document.body.classList.toggle('is-mobile', mob);
-  // Si on bascule en mobile alors qu'un éditeur est ouvert : on le ferme
+
+  // ─── FIX containing-block ────────────────────────────────────────────
+  // .header utilise `backdrop-filter` qui crée un nouveau containing-block
+  // pour les position:fixed descendants. Conséquence : la sheet ancrée
+  // `bottom:78px` était positionnée par rapport au header (cassée).
+  // Solution : portail vers <body> en mobile, retour dans .nav-menu en desktop.
+  const dd = document.getElementById('navMenuDropdown');
+  if (dd) {
+    if (mob && dd.parentElement?.id !== 'mobileDropdownPortal') {
+      let portal = document.getElementById('mobileDropdownPortal');
+      if (!portal) {
+        portal = document.createElement('div');
+        portal.id = 'mobileDropdownPortal';
+        document.body.appendChild(portal);
+      }
+      portal.appendChild(dd);
+    } else if (!mob && dd.parentElement?.id === 'mobileDropdownPortal') {
+      const navMenu = document.getElementById('navMenu');
+      if (navMenu) navMenu.appendChild(dd);
+    }
+  }
+
   if (mob) {
     document.getElementById('articleEditor')?.classList.remove('on');
     document.getElementById('editor')?.classList.remove('on');
@@ -7287,9 +7308,11 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleNavMenu();
   });
 
-  // Close on outside click (mobile : ignorer aussi la bottom-nav qui pilote l'ouverture)
+  // Close on outside click (mobile : ignorer aussi la bottom-nav et le portail dropdown)
   document.addEventListener('click', e => {
     if (e.target.closest('#navMenu')) return;
+    if (e.target.closest('#navMenuDropdown')) return;       // dropdown peut être en portail body
+    if (e.target.closest('#mobileDropdownPortal')) return;
     if (e.target.closest('.mobile-nav')) return;
     closeNavMenu();
   });

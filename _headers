@@ -1,0 +1,22 @@
+# Cloudflare Pages — en-têtes HTTP
+# Doc : https://developers.cloudflare.com/pages/configuration/headers/
+
+# Sécurité de base sur toutes les pages
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-XSS-Protection: 1; mode=block
+
+# index.html : pas de cache long (on veut que les MAJ soient visibles vite)
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Fichiers SQL : ne devraient pas être servis publiquement, mais au cas où
+/*.sql
+  X-Robots-Tag: noindex
+  Cache-Control: no-store
