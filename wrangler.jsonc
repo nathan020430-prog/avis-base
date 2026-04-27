@@ -6,7 +6,9 @@
     "enabled": true
   },
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "not_found_handling": "single-page-application",
+    "html_handling": "auto-trailing-slash"
   },
   "compatibility_flags": [
     "nodejs_compat"

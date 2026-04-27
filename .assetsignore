@@ -1,0 +1,26 @@
+# Fichiers à ne PAS servir publiquement par Cloudflare Workers Static Assets
+# Doc : https://developers.cloudflare.com/workers/static-assets/binding/#configuration
+
+# Documentation interne
+README.md
+PLAN_DEV.md
+
+# Schémas SQL (sensibles : structure de la DB)
+*.sql
+
+# Config dev / déploiement
+wrangler.jsonc
+wrangler.toml
+.gitignore
+.assetsignore
+package.json
+package-lock.json
+
+# Git / Claude
+.git
+.gitattributes
+.claude
+
+# Backups
+*.bak
+*.orig
