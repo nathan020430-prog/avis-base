@@ -47,6 +47,8 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.8.3.2** — Mode mobile lecture seule + bottom nav + bottom-sheet menu compte
+- **v0.8.3** — Détection mobile + blocage écriture/édition sur mobile (choix éditorial)
 - **v0.8.2** — Pagination & compteur de publications
 - **v0.8.0.1** — Correctifs V0.8 (collisions CSS modales, boost dans "À la une")
 - **v0.8** — Économie de pièces (gain par lectures, pourboires, boost, badges) + score de crédibilité automatique
@@ -66,4 +68,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.8.2
+© Avis Basé · Beta · v0.8.3.2
