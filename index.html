@@ -3413,7 +3413,7 @@ function renderArticles() {
     if (empty) empty.style.display = 'none';
     const pager = document.getElementById('articlesPager');
     if (pager) pager.style.display = 'none';
-    bindArticleCardEvents();
+    // Note : renderHomepage() lie déjà ses propres clics, pas besoin d'appel externe
     return;
   }
 
