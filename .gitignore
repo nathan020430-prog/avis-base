@@ -1,0 +1,33 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code local config
+.claude/settings.local.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Env / secrets (par sécurité, même si on ne devrait pas en avoir)
+.env
+.env.*
+*.key
+*.pem
+
+# Build artifacts (au cas où)
+dist/
+build/
+node_modules/
+
+# Backup
+*.bak
+*.orig
