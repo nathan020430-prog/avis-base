@@ -49,20 +49,24 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 
 ## 🗺️ Roadmap globale
 
+> **🎯 Philosophie de lancement** : Pas de com publique tant que le produit n'est pas **complètement fini**.
+> Tout le développement reste en `0.x.x` (pré-release). La **v1.0.0 = lancement public final**, à la toute fin.
+> Pendant la phase 0.x.x, le site est accessible sur `avis-base.com` mais en **soft-launch** : on construit, on itère avec quelques beta-testeurs, on ne fait **pas de com**.
+
 | Version | Phase | Objectif | Durée estimée |
 |---------|-------|----------|---------------|
 | **v0.9.0** | Stabilisation | Mobile interactif (lecture + social) — **écriture reste desktop** | 1 semaine |
 | **v0.9.1** | Stabilisation | Notifications in-app basiques | 3-5 jours |
-| **v1.0.0** | 🚀 Lancement | Migration hébergement + polish public | 1 semaine |
-| **v1.1.0** | Social | Système de follow + fil personnalisé | 1-2 semaines |
-| **v1.2.0** | Média | Upload vidéo direct (desktop) | 1-2 semaines |
-| **v1.3.0** | Social | Commentaires améliorés (threads) | 1 semaine |
-| **v1.4.0** | Communication | Messages privés (DM) — mobile + desktop | 2 semaines |
-| **v1.5.0** | Engagement | Notifications push + emails | 1 semaine |
-| **v2.0.0** | 🏗️ Refonte | Architecture Next.js (préparer dev pro) | 3-4 semaines |
-| **v2.1.0** | Mobile | App iOS + Android (lecture/interaction, pas d'écriture) | 4-6 semaines |
-| **v2.2.0** | Sécurité | Modération avancée + anti-fake news | 2 semaines |
-| **v3.0.0** | 💰 Monétisation | Abonnements + tips créateurs | 2-3 semaines |
+| **v0.10.0** | Social | Système de follow + fil personnalisé | 1-2 semaines |
+| **v0.11.0** | Média | Upload vidéo direct (desktop) | 1-2 semaines |
+| **v0.12.0** | Social | Commentaires améliorés (threads) | 1 semaine |
+| **v0.13.0** | Communication | Messages privés (DM) — mobile + desktop | 2 semaines |
+| **v0.14.0** | Engagement | Notifications push + emails | 1 semaine |
+| **v0.15.0** | 🏗️ Refonte | Architecture Next.js (préparer dev pro) | 3-4 semaines |
+| **v0.16.0** | Mobile | App iOS + Android (lecture/interaction, pas d'écriture) | 4-6 semaines |
+| **v0.17.0** | Sécurité | Modération avancée + anti-fake news | 2 semaines |
+| **v0.18.0** | 💰 Monétisation | Abonnements + tips créateurs | 2-3 semaines |
+| **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
 ---
 
@@ -241,84 +245,18 @@ Avant de coder, propose-moi le SQL et la structure UI pour validation.
 
 ---
 
-## 🚀 v1.0.0 — Lancement public
-
-**Objectif :** Migrer l'hébergement, polish final, prêt pour le public.
-
-### Prompt Claude Code :
-
-```
-Contexte : Avis Basé est prêt techniquement. Je veux passer en v1.0
-pour le lancement public.
-
-Mission v1.0.0 : Préparation lancement public.
-
-Tâches :
-
-1. SEO et métadonnées sociales
-   - Open Graph tags complets (og:title, og:description, og:image, og:url)
-   - Twitter Card tags
-   - Schema.org JSON-LD pour les articles (type Article)
-   - Sitemap.xml dynamique (généré côté Supabase)
-   - robots.txt
-   - Favicon multi-format (32, 192, 512px) + apple-touch-icon
-
-2. Performance
-   - Lazy loading des images d'articles
-   - Préconnexion aux domaines externes
-   - Service Worker pour cache offline basique
-   - Compression des SVG inline
-
-3. Page de partage d'article
-   - URL propre : /article/[slug] (avec hash routing si pas de serveur)
-   - Image de partage générée auto (titre + auteur sur fond pattern)
-
-4. Footer
-   - Lien vers TikTok @avis_base.nth
-   - Page "À propos" simple
-   - Page "Charte éditoriale" (sources, vérification, IA)
-   - Mentions légales (template à remplir)
-   - Contact email
-
-5. Onboarding nouveau user
-   - Tour guidé en 3-4 étapes au premier login
-   - Suggestion : suivre 3 articles populaires pour personnaliser
-
-6. Page 404 stylée
-
-7. Mise à jour version : v1.0.0
-   - Retire le tag "beta"
-   - Console.log : "Avis Basé v1.0.0 - Le média collaboratif qui source tout"
-
-Migration hébergement (instructions séparées) :
-- Je vais migrer vers Cloudflare Pages
-- Génère-moi un fichier _headers pour cache optimal
-- Génère-moi un fichier _redirects pour les routes propres
-
-Propose-moi le plan détaillé avant de commencer.
-```
-
-### ✅ Critères de validation
-- [ ] Le site est en ligne sur Cloudflare Pages (gratuit)
-- [ ] Le partage sur réseaux sociaux affiche un beau preview
-- [ ] Les performances Lighthouse sont >90
-- [ ] Aucune erreur 404 ou bug visible
-- [ ] L'URL principale (avisbase.fr ou autre) fonctionne
-
----
-
-## 👥 v1.1.0 — Système de follow + fil personnalisé
+## 👥 v0.10.0 — Système de follow + fil personnalisé
 
 **Objectif :** Transformer Avis Basé en vrai réseau social.
 
 ### Prompt Claude Code :
 
 ```
-Contexte : Avis Basé v1.0 est en ligne. Maintenant je veux ajouter
-le cœur du réseau social : suivre des utilisateurs et avoir un fil
-personnalisé.
+Contexte : Avis Basé v0.9.1 fonctionne (mobile interactif + notifs).
+Maintenant je veux ajouter le cœur du réseau social : suivre des
+utilisateurs et avoir un fil personnalisé.
 
-Mission v1.1.0 : Système de follow + fil "Mon Feed".
+Mission v0.10.0 : Système de follow + fil "Mon Feed".
 
 Côté Supabase :
 1. Crée la table "follows" :
@@ -351,7 +289,7 @@ Côté frontend :
    - Sur la page d'accueil
    - Basé sur : auteurs d'articles likés, sources fréquemment citées
 
-Version : v1.1.0
+Version : v0.10.0
 Propose-moi le schéma et les écrans avant de coder.
 ```
 
@@ -363,7 +301,7 @@ Propose-moi le schéma et les écrans avant de coder.
 
 ---
 
-## 🎥 v1.2.0 — Upload vidéo direct (desktop)
+## 🎥 v0.11.0 — Upload vidéo direct (desktop)
 
 **Objectif :** Permettre l'upload de vidéos courtes (pas juste l'éditeur de clips). **Conformément au choix éditorial : l'upload se fait sur desktop uniquement.**
 
@@ -378,7 +316,7 @@ RAPPEL ÉDITORIAL : L'upload de vidéos se fait sur DESKTOP uniquement
 (comme la rédaction d'articles et l'édition de clips). Sur mobile,
 le bouton affiche le même message explicatif.
 
-Mission v1.2.0 : Upload vidéo natif (desktop only).
+Mission v0.11.0 : Upload vidéo natif (desktop only).
 
 Côté Supabase :
 1. Configure le bucket "videos" dans Supabase Storage :
@@ -418,7 +356,7 @@ IMPORTANT :
 - Stocker dans Supabase Storage est OK pour démarrer mais devient cher.
 - Plan B : intégrer Cloudflare Stream plus tard pour scaler.
 
-Version : v1.2.0
+Version : v0.11.0
 Avant : montre-moi le composant d'upload en wireframe + le SQL.
 ```
 
@@ -431,7 +369,7 @@ Avant : montre-moi le composant d'upload en wireframe + le SQL.
 
 ---
 
-## 💬 v1.3.0 — Commentaires améliorés
+## 💬 v0.12.0 — Commentaires améliorés
 
 **Objectif :** Système de commentaires avec threads (réponses imbriquées).
 
@@ -441,7 +379,7 @@ Avant : montre-moi le composant d'upload en wireframe + le SQL.
 Contexte : Les commentaires actuels sont basiques. Je veux un vrai système
 de discussion avec threads (comme Reddit en plus simple).
 
-Mission v1.3.0 : Commentaires en threads + modération de base.
+Mission v0.12.0 : Commentaires en threads + modération de base.
 
 Côté Supabase :
 1. Adapter (ou créer) la table "comments" :
@@ -476,7 +414,7 @@ Côté frontend :
 4. Lazy loading : 10 commentaires top, "Voir plus" pour charger
 5. Realtime : nouveau commentaire apparaît avec animation discrète
 
-Version : v1.3.0
+Version : v0.12.0
 ```
 
 ### ✅ Critères de validation
@@ -487,7 +425,7 @@ Version : v1.3.0
 
 ---
 
-## 📩 v1.4.0 — Messages privés
+## 📩 v0.13.0 — Messages privés
 
 **Objectif :** Permettre la messagerie 1-to-1 entre utilisateurs.
 
@@ -496,7 +434,7 @@ Version : v1.3.0
 ```
 Contexte : Les utilisateurs veulent pouvoir se contacter en privé.
 
-Mission v1.4.0 : Messagerie privée (DM).
+Mission v0.13.0 : Messagerie privée (DM).
 
 Côté Supabase :
 1. Table "conversations" :
@@ -536,7 +474,7 @@ Limites importantes pour éviter le spam :
 - Un user qui ne suit pas peut envoyer 1 "demande de message" par jour
 - Bouton "Bloquer" sur les profils
 
-Version : v1.4.0
+Version : v0.13.0
 Présente-moi le schéma et les wireframes avant de coder.
 ```
 
@@ -548,7 +486,7 @@ Présente-moi le schéma et les wireframes avant de coder.
 
 ---
 
-## 🔔 v1.5.0 — Notifications push + emails
+## 🔔 v0.14.0 — Notifications push + emails
 
 **Objectif :** Garder les utilisateurs engagés même hors site.
 
@@ -557,7 +495,7 @@ Présente-moi le schéma et les wireframes avant de coder.
 ```
 Contexte : Les notifs in-app sont OK, mais je veux notifier hors-app.
 
-Mission v1.5.0 : Notifications push (web) + emails.
+Mission v0.14.0 : Notifications push (web) + emails.
 
 Web Push :
 1. Génère les clés VAPID (à stocker en variables Supabase)
@@ -584,7 +522,7 @@ Préférences notifs (page dédiée) :
 - Toggle par canal : in-app, push, email
 - Mode "Ne pas déranger" (créneaux horaires)
 
-Version : v1.5.0
+Version : v0.14.0
 ```
 
 ### ✅ Critères de validation
@@ -595,7 +533,7 @@ Version : v1.5.0
 
 ---
 
-## 🏗️ v2.0.0 — Refonte architecture (préparation dev pro)
+## 🏗️ v0.15.0 — Refonte architecture (préparation dev pro)
 
 **Objectif :** Passer du single-file HTML à une vraie app moderne, prête pour un dev professionnel.
 
@@ -605,7 +543,7 @@ Version : v1.5.0
 Contexte : J'ai validé le concept avec mon MVP single-file. Maintenant
 je veux migrer vers une architecture pro pour pouvoir embaucher un dev.
 
-Mission v2.0.0 : Refonte complète en Next.js 14 + TypeScript.
+Mission v0.15.0 : Refonte complète en Next.js 14 + TypeScript.
 
 Stack cible :
 - Next.js 14 (App Router)
@@ -652,12 +590,12 @@ Structure du projet :
 index.html. Pour chaque feature, montre-moi avant la structure des fichiers
 et le code, puis je valide.
 
-Version : v2.0.0
+Version : v0.15.0
 Commence par la phase 1 (setup) et confirme avec moi à chaque étape.
 ```
 
 ### ✅ Critères de validation
-- [ ] Toutes les features de v1.5 fonctionnent en v2.0
+- [ ] Toutes les features de v0.14.0 fonctionnent en v0.15.0
 - [ ] Le code est propre, typé, testé
 - [ ] Un dev pro peut comprendre l'architecture en 30 min
 - [ ] Le déploiement Vercel est automatique depuis GitHub
@@ -667,14 +605,14 @@ Commence par la phase 1 (setup) et confirme avec moi à chaque étape.
 
 ---
 
-## 📱 v2.1.0 — App mobile native (lecture + interactions)
+## 📱 v0.16.0 — App mobile native (lecture + interactions)
 
 **Objectif :** Apps iOS et Android avec une seule base de code. **Cohérent avec le choix éditorial : pas de création d'articles ni d'upload vidéo dans l'app mobile.**
 
 ### Prompt Claude Code :
 
 ```
-Contexte : Le site web Next.js v2.0 fonctionne bien. Je veux maintenant
+Contexte : Le site web Next.js v0.15.0 fonctionne bien. Je veux maintenant
 des apps mobiles natives.
 
 RAPPEL ÉDITORIAL : Comme sur le mobile web, l'app native ne permet PAS :
@@ -684,7 +622,7 @@ RAPPEL ÉDITORIAL : Comme sur le mobile web, l'app native ne permet PAS :
 Ces actions restent desktop only. L'app mobile est focalisée sur :
 LECTURE + INTERACTIONS SOCIALES + MESSAGERIE.
 
-Mission v2.1.0 : App mobile en Expo (React Native).
+Mission v0.16.0 : App mobile en Expo (React Native).
 
 Stack :
 - Expo SDK (le plus récent)
@@ -753,7 +691,7 @@ Cohérence cross-platform :
     - Google Play : pareil
     - Compte développeur (99$/an Apple, 25$ unique Google)
 
-Version : v2.1.0
+Version : v0.16.0
 Phase 1 d'abord et on valide.
 ```
 
@@ -766,7 +704,7 @@ Phase 1 d'abord et on valide.
 
 ---
 
-## 🛡️ v2.2.0 — Modération avancée
+## 🛡️ v0.17.0 — Modération avancée
 
 **Objectif :** Lutter contre les abus et la désinformation (cohérent avec votre concept "sourcer tout").
 
@@ -777,7 +715,7 @@ Contexte : Avec la croissance, j'ai besoin d'outils de modération solides.
 Le concept d'Avis Basé est de sourcer tout, donc la modération doit
 être exemplaire.
 
-Mission v2.2.0 : Système de modération communautaire + anti-fake news.
+Mission v0.17.0 : Système de modération communautaire + anti-fake news.
 
 Backend :
 1. Table "reports" (signalements) :
@@ -815,7 +753,7 @@ Modération communautaire :
 - Système jury pour les cas litigieux
 - Tutoriel/formation pour devenir fact-checker
 
-Version : v2.2.0
+Version : v0.17.0
 ```
 
 ### ✅ Critères de validation
@@ -826,7 +764,7 @@ Version : v2.2.0
 
 ---
 
-## 💰 v3.0.0 — Monétisation
+## 💰 v0.18.0 — Monétisation
 
 **Objectif :** Rendre la plateforme viable financièrement de façon éthique.
 
@@ -836,7 +774,7 @@ Version : v2.2.0
 Contexte : Avis Basé a une communauté active. Il est temps de monétiser
 de façon éthique (pas de pub intrusive, alignée avec les valeurs).
 
-Mission v3.0.0 : Modèle économique multi-source.
+Mission v0.18.0 : Modèle économique multi-source.
 
 Modèle :
 
@@ -874,7 +812,7 @@ Implémentation :
 ⚠️ RGPD : intégration soignée des CGV, CGU, mentions de paiement.
 ⚠️ Comptabilité : prévoir un comptable dès la première facture.
 
-Version : v3.0.0
+Version : v0.18.0
 ```
 
 ### ✅ Critères de validation
@@ -885,6 +823,164 @@ Version : v3.0.0
 
 ---
 
+## 🚀 v1.0.0 — LANCEMENT PUBLIC (étape finale)
+
+> **🎯 Cette version arrive UNIQUEMENT quand TOUT le reste est fini.**
+> C'est le moment où on retire le tag "beta", où on lance la com publique
+> (TikTok, presse, réseaux), et où on ouvre les inscriptions massives.
+>
+> **Avant la v1.0.0** : `avis-base.com` est en soft-launch — accessible mais
+> sans com active. On itère avec quelques beta-testeurs pour fiabiliser tout.
+>
+> **🚨 NE PAS faire de communication publique avant cette version.**
+> Le produit doit être 100% prêt : stable, performant, beau, complet.
+
+**Objectif :** Lancer publiquement Avis Basé avec un produit fini, polish maximal, prêt à accueillir des milliers d'utilisateurs.
+
+### Pré-requis (à valider avant de coder la v1.0.0)
+
+Toutes les versions précédentes doivent être livrées et stables :
+- [x] v0.8.3.2 — Mobile read-only ✅
+- [ ] v0.9.0 — Mobile interactif (lecture + social)
+- [ ] v0.9.1 — Notifications in-app
+- [ ] v0.10.0 — Follow + fil personnalisé
+- [ ] v0.11.0 — Upload vidéo direct
+- [ ] v0.12.0 — Commentaires en threads
+- [ ] v0.13.0 — Messages privés
+- [ ] v0.14.0 — Notifications push + emails
+- [ ] v0.15.0 — Refonte Next.js
+- [ ] v0.16.0 — App mobile native iOS/Android
+- [ ] v0.17.0 — Modération avancée + fact-checking
+- [ ] v0.18.0 — Monétisation (abonnements + tips)
+
+**Tant qu'une de ces cases est décochée, on ne lance pas v1.0.0.**
+
+### Prompt Claude Code :
+
+```
+Contexte : Toutes les versions 0.x.x sont livrées et stables. Avis Basé
+est prêt techniquement (web + mobile + monétisation). Le moment du
+lancement public est venu.
+
+Mission v1.0.0 : Polish final + retrait du tag beta + préparation com.
+
+Ce qui est DÉJÀ fait (à NE PAS refaire) :
+- Hébergement Cloudflare Pages ✅
+- Domaine avis-base.com ✅
+- HTTPS automatique ✅
+- Configuration Supabase prod ✅
+
+À faire pour v1.0.0 :
+
+1. Retrait du tag "beta"
+   - Suppression de la beta-tag dans le header
+   - Console.log : "Avis Basé v1.0.0 - Le média collaboratif qui source tout"
+   - Mise à jour du footer (retire "Beta")
+   - Mise à jour du README
+
+2. SEO et métadonnées sociales (audit complet)
+   - Open Graph tags vérifiés sur chaque page (og:title, og:description,
+     og:image, og:url, og:type)
+   - Twitter Card tags
+   - Schema.org JSON-LD pour les articles (type Article + author + sources)
+   - Sitemap.xml dynamique
+   - robots.txt
+   - Favicon multi-format (32, 192, 512px) + apple-touch-icon
+   - Metas description optimisées par page
+
+3. Pages légales obligatoires (RGPD)
+   - Mentions légales (éditeur, hébergeur, contact, directeur publication)
+   - Politique de confidentialité (cookies, données collectées,
+     droits d'accès/suppression)
+   - CGU (Conditions Générales d'Utilisation)
+   - CGV si abonnements payants
+   - Charte éditoriale publique
+   - Charte de modération publique
+   - Bandeau cookies conforme RGPD
+
+4. Performance (Lighthouse cible >95 sur tout)
+   - Audit Lighthouse complet → corriger tous les warnings
+   - Compression images (WebP, lazy loading)
+   - Préconnexion aux domaines externes
+   - Service Worker pour cache offline + PWA installable
+   - Analyse du bundle, suppression du code mort
+   - Tests sur connexion lente (3G simulé)
+
+5. Onboarding nouveau user
+   - Tour guidé en 4-5 étapes au premier login
+   - Suggestion : suivre 5 articles populaires + 3 contributeurs
+   - Email de bienvenue détaillé (qu'est-ce qu'Avis Basé, comment contribuer)
+
+6. Page 404 stylée + page erreur 500
+
+7. Page "Changelog" publique
+   - Historique des versions avec descriptions courtes
+   - Lien depuis le footer
+
+8. Page "À propos"
+   - Histoire d'Avis Basé
+   - Manifeste éditorial
+   - L'équipe (même si solo : "Créé par X")
+
+9. Page "Statistiques publiques"
+   - Nombre d'articles, contributeurs, sources citées
+   - Mise à jour temps réel
+   - Crédibilité moyenne de la plateforme
+
+10. Tests cross-browser
+    - Chrome, Firefox, Safari, Edge
+    - iOS Safari, Android Chrome
+    - Tablette iPad/Android
+
+Mise à jour version : v1.0.0
+- Tag git : `git tag v1.0.0 && git push --tags`
+- Annonce sur changelog public
+
+Propose-moi le plan détaillé avant de commencer.
+```
+
+### Plan de communication (à préparer en parallèle)
+
+À avoir prêt pour le **jour du lancement** :
+
+1. **TikTok** (@avis_base.nth)
+   - Vidéo de lancement avec démo du site
+   - Série "Pourquoi j'ai créé Avis Basé"
+   - Plan de contenu pour les 4 premières semaines
+
+2. **Réseaux sociaux**
+   - X (anciennement Twitter) : compte créé, bio + lien
+   - Instagram : compte créé, lien en bio
+   - LinkedIn : post de lancement (si tu en as un)
+
+3. **Presse / Communauté**
+   - Communiqué de presse (1 page) à envoyer à 10-20 médias
+   - Post Reddit dans r/france, r/medias, r/journalisme
+   - Hacker News (si version anglaise)
+   - Product Hunt (le matin, ne pas oublier)
+
+4. **Email**
+   - Liste d'attente des beta-testeurs (à constituer pendant 0.x.x)
+   - Email de lancement avec invitation
+
+5. **Discord/Telegram**
+   - Serveur communautaire ouvert au public
+
+### ✅ Critères de validation v1.0.0
+- [ ] Toutes les versions 0.x.x sont stables et déployées
+- [ ] Les performances Lighthouse sont >95 sur Performance, Accessibility, Best Practices, SEO
+- [ ] Aucune erreur console en production
+- [ ] Toutes les pages légales sont en ligne et conformes RGPD
+- [ ] Le site est testé sur 6+ navigateurs/appareils
+- [ ] Le partage sur réseaux sociaux affiche un beau preview
+- [ ] L'onboarding nouveau user est fluide et guidé
+- [ ] La page 404 est stylée
+- [ ] Le tag "beta" est retiré partout
+- [ ] La com publique est planifiée et prête à être déclenchée
+- [ ] Le tag git `v1.0.0` est poussé
+
+---
+
 # 🛠️ Bonnes pratiques pour tout le projet
 
 ## Avec Claude Code
@@ -892,8 +988,9 @@ Version : v3.0.0
 **À chaque session, ouvrez avec ce prompt système :**
 ```
 Tu travailles sur Avis Basé, un média collaboratif.
-Stack : Single-file HTML + Supabase (jusqu'à v1.5), puis Next.js + Supabase.
+Stack : Single-file HTML + Supabase (jusqu'à v0.14.0), puis Next.js + Supabase à partir de v0.15.0.
 Concept : tout doit être sourcé, vérifiable, transparent.
+Le lancement public est en v1.0.0 (toute fin) — pas de com avant.
 
 Avant de coder une feature :
 1. Propose le plan détaillé
@@ -916,10 +1013,12 @@ Puis code par petites étapes vérifiables.
 
 ## Tests utilisateurs
 
-- À partir de v1.0 : recrutez 5-10 beta-testeurs
+- **Pendant la phase 0.x.x (soft-launch)** : recrutez 5-10 beta-testeurs proches
 - Outil simple : groupe Discord ou Telegram privé
 - Faites un appel vidéo de 20 min toutes les 2 semaines
 - Notez TOUT ce qui les fait râler
+- **À l'approche de v1.0.0** : étendez à 30-50 beta-testeurs externes
+- C'est leur retour qui valide le go/no-go pour la com publique
 
 ## Quand passer à un dev pro
 
@@ -954,27 +1053,68 @@ Puis code par petites étapes vérifiables.
 
 ---
 
-# 🎯 Checklist de lancement v1.0
+# 🎯 Checklist finale de lancement v1.0.0
 
-- [ ] Site déployé sur hébergement gratuit (Cloudflare Pages)
-- [ ] Domaine personnalisé configuré (avisbase.fr ou autre)
-- [ ] HTTPS activé (automatique sur Cloudflare)
-- [ ] Page À propos rédigée
+> **À cocher avant de cliquer sur "Publier" sur TikTok le jour J.**
+
+### Technique
+- [x] Site déployé sur Cloudflare Pages (gratuit) ✅
+- [x] Domaine `avis-base.com` configuré ✅
+- [x] HTTPS activé ✅
+- [x] Backend Supabase configuré pour `avis-base.com` ✅
+- [ ] Toutes les versions v0.9.0 → v0.18.0 livrées et stables
+- [ ] Lighthouse > 95 sur Performance, Accessibility, Best Practices, SEO
+- [ ] Testé sur Chrome, Firefox, Safari, Edge (desktop)
+- [ ] Testé sur iOS Safari + Android Chrome
+- [ ] Testé sur tablette iPad/Android
+- [ ] Aucune erreur console en production
+- [ ] Backup Supabase activé (Point-in-Time Recovery)
+- [ ] Sentry ou monitoring d'erreurs en place
+
+### Légal & RGPD
+- [ ] Mentions légales conformes (éditeur, hébergeur, contact)
+- [ ] Politique de confidentialité publiée
+- [ ] CGU publiées
+- [ ] CGV publiées (si abonnements)
+- [ ] Bandeau cookies conforme RGPD
+- [ ] Page de désabonnement aux emails accessible
+- [ ] Email de support actif (contact@avis-base.com)
+
+### Contenu & UX
 - [ ] Charte éditoriale publiée
-- [ ] Mentions légales en règle
-- [ ] CGU + politique confidentialité
-- [ ] Bandeau cookies (si analytics)
-- [ ] Open Graph + Twitter Cards testés
-- [ ] Lighthouse > 90 sur les 4 catégories
-- [ ] Testé sur iPhone, Android, desktop
-- [ ] 5 articles de qualité publiés pour le lancement
-- [ ] Plan de communication TikTok prêt
-- [ ] Discord/Telegram beta-testeurs créé
-- [ ] Backup DB configuré
-- [ ] Email de support actif (contact@avisbase.fr)
+- [ ] Charte de modération publiée
+- [ ] Page À propos rédigée
+- [ ] Page Changelog publique
+- [ ] Page Statistiques publiques
+- [ ] Page 404 stylée
+- [ ] Tag "beta" retiré partout
+- [ ] Onboarding nouveau user testé sur 5+ personnes
+- [ ] Open Graph + Twitter Cards testés sur metatags.io
+- [ ] Au moins 20 articles de qualité publiés pour le jour du lancement
+- [ ] Au moins 5 clips vidéo publiés
+
+### Communauté
+- [ ] Discord/Telegram public ouvert
+- [ ] 30-50 beta-testeurs ont validé l'expérience
+- [ ] Liste d'attente d'inscriptions pré-lancement constituée
+
+### Communication (à déclencher le jour J)
+- [ ] Vidéo de lancement TikTok prête (@avis_base.nth)
+- [ ] Plan éditorial TikTok pour les 4 premières semaines
+- [ ] Comptes X / Instagram / LinkedIn créés et alimentés
+- [ ] Communiqué de presse rédigé (1 page) — liste de 10-20 médias prêts
+- [ ] Post Product Hunt préparé (planifier le matin du jour J)
+- [ ] Post Reddit préparé (r/france, r/medias)
+- [ ] Email de lancement à la liste d'attente prêt
+
+### Tag final
+- [ ] `git tag v1.0.0 && git push --tags`
+- [ ] Annonce sur changelog public
 
 ---
 
 **Bonne route avec Avis Basé ! 🚀**
 
 *Document généré pour servir de feuille de route. Adaptez les versions selon vos retours utilisateurs réels — c'est eux qui doivent guider les priorités.*
+
+*Philosophie : pas de com tant que ce n'est pas fini. Le soft-launch en 0.x.x permet d'itérer dans l'ombre. La v1.0.0 = grand feu d'artifice public.*
