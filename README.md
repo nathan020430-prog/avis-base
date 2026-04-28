@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.9.0** — Mobile interactif (édition profil, favoris, signalement d'articles, charte éditoriale)
 - **v0.8.3.2** — Mode mobile lecture seule + bottom nav + bottom-sheet menu compte
 - **v0.8.3** — Détection mobile + blocage écriture/édition sur mobile (choix éditorial)
 - **v0.8.2** — Pagination & compteur de publications
@@ -54,6 +55,13 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 - **v0.8** — Économie de pièces (gain par lectures, pourboires, boost, badges) + score de crédibilité automatique
 - **v0.7.1** — Refonte UI top bar, design plus éditorial
 - **v0.7** — Menu nav unifié
+
+## Migrations SQL à appliquer (dans l'ordre)
+
+1. `v0.8-migration.sql` (V0.8 — économie de pièces)
+2. `schema_v083.sql` (V0.8.3 — schéma complet refactor)
+3. `hotfix_v0832_comments.sql` (V0.8.3.2 — commentaires polymorphes)
+4. **`v0.9.0-migration.sql`** (V0.9.0 — profils enrichis + favoris) ← **NOUVEAU**
 
 ## Développement local
 
@@ -68,4 +76,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.8.3.2
+© Avis Basé · Beta · v0.9.0
