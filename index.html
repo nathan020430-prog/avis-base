@@ -3928,8 +3928,8 @@ async function incrementArticleReads(id) {
     } catch (e) { console.warn('claim_read exception:', e); }
   } else {
     const newCount = (a.reads || 0) + 1;
-    await supa.from('articles').update({ reads: newCount }).eq('id', id);
-    a.reads = newCount;
+    const { error: readErr } = await supa.from('articles').update({ reads: newCount }).eq('id', id);
+    if (!readErr) a.reads = newCount;
   }
 }
 
@@ -8111,12 +8111,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─ Auth buttons ─
   document.getElementById('authBtn').addEventListener('click', () => openAuthModal('signup'));
-  document.getElementById('heroWriteBtn')?.addEventListener('click', () => {
-    if (currentUser) openArticleEditorForSubmit(); else openAuthModal('signup');
-  });
-  document.getElementById('emptyWriteBtn')?.addEventListener('click', () => {
-    if (currentUser) openArticleEditorForSubmit(); else openAuthModal('signup');
-  });
   document.getElementById('tabSignup').addEventListener('click', () => openAuthModal('signup'));
   document.getElementById('tabLogin').addEventListener('click', () => openAuthModal('login'));
   document.getElementById('authSubmitBtn').addEventListener('click', () => { if (authMode === 'signup') signup(); else login(); });
