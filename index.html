@@ -2656,6 +2656,136 @@ body.is-mobile #navMenuBtnLabel{display:none !important}
 [aria-hidden="true"][style*="display:none"]{display:none !important}
 
 /* ═══════════════════════════════════════════
+   BROADSHEET — Sections "Une" supplémentaires
+   (numbered top 5 + opinion-band)
+═══════════════════════════════════════════ */
+.homepage-extras{
+  max-width:1320px;margin:0 auto;
+  padding:0;
+}
+
+/* Section "Les mieux sourcés" : 1/3 quote + 2/3 top 5 numbered */
+.bs-section2{
+  display:grid;grid-template-columns:1fr 2fr;gap:0;
+  border-top:2px solid var(--ink);
+  border-bottom:1px solid var(--rule);
+  padding:0 40px;
+  background:var(--bg);
+}
+.bs-section2__col{padding:22px 24px;border-right:1px solid var(--rule)}
+.bs-section2__col:last-child{border-right:none;padding-right:0}
+.bs-section2__col--quote{padding-left:0}
+
+.bs-quote{
+  font-family:var(--ff);
+  font-size:clamp(1.3rem,2.2vw,1.7rem);
+  font-weight:400;font-style:italic;line-height:1.28;
+  color:var(--ink);
+  border-left:3px solid var(--accent);
+  padding-left:18px;
+  margin-bottom:12px;
+  text-wrap:pretty;
+}
+.bs-quote__source{
+  font-size:0.74rem;color:var(--ink-muted);
+  padding-left:21px;font-weight:600;font-style:normal;letter-spacing:0.02em;
+}
+
+.bs-numbered{display:flex;flex-direction:column}
+.bs-numbered-item{
+  display:grid;grid-template-columns:42px 1fr auto;gap:14px;
+  align-items:center;
+  padding:14px 0;
+  border-bottom:1px solid var(--rule-light);
+  cursor:pointer;
+  transition:padding-left var(--tr);
+}
+.bs-numbered-item:last-child{border-bottom:none}
+.bs-numbered-item:hover{padding-left:6px}
+.bs-numbered-item__num{
+  font-family:var(--ff);font-size:2.2rem;font-weight:300;font-style:italic;
+  color:var(--rule);line-height:1;text-align:right;
+  transition:color var(--tr);
+}
+.bs-numbered-item:hover .bs-numbered-item__num{color:var(--accent)}
+.bs-numbered-item--top .bs-numbered-item__num{color:var(--accent)}
+.bs-numbered-item__body{min-width:0}
+.bs-numbered-item__title{
+  font-family:var(--ff);font-size:1.02rem;font-weight:400;
+  line-height:1.3;color:var(--ink);
+  text-wrap:pretty;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  transition:color var(--tr);
+}
+.bs-numbered-item:hover .bs-numbered-item__title{color:var(--accent)}
+.bs-numbered-item__meta{font-size:0.72rem;color:var(--ink-muted);font-weight:600;margin-top:3px}
+.bs-numbered-item__meta strong{color:var(--accent);font-family:var(--ff);font-weight:700;font-size:0.82rem}
+.bs-numbered-item__score{
+  font-family:var(--ff);font-size:0.86rem;font-weight:600;
+  color:var(--ink-muted);white-space:nowrap;
+}
+
+/* Bandeau Opinion (dark, 3 tribunes) */
+.opinion-band{
+  background:var(--ink);color:var(--bg);
+  padding:32px 40px;
+  display:grid;grid-template-columns:240px 1fr;gap:36px;
+  align-items:center;
+  margin-top:0;
+  border-top:1px solid var(--ink);
+}
+[data-theme="dark"] .opinion-band{
+  background:var(--surface-alt);color:var(--ink);
+  border-top:2px solid var(--accent);
+}
+.opinion-band__label{display:flex;flex-direction:column;gap:8px}
+.opinion-band__word{
+  font-family:var(--ff);
+  font-size:clamp(2rem,4vw,3.2rem);
+  font-weight:300;font-style:italic;line-height:0.92;
+  color:var(--bg);
+  letter-spacing:-0.02em;
+}
+[data-theme="dark"] .opinion-band__word{color:var(--ink)}
+.opinion-band__sub{
+  font-size:0.66rem;letter-spacing:0.18em;text-transform:uppercase;
+  color:rgba(244,239,228,0.5);font-weight:600;
+}
+[data-theme="dark"] .opinion-band__sub{color:var(--ink-muted)}
+.opinion-band__items{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+}
+.opinion-item{cursor:pointer;transition:opacity var(--tr)}
+.opinion-item:hover{opacity:1}
+.opinion-item__title{
+  font-family:var(--ff);font-size:1.04rem;font-weight:400;
+  line-height:1.32;color:var(--bg);
+  margin-bottom:6px;opacity:0.92;
+  text-wrap:pretty;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  transition:opacity var(--tr);
+}
+[data-theme="dark"] .opinion-item__title{color:var(--ink)}
+.opinion-item:hover .opinion-item__title{opacity:1}
+.opinion-item__byline{
+  font-size:0.7rem;color:rgba(244,239,228,0.5);font-weight:600;letter-spacing:0.04em;
+}
+[data-theme="dark"] .opinion-item__byline{color:var(--ink-muted)}
+
+@media(max-width:900px){
+  .bs-section2{grid-template-columns:1fr;padding:0 20px}
+  .bs-section2__col{border-right:none;border-bottom:1px solid var(--rule);padding:18px 0}
+  .bs-section2__col:last-child{border-bottom:none}
+  .opinion-band{grid-template-columns:1fr;padding:24px 20px;gap:22px}
+  .opinion-band__items{grid-template-columns:1fr;gap:16px}
+}
+@media(max-width:768px){
+  .bs-numbered-item{grid-template-columns:32px 1fr;gap:10px}
+  .bs-numbered-item__num{font-size:1.7rem}
+  .bs-numbered-item__score{grid-column:1 / -1;text-align:right;margin-top:4px}
+}
+
+/* ═══════════════════════════════════════════
    READING PROGRESS BAR
 ═══════════════════════════════════════════ */
 .reading-progress{
@@ -3007,6 +3137,9 @@ body.reading .reading-progress{opacity:1}
 
 <!-- Homepage 3-col -->
 <div class="homepage-layout" id="homepageLayout" style="display:none"></div>
+
+<!-- Sections Broadsheet supplémentaires (numbered + opinion) -->
+<div class="homepage-extras" id="homepageExtras" style="display:none"></div>
 
 <!-- Grille articles publics -->
 <main class="grid grid--articles" id="articlesGrid"></main>
@@ -4931,12 +5064,14 @@ function renderArticles() {
 
   // V0.8.2 — Homepage 3 colonnes : affiché uniquement quand pas de filtre actif
   const isDefaultView = currentView === 'articles' && !searchQuery && articleThemeFilter === 'all' && articleTimeFilter === 'all';
+  const homepageExtras = document.getElementById('homepageExtras');
   if (homepageLayout) {
     if (isDefaultView) {
       homepageLayout.style.display = 'grid';
       renderHomepage();
     } else {
       homepageLayout.style.display = 'none';
+      if (homepageExtras) homepageExtras.style.display = 'none';
     }
   }
 
@@ -6732,6 +6867,102 @@ function renderHomepage() {
   renderTrendingCol();
   renderFeedCol();
   renderReliableCol();
+  renderHomepageExtras();
+}
+
+// ── Broadsheet extras : top 5 sourcés + opinion-band ──────
+function renderHomepageExtras() {
+  const wrap = document.getElementById('homepageExtras');
+  if (!wrap) return;
+  const published = articles.filter(a => a.status === 'published');
+  if (published.length < 2) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+  wrap.style.display = 'block';
+
+  // 1) Top 5 articles les mieux sourcés
+  const bestSourced = published.slice()
+    .map(a => ({ a, n: ((a.citedSources || []).length) + (a.videoSourceUrl ? 1 : 0) }))
+    .filter(x => x.n > 0)
+    .sort((x, y) => y.n - x.n || ((y.a.likesCount || 0) - (x.a.likesCount || 0)))
+    .slice(0, 5);
+
+  // 2) Quote : la plus longue tagline d'un article récent
+  const quoteCandidate = published.slice()
+    .filter(a => a.subtitle && a.subtitle.length > 30 && a.subtitle.length < 180)
+    .sort((a, b) => new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt))[0];
+
+  // 3) Opinion : 3 articles communautaires (auteurs avec score moyen)
+  const opinions = published.slice()
+    .filter(a => a.subtitle)
+    .sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0))
+    .slice(0, 3);
+
+  let html = '';
+
+  // Section "Les mieux sourcés"
+  if (bestSourced.length) {
+    const numberedItems = bestSourced.map((x, i) => {
+      const a = x.a;
+      const isTop = i < 3;
+      return `<div class="bs-numbered-item${isTop ? ' bs-numbered-item--top' : ''}" data-slug="${escapeHtml(a.slug)}">
+        <div class="bs-numbered-item__num">${i + 1}</div>
+        <div class="bs-numbered-item__body">
+          <div class="bs-numbered-item__title">${escapeHtml(a.title)}</div>
+          <div class="bs-numbered-item__meta">
+            <span>@${escapeHtml(a.authorUsername || 'anonyme')}</span>
+            · <strong>${x.n} sources</strong>
+            · ↑ ${a.likesCount || 0}
+          </div>
+        </div>
+        <div class="bs-numbered-item__score">${a.readingMinutes || 0} min</div>
+      </div>`;
+    }).join('');
+
+    const quoteBlock = quoteCandidate ? `
+      <div class="rubrique" style="padding:14px 0 6px">Citation</div>
+      <div class="bs-quote">« ${escapeHtml(quoteCandidate.subtitle)} »</div>
+      <div class="bs-quote__source">— @${escapeHtml(quoteCandidate.authorUsername || 'anonyme')}, sur « ${escapeHtml(quoteCandidate.title.slice(0, 64))}${quoteCandidate.title.length > 64 ? '…' : ''} »</div>
+    ` : `
+      <div class="rubrique" style="padding:14px 0 6px">Notre méthode</div>
+      <div class="bs-quote">« Chaque article part d'une vidéo longue, détaille le contexte et cite ses sources. »</div>
+      <div class="bs-quote__source">— Charte éditoriale d'Avis Basé</div>
+    `;
+
+    html += `
+      <div class="bs-section2">
+        <div class="bs-section2__col bs-section2__col--quote">
+          ${quoteBlock}
+        </div>
+        <div class="bs-section2__col">
+          <div class="rubrique rubrique--accent" style="padding:14px 0 6px">Les ${bestSourced.length} articles les mieux sourcés</div>
+          <div class="bs-numbered" id="bsNumbered">${numberedItems}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Bandeau Opinion (si on a au moins 1 article)
+  if (opinions.length) {
+    const opinionItems = opinions.map(a => `
+      <div class="opinion-item" data-slug="${escapeHtml(a.slug)}">
+        <div class="opinion-item__title">${escapeHtml(a.title)}</div>
+        <div class="opinion-item__byline">@${escapeHtml(a.authorUsername || 'anonyme')} · ${timeAgo(a.publishedAt || a.createdAt)} · ${(a.citedSources || []).length} sources</div>
+      </div>
+    `).join('');
+    html += `
+      <div class="opinion-band">
+        <div class="opinion-band__label">
+          <div class="opinion-band__word">Point<br/>de vue</div>
+          <div class="opinion-band__sub">Tribunes communautaires</div>
+        </div>
+        <div class="opinion-band__items">${opinionItems}</div>
+      </div>
+    `;
+  }
+
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('[data-slug]').forEach(el => {
+    el.addEventListener('click', () => openArticlePage(el.dataset.slug));
+  });
 }
 
 function renderTrendingCol() {
