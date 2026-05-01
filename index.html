@@ -2656,6 +2656,193 @@ body.is-mobile #navMenuBtnLabel{display:none !important}
 [aria-hidden="true"][style*="display:none"]{display:none !important}
 
 /* ═══════════════════════════════════════════
+   ANIMATIONS — pack de fluidité v0.9.4
+═══════════════════════════════════════════ */
+@keyframes revealUp{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes revealLeft{
+  from{opacity:0;transform:translateX(-14px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes revealRight{
+  from{opacity:0;transform:translateX(14px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes dropCapIn{
+  from{opacity:0;transform:scale(0.6) rotate(-6deg);transform-origin:bottom left}
+  to{opacity:1;transform:scale(1) rotate(0);transform-origin:bottom left}
+}
+@keyframes heartPop{
+  0%{transform:scale(1)}
+  35%{transform:scale(1.45) rotate(-6deg)}
+  60%{transform:scale(0.85) rotate(4deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+@keyframes counterUp{
+  from{opacity:0;transform:translateY(6px) scale(0.92)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes underlineDraw{
+  from{transform:scaleX(0);transform-origin:left}
+  to{transform:scaleX(1);transform-origin:left}
+}
+@keyframes ctaArrow{
+  0%,100%{transform:translateX(0)}
+  50%{transform:translateX(4px)}
+}
+@keyframes shimmerLoad{
+  0%{background-position:-200% 0}
+  100%{background-position:200% 0}
+}
+
+/* ── Reveal au scroll (IntersectionObserver) ── */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1)}
+.reveal.is-visible{opacity:1;transform:translateY(0)}
+.reveal--left{transform:translateX(-14px)}
+.reveal--left.is-visible{transform:translateX(0)}
+.reveal--right{transform:translateX(14px)}
+.reveal--right.is-visible{transform:translateX(0)}
+
+/* Respect du prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+    scroll-behavior:auto !important;
+  }
+  .reveal{opacity:1;transform:none !important}
+}
+
+/* ── Article cards stagger (à l'apparition de la grille) ── */
+.grid--articles.is-staggered .article-card,
+.grid.is-staggered .card{
+  opacity:0;animation:revealUp 0.55s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+.grid--articles.is-staggered .article-card:nth-child(1){animation-delay:0.04s}
+.grid--articles.is-staggered .article-card:nth-child(2){animation-delay:0.10s}
+.grid--articles.is-staggered .article-card:nth-child(3){animation-delay:0.16s}
+.grid--articles.is-staggered .article-card:nth-child(4){animation-delay:0.22s}
+.grid--articles.is-staggered .article-card:nth-child(5){animation-delay:0.28s}
+.grid--articles.is-staggered .article-card:nth-child(6){animation-delay:0.34s}
+.grid--articles.is-staggered .article-card:nth-child(n+7){animation-delay:0.40s}
+
+/* Numbered top 5 stagger */
+.bs-numbered.is-staggered .bs-numbered-item{
+  opacity:0;animation:revealLeft 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+.bs-numbered.is-staggered .bs-numbered-item:nth-child(1){animation-delay:0.05s}
+.bs-numbered.is-staggered .bs-numbered-item:nth-child(2){animation-delay:0.12s}
+.bs-numbered.is-staggered .bs-numbered-item:nth-child(3){animation-delay:0.19s}
+.bs-numbered.is-staggered .bs-numbered-item:nth-child(4){animation-delay:0.26s}
+.bs-numbered.is-staggered .bs-numbered-item:nth-child(5){animation-delay:0.33s}
+
+/* Opinion items stagger */
+.opinion-band__items.is-staggered .opinion-item{
+  opacity:0;animation:revealUp 0.55s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+.opinion-band__items.is-staggered .opinion-item:nth-child(1){animation-delay:0.08s}
+.opinion-band__items.is-staggered .opinion-item:nth-child(2){animation-delay:0.18s}
+.opinion-band__items.is-staggered .opinion-item:nth-child(3){animation-delay:0.28s}
+
+/* Trending cards stagger */
+.col-trending.is-staggered .trending-card{
+  opacity:0;animation:revealLeft 0.45s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+.col-trending.is-staggered .trending-card:nth-child(1){animation-delay:0.05s}
+.col-trending.is-staggered .trending-card:nth-child(2){animation-delay:0.10s}
+.col-trending.is-staggered .trending-card:nth-child(3){animation-delay:0.15s}
+.col-trending.is-staggered .trending-card:nth-child(4){animation-delay:0.20s}
+.col-trending.is-staggered .trending-card:nth-child(5){animation-delay:0.25s}
+.col-trending.is-staggered .trending-card:nth-child(n+6){animation-delay:0.30s}
+
+/* Author cards stagger */
+.col-reliable.is-staggered .author-card{
+  opacity:0;animation:revealRight 0.45s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+.col-reliable.is-staggered .author-card:nth-child(1){animation-delay:0.08s}
+.col-reliable.is-staggered .author-card:nth-child(2){animation-delay:0.16s}
+.col-reliable.is-staggered .author-card:nth-child(3){animation-delay:0.24s}
+.col-reliable.is-staggered .author-card:nth-child(4){animation-delay:0.32s}
+
+/* ── Drop cap dropIn (premier paragraphe d'article) ── */
+.article-page__body p:first-of-type::first-letter{
+  animation:dropCapIn 0.7s 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+/* ── Heart-pop quand on like ── */
+.vote-btn--like.heart-pop svg,
+.vote-btn--liked.heart-pop svg,
+.comment__action--liked.heart-pop svg,
+.comment__action.heart-pop svg{
+  animation:heartPop 0.55s cubic-bezier(0.34,1.56,0.64,1);
+  display:inline-block;transform-origin:center;
+}
+
+/* ── Counter-up sur les chiffres animés ── */
+.counter-up{display:inline-block;animation:counterUp 0.4s cubic-bezier(0.16,1,0.3,1)}
+
+/* ── CTA "Lire l'article →" : flèche qui se balance au hover ── */
+.featured__cta{position:relative;overflow:hidden}
+.featured__cta::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(255,255,255,0.15),transparent);transform:translateX(-100%);transition:transform 0.6s}
+.featured__cta:hover::after{transform:translateX(100%)}
+
+/* ── Liens article : underline qui se dessine ── */
+.article-page__body a{position:relative;text-decoration:none}
+.article-page__body a::after{
+  content:'';position:absolute;left:0;right:0;bottom:-1px;
+  height:1.5px;background:var(--accent);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.article-page__body a:hover::after{transform:scaleX(1)}
+
+/* ── Hover refinements sur cartes : ombre douce ── */
+.article-card,.card{transition:background var(--tr), box-shadow 0.4s cubic-bezier(0.16,1,0.3,1), transform 0.3s cubic-bezier(0.16,1,0.3,1)}
+.article-card:hover,.card:hover{box-shadow:0 6px 24px rgba(26,17,8,0.06)}
+
+/* ── Modale : transitions plus douces ── */
+.modal__box{will-change:transform,opacity}
+.v8-modal{will-change:transform,opacity}
+
+/* ── Theme toggle : crossfade icônes plus doux ── */
+#themeIcon{transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s}
+#themeToggle:active #themeIcon{transform:rotate(180deg) scale(0.9)}
+
+/* ── Sticky minibar visible au scroll ── */
+.minibar{
+  position:fixed;top:0;left:0;right:0;z-index:90;
+  background:rgba(244,239,228,0.96);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--rule);
+  padding:10px 40px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  transform:translateY(-100%);
+  transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
+  font-size:0.78rem;
+}
+.minibar.on{transform:translateY(0)}
+[data-theme="dark"] .minibar{background:rgba(21,17,11,0.94)}
+.minibar__brand{
+  font-family:var(--ff);font-size:1.05rem;font-weight:400;letter-spacing:-0.01em;
+  display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink);
+}
+.minibar__brand em{font-style:italic;color:var(--accent)}
+.minibar__nav{display:flex;align-items:center;gap:10px}
+.minibar__nav button{
+  font-size:0.78rem;font-weight:600;color:var(--ink-muted);
+  background:transparent;border:none;cursor:pointer;
+  padding:6px 10px;border-radius:2px;transition:all var(--tr);font-family:inherit;
+}
+.minibar__nav button:hover{color:var(--ink);background:var(--surface-alt)}
+@media(max-width:768px){.minibar{padding:8px 16px;font-size:0.74rem}.minibar__nav button{padding:5px 8px}.minibar .minibar__nav .minibar__hide-mobile{display:none}}
+
+/* ── Smooth scroll fluide ── */
+@supports (scroll-behavior: smooth){html{scroll-behavior:smooth}}
+
+/* ═══════════════════════════════════════════
    BROADSHEET — Sections "Une" supplémentaires
    (numbered top 5 + opinion-band)
 ═══════════════════════════════════════════ */
@@ -3080,6 +3267,16 @@ body.reading .reading-progress{opacity:1}
     <span>avis-base.com</span>
   </div>
 </header>
+
+<!-- Sticky minibar (apparaît au scroll past masthead) -->
+<div class="minibar" id="minibar" aria-label="Barre de navigation persistante">
+  <a href="#" class="minibar__brand" id="minibarBrand">Avis <em>Basé</em></a>
+  <div class="minibar__nav">
+    <button class="minibar__hide-mobile" data-mini-nav="recent">Récents</button>
+    <button class="minibar__hide-mobile" data-mini-nav="popular">Tendances</button>
+    <button data-mini-nav="top">↑ Haut de page</button>
+  </div>
+</div>
 
 <!-- TikTok banner -->
 <div class="tiktok-banner" id="tiktokBanner" style="display:none">
@@ -4526,7 +4723,7 @@ function renderDetailModal(s) {
 function bindDetailEvents() {
   const likeBtn = document.getElementById('srcLikeBtn');
   const dislikeBtn = document.getElementById('srcDislikeBtn');
-  if (likeBtn) likeBtn.addEventListener('click', () => toggleVote('source', currentDetailId, 1));
+  if (likeBtn) likeBtn.addEventListener('click', e => { heartPop(e.currentTarget); toggleVote('source', currentDetailId, 1); });
   if (dislikeBtn) dislikeBtn.addEventListener('click', () => toggleVote('source', currentDetailId, -1));
   const voteLoginBtn = document.getElementById('voteLoginBtn');
   if (voteLoginBtn) voteLoginBtn.addEventListener('click', e => { e.preventDefault(); closeModal('detailModal'); openAuthModal('login'); });
@@ -5156,6 +5353,7 @@ function renderArticles() {
     empty.style.display = 'none';
     grid.style.display = 'grid';
     grid.innerHTML = pageArticles.map(a => articleCardHtml(a, false)).join('');
+    triggerStagger(grid);
   }
 
   // Pager UI — compte l'ensemble des articles publiés (pas le filtré), car c'est un "compteur de publications"
@@ -5582,7 +5780,7 @@ function renderArticlePage(a) {
   document.getElementById('articleBackBtn')?.addEventListener('click', () => { closeModal('articlePageModal'); });
   document.getElementById('editArticleBtn')?.addEventListener('click', () => { closeModal('articlePageModal'); openArticleEditorForEdit(a.id); });
   document.getElementById('sendReviewBtn')?.addEventListener('click', () => submitArticleForReview(a.id));
-  document.getElementById('artLikeBtn')?.addEventListener('click', () => toggleVote('article', a.id, 1));
+  document.getElementById('artLikeBtn')?.addEventListener('click', e => { heartPop(e.currentTarget); toggleVote('article', a.id, 1); });
   document.getElementById('artDislikeBtn')?.addEventListener('click', () => toggleVote('article', a.id, -1));
   document.getElementById('artVoteLoginBtn')?.addEventListener('click', () => { closeModal('articlePageModal'); openAuthModal('login'); });
   document.getElementById('credInfoBtn')?.addEventListener('click', openCredibilityInfoModal);
@@ -6963,6 +7161,11 @@ function renderHomepageExtras() {
   wrap.querySelectorAll('[data-slug]').forEach(el => {
     el.addEventListener('click', () => openArticlePage(el.dataset.slug));
   });
+  // Reveal au scroll + stagger interne
+  applyReveal('.bs-section2');
+  applyReveal('.opinion-band');
+  triggerStagger(wrap.querySelector('#bsNumbered'));
+  triggerStagger(wrap.querySelector('.opinion-band__items'));
 }
 
 function renderTrendingCol() {
@@ -7012,6 +7215,7 @@ function renderTrendingCol() {
   col.querySelectorAll('.trending-card[data-slug]').forEach(card => {
     card.addEventListener('click', () => openArticlePage(card.dataset.slug));
   });
+  triggerStagger(col);
 }
 
 function renderFeedCol() {
@@ -7070,6 +7274,7 @@ function renderFeedCol() {
   col.querySelectorAll('[data-slug]').forEach(card => {
     card.addEventListener('click', () => openArticlePage(card.dataset.slug));
   });
+  triggerStagger(col);
 }
 
 function renderReliableCol() {
@@ -7103,6 +7308,7 @@ function renderReliableCol() {
     </div>
     ${topAuthors.length ? authorCards : '<p style="font-size:0.85rem;color:var(--text-muted)">Aucun auteur disponible.</p>'}
   `;
+  triggerStagger(col);
 }
 
 
@@ -8120,6 +8326,108 @@ function updateSuggActive() {
   });
 }
 
+// ═══ ANIMATIONS PACK v0.9.4 ═══════════════════════════════
+const _prefersReducedMotion = (typeof window !== 'undefined' && window.matchMedia)
+  ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+
+// IntersectionObserver pour révéler les sections au scroll
+let _revealObserver = null;
+function ensureRevealObserver() {
+  if (_prefersReducedMotion) return null;
+  if (_revealObserver || typeof IntersectionObserver === 'undefined') return _revealObserver;
+  _revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('is-visible');
+        _revealObserver.unobserve(e.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+  return _revealObserver;
+}
+function applyReveal(selector, opts = {}) {
+  const obs = ensureRevealObserver();
+  document.querySelectorAll(selector).forEach(el => {
+    if (el.classList.contains('reveal')) return;
+    el.classList.add('reveal');
+    if (opts.dir === 'left') el.classList.add('reveal--left');
+    else if (opts.dir === 'right') el.classList.add('reveal--right');
+    if (obs) obs.observe(el);
+    else el.classList.add('is-visible');
+  });
+}
+
+// Stagger : ajoute la classe .is-staggered une fois qu'on a remplit la grille
+function triggerStagger(el) {
+  if (!el || _prefersReducedMotion) return;
+  el.classList.remove('is-staggered');
+  // Force reflow pour rejouer l'animation à chaque rendu
+  void el.offsetWidth;
+  el.classList.add('is-staggered');
+}
+
+// Heart-pop sur le bouton like
+function heartPop(btn) {
+  if (!btn || _prefersReducedMotion) return;
+  btn.classList.remove('heart-pop');
+  void btn.offsetWidth;
+  btn.classList.add('heart-pop');
+  setTimeout(() => btn.classList.remove('heart-pop'), 600);
+}
+
+// Counter-up : anime un nombre de 0 → target
+function counterUp(el, target, duration = 700) {
+  if (!el || _prefersReducedMotion) { if (el) el.textContent = target; return; }
+  const start = performance.now();
+  const from = parseFloat(el.textContent) || 0;
+  const to = Number(target) || 0;
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(from + (to - from) * eased);
+    if (t < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// Minibar : apparaît quand on scroll past le masthead
+let _minibarBound = false;
+function bindMinibar() {
+  if (_minibarBound) return;
+  _minibarBound = true;
+  const mh = document.getElementById('masthead');
+  const mb = document.getElementById('minibar');
+  if (!mh || !mb) return;
+  let mhBottom = mh.getBoundingClientRect().bottom + window.scrollY;
+  const measure = () => { mhBottom = mh.getBoundingClientRect().bottom + window.scrollY; };
+  window.addEventListener('resize', measure);
+  // Show/hide selon scroll position
+  let raf = 0;
+  const onScroll = () => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      const y = window.scrollY;
+      const reading = document.body.classList.contains('reading');
+      // Cache la minibar pendant la lecture (la modale a son propre header)
+      if (reading) { mb.classList.remove('on'); return; }
+      if (y > mhBottom + 40) mb.classList.add('on');
+      else mb.classList.remove('on');
+    });
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  // Wiring
+  document.getElementById('minibarBrand')?.addEventListener('click', e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  mb.querySelectorAll('[data-mini-nav]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.miniNav;
+      if (action === 'top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+      if (typeof handleNavAction === 'function') handleNavAction(action);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+}
+
 // ── BROADSHEET — hydratation du masthead ──
 function hydrateMasthead() {
   try {
@@ -8167,6 +8475,11 @@ async function init() {
   await loadClips();
   await loadSources();
   setSyncState(true);
+
+  // V0.9.4 — Animations : minibar sticky + reveals au scroll
+  bindMinibar();
+  applyReveal('.featured');
+  applyReveal('.footer--media');
 
   // Hide loading, show content
   document.getElementById('loading').style.display = 'none';
