@@ -5,7 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="theme-color" content="#F4EFE4" id="themeMeta"/>
 <title>Avis Basé — Le média collaboratif qui source tout</title>
-<meta name="description" content="Média collaboratif qui vérifie et source l'actualité. Articles écrits par la communauté, sources citées sur TikTok @avis_base.nth."/>
+<meta name="description" id="metaDescription" content="Média collaboratif qui vérifie et source l'actualité. Articles écrits par la communauté, sources citées sur TikTok @avis_base.nth."/>
+<meta name="author" content="Avis Basé — Communauté"/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://avis-base.com/" id="canonicalLink"/>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" id="ogType"/>
+<meta property="og:site_name" content="Avis Basé"/>
+<meta property="og:title" content="Avis Basé — Le média collaboratif qui source tout" id="ogTitle"/>
+<meta property="og:description" content="Média collaboratif qui vérifie et source l'actualité. Chaque article cite ses sources." id="ogDescription"/>
+<meta property="og:url" content="https://avis-base.com/" id="ogUrl"/>
+<meta property="og:image" content="https://avis-base.com/og-default.png" id="ogImage"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:locale" content="fr_FR"/>
+
+<!-- Twitter Cards -->
+<meta name="twitter:card" content="summary_large_image" id="twCard"/>
+<meta name="twitter:site" content="@avis_base.nth"/>
+<meta name="twitter:title" content="Avis Basé — Le média collaboratif qui source tout" id="twTitle"/>
+<meta name="twitter:description" content="Média collaboratif qui vérifie et source l'actualité. Chaque article cite ses sources." id="twDescription"/>
+<meta name="twitter:image" content="https://avis-base.com/og-default.png" id="twImage"/>
+
+<!-- JSON-LD structured data (NewsMediaOrganization) -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"NewsMediaOrganization","name":"Avis Basé","url":"https://avis-base.com/","logo":"https://avis-base.com/logo.png","description":"Média collaboratif qui vérifie et source l'actualité","sameAs":["https://www.tiktok.com/@avis_base.nth"]}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,500;1,9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -2627,6 +2654,117 @@ body.is-mobile #navMenuBtnLabel{display:none !important}
 
 /* Hide legacy hidden elements */
 [aria-hidden="true"][style*="display:none"]{display:none !important}
+
+/* ═══════════════════════════════════════════
+   READING PROGRESS BAR
+═══════════════════════════════════════════ */
+.reading-progress{
+  position:fixed;top:0;left:0;right:0;
+  height:3px;background:transparent;
+  z-index:1100;pointer-events:none;
+  opacity:0;transition:opacity 0.25s;
+}
+body.reading .reading-progress{opacity:1}
+.reading-progress__bar{
+  height:100%;width:100%;
+  background:linear-gradient(90deg,var(--accent),var(--accent-dark));
+  transform-origin:left center;transform:scaleX(0);
+  transition:transform 0.1s linear;
+  box-shadow:0 0 6px rgba(140,28,19,0.4);
+}
+[data-theme="dark"] .reading-progress__bar{box-shadow:0 0 8px rgba(212,74,61,0.5)}
+
+/* ═══════════════════════════════════════════
+   SHARE BUTTONS (article page)
+═══════════════════════════════════════════ */
+.share-bar{
+  display:flex;align-items:center;gap:8px;
+  margin:24px 0;padding:14px 0;
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  flex-wrap:wrap;
+}
+.share-bar__label{
+  font-size:0.7rem;color:var(--ink-muted);
+  text-transform:uppercase;letter-spacing:0.12em;font-weight:700;
+  margin-right:6px;
+}
+.share-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 13px;border-radius:2px;
+  background:transparent;color:var(--ink);
+  border:1px solid var(--rule);
+  font-size:0.8rem;font-weight:600;
+  cursor:pointer;transition:all var(--tr);
+  font-family:inherit;
+}
+.share-btn:hover{border-color:var(--ink);background:var(--surface-alt)}
+.share-btn svg{flex-shrink:0}
+.share-btn--twitter:hover{background:#000;color:#fff;border-color:#000}
+[data-theme="dark"] .share-btn--twitter:hover{background:#fff;color:#000;border-color:#fff}
+.share-btn__lbl{font-weight:600}
+@media(max-width:520px){.share-btn__lbl{display:none}.share-btn{padding:7px 9px}}
+
+/* ═══════════════════════════════════════════
+   PRINT (A4 broadsheet authentique)
+═══════════════════════════════════════════ */
+@media print{
+  @page{size:A4;margin:1.5cm 1.4cm}
+  *,*::before,*::after{
+    background:transparent !important;color:#000 !important;
+    box-shadow:none !important;text-shadow:none !important;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  body{background:#fff !important;color:#000 !important;font-size:10.5pt;line-height:1.55}
+  /* On masque tout sauf l'article si modale ouverte, sinon la home */
+  .masthead__top,.masthead__meta-center,
+  .header__actions,.nav-menu,.nav-menu__dropdown,
+  .tiktok-banner,.search-bar,.pager,.minibar,
+  .mobile-nav,.toast,.editor,.editor__topbar,
+  .reading-progress,.share-bar,
+  .modal__head .modal__close,.modal__foot,
+  .article-page__back,.featured__cta,
+  #syncInd,.beta-tag,
+  .article-card__admin,.article-card__status,
+  .nav-menu__btn,.icon-btn,
+  .vote-btn,.article-vote-bar,
+  .comment-form,.comment__actions,
+  .propose-clip-bar,.call-article-btn,
+  .v8-modal__close,.modal__close{display:none !important}
+
+  /* Fond crème → blanc, encre → noir */
+  .masthead{border-bottom:3px double #000 !important;page-break-after:avoid;padding:0}
+  .masthead__title{font-size:48pt !important;color:#000 !important}
+  .masthead__title em{color:#000 !important;font-style:italic}
+  .masthead__sub{font-size:8pt !important;color:#333 !important}
+  .masthead__center{padding:6pt 0}
+  .rubrique,.rubrique--accent{color:#666 !important;font-size:8pt}
+  .rubrique::after{background:#999 !important}
+  /* Si on imprime depuis la lecture article */
+  .modal{position:relative !important;display:block !important;padding:0 !important;background:#fff !important;inset:auto !important;overflow:visible !important}
+  .modal__backdrop{display:none !important}
+  .modal__box{box-shadow:none !important;border:none !important;max-width:none !important;background:#fff !important}
+  .modal__body{padding:0 !important}
+  .article-page{padding:0 !important;max-width:none !important}
+  .article-page__title{font-size:24pt !important;color:#000 !important;page-break-after:avoid}
+  .article-page__subtitle{font-size:12pt !important;color:#333 !important;font-style:italic;page-break-after:avoid}
+  .article-page__byline{border-color:#000 !important;page-break-inside:avoid}
+  .article-page__cover img{max-height:11cm;object-fit:contain}
+  .article-page__body{font-size:11pt !important;color:#000 !important;column-count:2;column-gap:1cm;column-rule:1px solid #ccc;text-align:justify;hyphens:auto}
+  .article-page__body h1,.article-page__body h2,.article-page__body h3{page-break-after:avoid}
+  .article-page__body p,.article-page__body blockquote,.article-page__body ul,.article-page__body ol{page-break-inside:avoid}
+  .article-page__body p:first-of-type::first-letter{color:#000 !important;font-size:3.4em !important}
+  .article-page__body a{color:#000 !important;text-decoration:underline}
+  .article-page__body a::after{content:" [" attr(href) "]";font-size:0.78em;color:#666 !important;word-break:break-all}
+  .article-page__cited{break-before:column;background:transparent !important;border:1px solid #999 !important;padding:0.5cm}
+  .article-page__cited-item{background:transparent !important;border:none !important;border-left:2px solid #000 !important}
+  .article-page__footnotes{border-top:1px solid #000 !important}
+  .footer--media,.footer{border-top:3px double #000 !important;padding:6pt 0;font-size:8pt;color:#333 !important;page-break-before:avoid}
+  /* Forcer simple-colonne sur la home si on imprime pas un article */
+  .grid--articles{column-count:3 !important;column-gap:0.6cm;display:block !important;padding:6pt 0 !important}
+  .article-card{break-inside:avoid;border:none !important;border-bottom:1px solid #999 !important;padding:6pt 0 !important;background:transparent !important}
+  .article-card__title{font-size:13pt !important;color:#000 !important}
+  .article-card__subtitle{font-size:10pt !important;color:#333 !important}
+}
 </style>
 </head>
 <body>
@@ -2912,6 +3050,9 @@ body.is-mobile #navMenuBtnLabel{display:none !important}
   <h2 class="empty__title">Aucune source</h2>
 </div>
 
+<!-- Reading progress bar (visible uniquement en lecture d'article) -->
+<div class="reading-progress" aria-hidden="true"><div id="readingProgressBar" class="reading-progress__bar"></div></div>
+
 <footer class="footer--media">
   <div class="footer__inner">
     <div>
@@ -3154,7 +3295,20 @@ body.is-mobile #navMenuBtnLabel{display:none !important}
   <div class="modal__box modal__box--lg">
     <div class="modal__head" style="display:flex;align-items:center;justify-content:space-between">
       <h2 class="modal__title">Article</h2>
-      <button class="modal__close" data-close>×</button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="share-btn share-btn--twitter" id="shareTwitter" aria-label="Partager sur Twitter / X" title="Partager sur Twitter / X">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          <span class="share-btn__lbl">Twitter</span>
+        </button>
+        <button class="share-btn" id="shareCopy" aria-label="Copier le lien" title="Copier le lien">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          <span class="share-btn__lbl">Lien</span>
+        </button>
+        <button class="share-btn" id="shareNative" aria-label="Partager" title="Partager" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+        <button class="modal__close" data-close>×</button>
+      </div>
     </div>
     <div class="modal__body" id="articlePageBody"></div>
   </div>
@@ -5043,6 +5197,88 @@ function renderArticleMarkdown(md) {
 }
 
 // ─── Page publique d'un article ───
+// ── SEO/OG meta dynamique par article ──────────────────────────
+const SITE_BASE_URL = (typeof location !== 'undefined' && location.origin && location.origin !== 'null') ? location.origin : 'https://avis-base.com';
+const DEFAULT_OG_IMAGE = SITE_BASE_URL + '/og-default.png';
+function setMetaTag(id, attr, value) {
+  const el = document.getElementById(id);
+  if (el && value != null) el.setAttribute(attr, value);
+}
+function buildArticleOgImage(a) {
+  // Priorité : coverImage > YouTube thumb > default
+  if (a.coverImage) return a.coverImage;
+  const ytId = (typeof extractYoutubeId === 'function') ? extractYoutubeId(a.videoSourceUrl) : null;
+  if (ytId) return `https://i.ytimg.com/vi/${ytId}/maxresdefault.jpg`;
+  return DEFAULT_OG_IMAGE;
+}
+function setArticleMeta(a) {
+  if (!a) return resetMeta();
+  const url = `${SITE_BASE_URL}/#article/${a.slug}`;
+  const title = `${a.title} — Avis Basé`;
+  const desc = (a.subtitle || a.body || '').toString().replace(/[#*`\n>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
+  const img = buildArticleOgImage(a);
+  document.title = title;
+  setMetaTag('metaDescription', 'content', desc);
+  setMetaTag('canonicalLink', 'href', url);
+  setMetaTag('ogType', 'content', 'article');
+  setMetaTag('ogTitle', 'content', title);
+  setMetaTag('ogDescription', 'content', desc);
+  setMetaTag('ogUrl', 'content', url);
+  setMetaTag('ogImage', 'content', img);
+  setMetaTag('twTitle', 'content', title);
+  setMetaTag('twDescription', 'content', desc);
+  setMetaTag('twImage', 'content', img);
+}
+function resetMeta() {
+  const url = `${SITE_BASE_URL}/`;
+  const title = 'Avis Basé — Le média collaboratif qui source tout';
+  const desc = "Média collaboratif qui vérifie et source l'actualité. Chaque article cite ses sources.";
+  document.title = title;
+  setMetaTag('metaDescription', 'content', desc);
+  setMetaTag('canonicalLink', 'href', url);
+  setMetaTag('ogType', 'content', 'website');
+  setMetaTag('ogTitle', 'content', title);
+  setMetaTag('ogDescription', 'content', desc);
+  setMetaTag('ogUrl', 'content', url);
+  setMetaTag('ogImage', 'content', DEFAULT_OG_IMAGE);
+  setMetaTag('twTitle', 'content', title);
+  setMetaTag('twDescription', 'content', desc);
+  setMetaTag('twImage', 'content', DEFAULT_OG_IMAGE);
+}
+
+// ── Reading progress bar ──────────────────────────────────────
+function updateReadingProgress() {
+  const bar = document.getElementById('readingProgressBar');
+  if (!bar) return;
+  const modal = document.getElementById('articlePageModal');
+  const isOpen = modal && modal.classList.contains('on');
+  if (!isOpen) { bar.style.transform = 'scaleX(0)'; return; }
+  const scroller = modal.querySelector('.modal__body') || modal;
+  const max = scroller.scrollHeight - scroller.clientHeight;
+  const pct = max > 0 ? Math.min(1, Math.max(0, scroller.scrollTop / max)) : 0;
+  bar.style.transform = `scaleX(${pct})`;
+}
+
+// ── Partage article ───────────────────────────────────────────
+async function shareArticle(a, kind) {
+  const url = `${SITE_BASE_URL}/#article/${a.slug}`;
+  const text = `${a.title} — via Avis Basé`;
+  if (kind === 'native' && navigator.share) {
+    try { await navigator.share({ title: a.title, text, url }); } catch {}
+    return;
+  }
+  if (kind === 'twitter') {
+    const u = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&via=avis_base.nth`;
+    window.open(u, '_blank', 'noopener,width=600,height=480');
+    return;
+  }
+  if (kind === 'copy') {
+    try { await navigator.clipboard.writeText(url); showToast('Lien copié dans le presse-papier ✓'); }
+    catch { showToast('Impossible de copier le lien', true); }
+    return;
+  }
+}
+
 async function openArticlePage(slug) {
   const a = articles.find(x => x.slug === slug);
   if (!a) { showToast('Article introuvable', true); return; }
@@ -5050,8 +5286,27 @@ async function openArticlePage(slug) {
   currentDetailId = null; // reset pour que les commentaires soient bien dans le contexte article
   incrementArticleReads(a.id);
   renderArticlePage(a);
+  setArticleMeta(a);
   openModal('articlePageModal');
+  document.body.classList.add('reading');
   try { history.replaceState(null, '', '#article/' + slug); } catch {}
+  // Active le scroll listener pour la progress bar
+  const scroller = document.querySelector('#articlePageModal .modal__body');
+  if (scroller && !scroller._progressBound) {
+    scroller.addEventListener('scroll', updateReadingProgress, { passive: true });
+    scroller._progressBound = true;
+  }
+  setTimeout(updateReadingProgress, 50);
+  // Hooks share buttons
+  const shareT = document.getElementById('shareTwitter');
+  const shareC = document.getElementById('shareCopy');
+  const shareN = document.getElementById('shareNative');
+  if (shareT) shareT.onclick = () => shareArticle(a, 'twitter');
+  if (shareC) shareC.onclick = () => shareArticle(a, 'copy');
+  if (shareN) {
+    shareN.onclick = () => shareArticle(a, 'native');
+    shareN.style.display = (typeof navigator !== 'undefined' && navigator.share) ? 'inline-flex' : 'none';
+  }
 }
 
 async function incrementArticleReads(id) {
@@ -7564,7 +7819,18 @@ async function openManageUsers() {
 
 // ═══ MODAL HELPERS ═══
 function openModal(id) { document.getElementById(id).classList.add('on'); document.body.style.overflow = 'hidden'; }
-function closeModal(id) { document.getElementById(id).classList.remove('on'); document.body.style.overflow = ''; }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('on');
+  document.body.style.overflow = '';
+  // Reset SEO meta + progress bar quand on quitte la lecture d'article
+  if (id === 'articlePageModal') {
+    if (typeof resetMeta === 'function') resetMeta();
+    document.body.classList.remove('reading');
+    const bar = document.getElementById('readingProgressBar');
+    if (bar) bar.style.transform = 'scaleX(0)';
+    try { history.replaceState(null, '', location.pathname + location.search); } catch {}
+  }
+}
 
 // ═══ SEARCH DROPDOWN ═══
 function renderSearchSuggestions() {
