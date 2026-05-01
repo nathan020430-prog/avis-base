@@ -2843,6 +2843,126 @@ body.is-mobile #navMenuBtnLabel{display:none !important}
 @supports (scroll-behavior: smooth){html{scroll-behavior:smooth}}
 
 /* ═══════════════════════════════════════════
+   MOBILE FLUIDITY v0.9.5 — perf et tactile
+═══════════════════════════════════════════ */
+
+/* GPU promotion sur les éléments fréquemment animés */
+.article-card,.card,.bs-numbered-item,.opinion-item,
+.trending-card,.author-card,.featured__cover,.featured__cta,
+.modal__box,.v8-modal,.minibar,.toast,
+.reading-progress__bar,.vote-btn,.share-btn{
+  -webkit-backface-visibility:hidden;backface-visibility:hidden;
+  -webkit-transform:translateZ(0);transform:translateZ(0);
+}
+
+/* Smooth touch scrolling sur les containers scrollables */
+.modal,.modal__body,
+.editor__scroll,
+.nav-menu__dropdown,
+.search-dropdown,
+#mobileDropdownPortal .nav-menu__dropdown{
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
+
+/* Anti-zoom au double-tap sur les boutons (iOS) */
+button,a,.share-btn,.btn,.vote-btn,.mh-action,.icon-btn,
+.mobile-nav__item,.minibar__nav button,.share-btn,
+.article-card,.card,.trending-card,.author-card,
+.opinion-item,.bs-numbered-item{touch-action:manipulation}
+
+/* Pointer-coarse (= touchscreens) : pas d'effet box-shadow lourd au hover */
+@media (pointer:coarse){
+  .article-card:hover,.card:hover,
+  .article-card:active,.card:active{
+    box-shadow:none !important;background:var(--surface-alt);
+  }
+  /* Hover lift désactivé en touch (provoquait des "ghost hover" persistants) */
+  .article-card:hover,.card:hover{transform:none !important}
+  .article-card:hover .article-card__title,
+  .card:hover .card__title{color:var(--ink)}
+  .article-card:active{background:var(--surface-hover);transition:background 0.15s}
+  /* Pas de shine effect au hover sur touch (déclenché 1 seule fois en passing) */
+  .featured__cta::after{display:none}
+  /* Liens article : underline pleine largeur au tap (pas d'animation) */
+  .article-page__body a::after{transform:scaleX(1)}
+  /* Sécurité : limiter blur sur backdrop-filter qui rame sur old phones */
+  .modal__backdrop,.minibar,.editor__topbar,
+  .header__top,.tiktok-banner{
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  }
+}
+
+/* Stagger plus court sur mobile : 4 cards max, 40ms écart */
+@media(max-width:768px){
+  .grid--articles.is-staggered .article-card{
+    animation-duration:0.4s;
+  }
+  .grid--articles.is-staggered .article-card:nth-child(1){animation-delay:0.04s}
+  .grid--articles.is-staggered .article-card:nth-child(2){animation-delay:0.10s}
+  .grid--articles.is-staggered .article-card:nth-child(3){animation-delay:0.16s}
+  .grid--articles.is-staggered .article-card:nth-child(4){animation-delay:0.22s}
+  .grid--articles.is-staggered .article-card:nth-child(n+5){animation-delay:0.26s}
+
+  /* Stagger numbered + opinion accéléré */
+  .bs-numbered.is-staggered .bs-numbered-item{animation-duration:0.35s}
+  .bs-numbered.is-staggered .bs-numbered-item:nth-child(1){animation-delay:0.04s}
+  .bs-numbered.is-staggered .bs-numbered-item:nth-child(2){animation-delay:0.10s}
+  .bs-numbered.is-staggered .bs-numbered-item:nth-child(3){animation-delay:0.16s}
+  .bs-numbered.is-staggered .bs-numbered-item:nth-child(n+4){animation-delay:0.22s}
+
+  .opinion-band__items.is-staggered .opinion-item{animation-duration:0.4s}
+  .opinion-band__items.is-staggered .opinion-item:nth-child(1){animation-delay:0.06s}
+  .opinion-band__items.is-staggered .opinion-item:nth-child(2){animation-delay:0.14s}
+  .opinion-band__items.is-staggered .opinion-item:nth-child(3){animation-delay:0.22s}
+
+  /* Trending : même approche */
+  .col-trending.is-staggered .trending-card{animation-duration:0.35s}
+  .col-trending.is-staggered .trending-card:nth-child(1){animation-delay:0.04s}
+  .col-trending.is-staggered .trending-card:nth-child(2){animation-delay:0.09s}
+  .col-trending.is-staggered .trending-card:nth-child(3){animation-delay:0.14s}
+  .col-trending.is-staggered .trending-card:nth-child(4){animation-delay:0.19s}
+  .col-trending.is-staggered .trending-card:nth-child(n+5){animation-delay:0.22s}
+}
+
+/* Safe area iOS notch (haut) pour la minibar quand affichée */
+@supports(padding:max(0px)){
+  .minibar{
+    padding-top:max(10px,env(safe-area-inset-top));
+    padding-left:max(40px,env(safe-area-inset-left));
+    padding-right:max(40px,env(safe-area-inset-right));
+  }
+  @media(max-width:768px){
+    .minibar{
+      padding-left:max(16px,env(safe-area-inset-left));
+      padding-right:max(16px,env(safe-area-inset-right));
+    }
+  }
+}
+
+/* Mobile : minibar masquée pendant l'ouverture du sheet Compte (évite collision) */
+body.is-mobile.account-sheet-open .minibar{transform:translateY(-100%) !important}
+
+/* Transitions allégées pour les vieux Android */
+@media (max-width:768px) and (pointer:coarse){
+  .article-card,.card,.bs-numbered-item,
+  .opinion-item,.trending-card,.author-card{
+    transition-duration:0.2s !important;
+  }
+  /* Désactive le shimmer/shine effects coûteux sur mobile touch */
+  .featured__cta::after{display:none}
+}
+
+/* Reading progress : 2px sur mobile (plus discret) */
+@media(max-width:768px){
+  .reading-progress{height:2.5px}
+}
+
+/* Performance : ne pas animer pendant un scroll actif */
+html.is-scrolling .article-card:hover,
+html.is-scrolling .card:hover{transform:none !important;box-shadow:none !important}
+
+/* ═══════════════════════════════════════════
    BROADSHEET — Sections "Une" supplémentaires
    (numbered top 5 + opinion-band)
 ═══════════════════════════════════════════ */
@@ -8330,11 +8450,20 @@ function updateSuggActive() {
 const _prefersReducedMotion = (typeof window !== 'undefined' && window.matchMedia)
   ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
 
+// Détection d'un device touch (sert à tuner les seuils)
+const _isTouchDevice = (typeof window !== 'undefined') && (
+  ('ontouchstart' in window) ||
+  (window.matchMedia && window.matchMedia('(pointer:coarse)').matches)
+);
+
 // IntersectionObserver pour révéler les sections au scroll
 let _revealObserver = null;
 function ensureRevealObserver() {
   if (_prefersReducedMotion) return null;
   if (_revealObserver || typeof IntersectionObserver === 'undefined') return _revealObserver;
+  // Sur mobile : seuil plus haut pour éviter de jouer l'anim hors-écran
+  const threshold = _isTouchDevice ? 0.12 : 0.05;
+  const rootMargin = _isTouchDevice ? '0px 0px -5% 0px' : '0px 0px -10% 0px';
   _revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -8342,8 +8471,29 @@ function ensureRevealObserver() {
         _revealObserver.unobserve(e.target);
       }
     });
-  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+  }, { rootMargin, threshold });
   return _revealObserver;
+}
+
+// Scroll detector global : ajoute html.is-scrolling pendant le scroll
+// (désactive les hover/transform coûteux le temps du scroll)
+let _scrollIdleTimer = 0;
+function bindScrollDetector() {
+  if (typeof window === 'undefined') return;
+  const html = document.documentElement;
+  let scrolling = false;
+  const onScroll = () => {
+    if (!scrolling) {
+      scrolling = true;
+      html.classList.add('is-scrolling');
+    }
+    clearTimeout(_scrollIdleTimer);
+    _scrollIdleTimer = setTimeout(() => {
+      scrolling = false;
+      html.classList.remove('is-scrolling');
+    }, 150);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
 }
 function applyReveal(selector, opts = {}) {
   const obs = ensureRevealObserver();
@@ -8478,6 +8628,7 @@ async function init() {
 
   // V0.9.4 — Animations : minibar sticky + reveals au scroll
   bindMinibar();
+  bindScrollDetector();
   applyReveal('.featured');
   applyReveal('.footer--media');
 
