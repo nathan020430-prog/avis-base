@@ -2963,6 +2963,157 @@ html.is-scrolling .article-card:hover,
 html.is-scrolling .card:hover{transform:none !important;box-shadow:none !important}
 
 /* ═══════════════════════════════════════════
+   MOBILE FLUIDITY v0.9.6 — viewport, inputs, paint
+═══════════════════════════════════════════ */
+
+/* Empêche l'auto-zoom iOS sur focus input (font-size < 16px déclenche le zoom) */
+@media(max-width:768px){
+  input,textarea,select,
+  .fg__input,.fg__textarea,.fg__select,
+  .search-bar__input,.search,
+  .editor__title-input,.editor__desc-input,
+  .editor__article-body,.editor__subtitle-input,
+  .editor__meta-input,.editor__meta-select,
+  .timestamp-input input[type="text"],
+  .subtitle-row__time,.subtitle-row__text,
+  .stat-input-group input,
+  .hook-input,.hashtag-input-wrap input,
+  .source-input-row input,
+  .comment-form textarea,
+  .cited-source-card__label-input{
+    font-size:max(16px,1rem) !important;
+  }
+  /* Sauf le titre éditeur qui doit rester énorme */
+  .editor__title-input{font-size:clamp(1.7rem,7vw,2.2rem) !important}
+  .editor__desc-input{font-size:max(16px,1rem) !important}
+}
+
+/* Viewport dynamique iOS Safari : utilise 100dvh quand supporté
+   pour que les modales/editor remplissent l'écran sans déborder
+   sous la barre URL Safari */
+@supports (height: 100dvh){
+  .editor{height:100dvh}
+  .modal{min-height:100dvh}
+}
+@supports not (height: 100dvh){
+  .editor{height:100vh}
+}
+
+/* CSS containment : isole le repaint des cards (gros boost mobile) */
+.article-card,.card{
+  contain:layout paint;
+}
+.bs-numbered-item,.opinion-item,
+.trending-card,.author-card,.comment{
+  contain:layout;
+}
+
+/* Active states tactiles : feedback visuel au tap (HIG-style) */
+@media (pointer:coarse){
+  .article-card:active,.card:active,
+  .trending-card:active,.author-card:active,
+  .bs-numbered-item:active,.opinion-item:active{
+    background:var(--surface-hover) !important;
+    transition:background 0.08s !important;
+  }
+  .btn:active,.share-btn:active,.vote-btn:active,
+  .icon-btn:active,.mh-action:active,
+  .cal-nav-btn:active,.cal-today-btn:active,
+  .pager__btn:active{
+    transform:scale(0.96) !important;
+    transition:transform 0.1s !important;
+  }
+  .nav-menu__item:active,.minibar__nav button:active{
+    background:var(--surface-hover) !important;
+    transition:background 0.08s !important;
+  }
+  .mobile-nav__item:active{transform:scale(0.92)}
+  /* Cancel hover état after click sur mobile (évite "stuck" état) */
+  .article-card:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:-1px}
+}
+
+/* Body overscroll : empêche la "rubber band" qui révèle le fond du body */
+html,body{overscroll-behavior-y:none}
+body{overscroll-behavior:contain}
+
+/* SKELETON LOADERS — placeholders pendant le chargement */
+@keyframes skeletonShimmer{
+  0%{background-position:-200% 0}
+  100%{background-position:200% 0}
+}
+.skeleton{
+  background:linear-gradient(110deg,var(--surface-alt) 30%,var(--surface-hover) 50%,var(--surface-alt) 70%);
+  background-size:200% 100%;
+  animation:skeletonShimmer 1.6s ease-in-out infinite;
+  border-radius:2px;
+}
+.skeleton-card{
+  padding:22px 24px;
+  border-right:1px solid var(--rule);
+  display:flex;flex-direction:column;gap:10px;
+}
+.grid--articles .skeleton-card:nth-child(3n){border-right:none}
+@media(max-width:1024px){.grid--articles .skeleton-card:nth-child(3n){border-right:1px solid var(--rule)}.grid--articles .skeleton-card:nth-child(2n){border-right:none}}
+@media(max-width:768px){.grid--articles .skeleton-card{border-right:none !important;border-bottom:1px solid var(--rule);padding:18px 0}.grid--articles .skeleton-card:last-child{border-bottom:none}}
+.skeleton-card__thumb{aspect-ratio:3/2;border-radius:2px;margin-bottom:6px}
+.skeleton-card__line{height:14px;border-radius:2px}
+.skeleton-card__line--title{height:24px;width:88%}
+.skeleton-card__line--title2{height:24px;width:62%}
+.skeleton-card__line--sub{height:12px;width:96%}
+.skeleton-card__line--sub2{height:12px;width:78%}
+.skeleton-card__line--meta{height:10px;width:50%;margin-top:8px}
+
+/* Reduce motion sur skeletons pour ceux qui le préfèrent */
+@media (prefers-reduced-motion: reduce){
+  .skeleton{animation:none;background:var(--surface-alt)}
+}
+
+/* Tap highlight : couleur cohérente avec la palette (Apple/Android) */
+*{-webkit-tap-highlight-color:rgba(140,28,19,0.1)}
+[data-theme="dark"] *{-webkit-tap-highlight-color:rgba(212,74,61,0.18)}
+
+/* Loading spinner amélioré : moins lourd visuellement */
+.loading{padding:48px 40px}
+.loading__spinner{width:28px;height:28px;border-width:2.5px}
+
+/* Inputs : appearance:none global pour normaliser entre OS */
+input[type="email"],input[type="text"],input[type="url"],
+input[type="search"],input[type="number"],input[type="password"],
+input[type="date"],input[type="time"],textarea,select{
+  appearance:none;-webkit-appearance:none;
+  border-radius:2px;
+}
+
+/* iOS : empêche l'effet "sélection texte" lors d'un long-press sur cards */
+.article-card,.card,.trending-card,.author-card,
+.bs-numbered-item,.opinion-item,.mobile-nav__item,
+.featured__cta,.featured__title,.featured__cover,
+.btn,.share-btn,.vote-btn,.icon-btn,.mh-action,
+.minibar__brand,.minibar__nav button{
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
+}
+/* Mais garde la sélection sur le contenu textuel des articles ! */
+.article-page__body,.article-page__title,.article-page__subtitle,
+.detail__title,.detail__desc,.comment__content,
+.featured__subtitle,
+[contenteditable="true"]{
+  -webkit-user-select:text;user-select:text;
+  -webkit-touch-callout:default;
+}
+
+/* Mobile : padding-bottom adapté à la nav bar avec safe-area */
+@media(max-width:768px){
+  body.is-mobile main.grid--articles,
+  body.is-mobile main.grid,
+  body.is-mobile .homepage-layout,
+  body.is-mobile .article-page,
+  body.is-mobile #articlePageModal .modal__body{
+    padding-bottom:calc(80px + env(safe-area-inset-bottom,0px)) !important;
+  }
+}
+
+/* ═══════════════════════════════════════════
    BROADSHEET — Sections "Une" supplémentaires
    (numbered top 5 + opinion-band)
 ═══════════════════════════════════════════ */
@@ -3450,7 +3601,17 @@ body.reading .reading-progress{opacity:1}
 </section>
 
 <!-- Loading / grids -->
-<div class="loading" id="loading"><div class="loading__spinner"></div><p>Chargement des articles...</p></div>
+<div class="loading" id="loading" style="display:none"><div class="loading__spinner"></div><p>Chargement des articles...</p></div>
+
+<!-- Skeleton initial : 6 cards pré-rendues pour un first paint instantané -->
+<main class="grid grid--articles" id="skeletonGrid" aria-hidden="true">
+  <div class="skeleton-card"><div class="skeleton skeleton-card__thumb"></div><div class="skeleton skeleton-card__line skeleton-card__line--meta"></div><div class="skeleton skeleton-card__line skeleton-card__line--title"></div><div class="skeleton skeleton-card__line skeleton-card__line--title2"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub2"></div></div>
+  <div class="skeleton-card"><div class="skeleton skeleton-card__thumb"></div><div class="skeleton skeleton-card__line skeleton-card__line--meta"></div><div class="skeleton skeleton-card__line skeleton-card__line--title"></div><div class="skeleton skeleton-card__line skeleton-card__line--title2"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub2"></div></div>
+  <div class="skeleton-card"><div class="skeleton skeleton-card__thumb"></div><div class="skeleton skeleton-card__line skeleton-card__line--meta"></div><div class="skeleton skeleton-card__line skeleton-card__line--title"></div><div class="skeleton skeleton-card__line skeleton-card__line--title2"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub2"></div></div>
+  <div class="skeleton-card"><div class="skeleton skeleton-card__thumb"></div><div class="skeleton skeleton-card__line skeleton-card__line--meta"></div><div class="skeleton skeleton-card__line skeleton-card__line--title"></div><div class="skeleton skeleton-card__line skeleton-card__line--title2"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub2"></div></div>
+  <div class="skeleton-card"><div class="skeleton skeleton-card__thumb"></div><div class="skeleton skeleton-card__line skeleton-card__line--meta"></div><div class="skeleton skeleton-card__line skeleton-card__line--title"></div><div class="skeleton skeleton-card__line skeleton-card__line--title2"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub2"></div></div>
+  <div class="skeleton-card"><div class="skeleton skeleton-card__thumb"></div><div class="skeleton skeleton-card__line skeleton-card__line--meta"></div><div class="skeleton skeleton-card__line skeleton-card__line--title"></div><div class="skeleton skeleton-card__line skeleton-card__line--title2"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub"></div><div class="skeleton skeleton-card__line skeleton-card__line--sub2"></div></div>
+</main>
 
 <!-- Homepage 3-col -->
 <div class="homepage-layout" id="homepageLayout" style="display:none"></div>
@@ -8607,7 +8768,12 @@ async function init() {
   document.getElementById('yr').textContent = new Date().getFullYear();
   hydrateMasthead();
   document.getElementById('editorDate').value = new Date().toISOString().split('T')[0];
-  if (!configOK) { document.getElementById('loading').style.display = 'none'; return; }
+  if (!configOK) {
+    document.getElementById('loading').style.display = 'none';
+    const skel = document.getElementById('skeletonGrid');
+    if (skel) skel.style.display = 'none';
+    return;
+  }
 
   // Check auth
   const { data: { session } } = await supa.auth.getSession();
@@ -8631,6 +8797,10 @@ async function init() {
   bindScrollDetector();
   applyReveal('.featured');
   applyReveal('.footer--media');
+
+  // V0.9.6 — Retire les skeleton cards (le rendu réel a pris la relève)
+  const skel = document.getElementById('skeletonGrid');
+  if (skel) skel.style.display = 'none';
 
   // Hide loading, show content
   document.getElementById('loading').style.display = 'none';
