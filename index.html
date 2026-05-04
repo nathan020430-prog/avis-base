@@ -3573,8 +3573,6 @@ body.is-mobile .notif-bell{width:32px;height:32px}
           </div>
         </div>
       </div>
-      <div class="notif-backdrop" id="notifBackdrop"></div>
-
       <button class="mh-action" id="themeToggle" aria-label="Thème">
         <svg id="themeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
       </button>
@@ -3741,6 +3739,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
     <span class="masthead__meta-center">« Chaque article part d'une vidéo longue, détaille le contexte et cite ses sources. »</span>
     <span>avis-base.com</span>
   </div>
+  <div class="notif-backdrop" id="notifBackdrop"></div>
 </header>
 
 <!-- Sticky minibar (apparaît au scroll past masthead) -->
@@ -8626,7 +8625,7 @@ function refreshUserUI() {
     const calBtn = document.getElementById('calendarBtn');
     if (calBtn) calBtn.style.display = isAdmin() ? 'block' : 'none';
   } else {
-    authBtn.style.display = 'inline-flex';
+    authBtn.style.display = 'none';
     userMenu.style.display = 'none';
     submitBtn.style.display = 'none';
     addBtn.style.display = 'none';
