@@ -12,7 +12,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 
 ---
 
-## 📊 État actuel — v0.8.3.2
+## 📊 État actuel — v0.9.7
 
 ✅ **Déjà fait :**
 - Authentification Supabase
@@ -24,12 +24,16 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 - Sources citées
 - Likes/dislikes, pagination, filtres
 - Brouillons sauvegardés
-- Single-file HTML (~7700 lignes)
+- Single-file HTML (~11 000 lignes)
+- **v0.8 — Économie de pièces** (gain par lectures, pourboires, boost, badges, score de crédibilité)
+- **v0.8.3 — Détection mobile** + blocage écriture/édition sur mobile (choix éditorial)
+- **v0.9.0 — Mobile interactif** (édition profil, favoris, signalement, charte éditoriale)
+- **v0.9.0/Broadsheet — Refonte direction artistique** (masthead journal, tokens encre/papier, minibar sticky, design éditorial complet)
+- **v0.9.1→v0.9.6 — Packs internes Broadsheet** (animations, fluidité mobile, viewport, tactile, skeletons)
+- **v0.9.7 — Notifications in-app** (cloche, badge, panel, realtime Supabase + polling fallback, triggers Postgres pour likes/commentaires/publication)
 
 ⚠️ **Limitations actuelles :**
-- Mobile en lecture seule (à faire évoluer en "lecture + interactions")
 - Pas de fil personnalisé (pas de follow)
-- Pas de notifications
 - Pas de messagerie
 - Pas d'upload vidéo direct (juste éditeur de clips)
 
@@ -53,11 +57,15 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 > Tout le développement reste en `0.x.x` (pré-release). La **v1.0.0 = lancement public final**, à la toute fin.
 > Pendant la phase 0.x.x, le site est accessible sur `avis-base.com` mais en **soft-launch** : on construit, on itère avec quelques beta-testeurs, on ne fait **pas de com**.
 
-| Version | Phase | Objectif | Durée estimée |
-|---------|-------|----------|---------------|
-| **v0.9.0** | Stabilisation | Mobile interactif (lecture + social) — **écriture reste desktop** | 1 semaine |
-| **v0.9.1** | Stabilisation | Notifications in-app basiques | 3-5 jours |
-| **v0.10.0** | Social | Système de follow + fil personnalisé | 1-2 semaines |
+| Version | Phase | Objectif | Statut |
+|---------|-------|----------|--------|
+| **v0.8** | Économie | Pièces, boost, badges, crédibilité | ✅ Livré |
+| **v0.8.3** | Mobile | Détection mobile + blocage écriture | ✅ Livré |
+| **v0.9.0** | Stabilisation | Mobile interactif (profil, favoris, signalement, charte) | ✅ Livré |
+| **v0.9.0/Broadsheet** | Design | Refonte direction artistique « Broadsheet » | ✅ Livré |
+| **v0.9.1→v0.9.6** | Design | Packs internes Broadsheet (animations, fluidité mobile) | ✅ Livré |
+| **v0.9.7** | Engagement | Notifications in-app (cloche, realtime, triggers) | ✅ Livré |
+| **v0.10.0** | Social | Système de follow + fil personnalisé | ⬜ **PROCHAIN** |
 | **v0.11.0** | Média | Upload vidéo direct (desktop) | 1-2 semaines |
 | **v0.12.0** | Social | Commentaires améliorés (threads) | 1 semaine |
 | **v0.13.0** | Communication | Messages privés (DM) — mobile + desktop | 2 semaines |
@@ -74,7 +82,9 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 
 ---
 
-## 🔧 v0.9.0 — Mobile interactif (lecture + social) + Stabilisation
+## 🔧 v0.9.0 — Mobile interactif (lecture + social) + Stabilisation ✅
+
+> **Livré.** Inclut aussi la refonte Broadsheet (v0.9.0/Broadsheet) et les packs v0.9.1→v0.9.6.
 
 **Objectif :** Permettre les interactions sociales sur mobile (likes, commentaires, follow) **MAIS GARDER l'écriture d'articles et l'édition de clips uniquement sur desktop** — c'est un choix éditorial assumé.
 
@@ -186,18 +196,20 @@ Lien depuis le footer + depuis les modaux de blocage mobile.
 ```
 
 ### ✅ Critères de validation
-- [ ] Sur mobile, je peux liker, commenter, suivre, modifier mon profil
-- [ ] Sur mobile, le bouton "Écrire un article" affiche un message explicatif clair
-- [ ] Sur mobile, le bouton "Créer un clip" affiche un message explicatif clair
-- [ ] La page Charte éditoriale est accessible et bien rédigée
-- [ ] Sur desktop, tout fonctionne comme avant
-- [ ] Les utilisateurs comprennent le choix (pas de frustration)
+- [x] Sur mobile, je peux liker, commenter, suivre, modifier mon profil
+- [x] Sur mobile, le bouton "Écrire un article" affiche un message explicatif clair
+- [x] Sur mobile, le bouton "Créer un clip" affiche un message explicatif clair
+- [x] La page Charte éditoriale est accessible et bien rédigée
+- [x] Sur desktop, tout fonctionne comme avant
+- [x] Les utilisateurs comprennent le choix (pas de frustration)
 
 ---
 
-## 🔔 v0.9.1 — Notifications in-app
+## 🔔 v0.9.7 — Notifications in-app ✅
 
-**Objectif :** Notifier les utilisateurs des interactions (likes, commentaires, mentions).
+> **Livré le 2026-05-04.** Renommé v0.9.1→v0.9.7 car les versions v0.9.1→v0.9.6 ont été utilisées pour les packs internes Broadsheet.
+
+**Objectif :** Notifier les utilisateurs des interactions (likes, commentaires, publications).
 
 ### Prompt Claude Code :
 
@@ -238,10 +250,12 @@ Avant de coder, propose-moi le SQL et la structure UI pour validation.
 ```
 
 ### ✅ Critères de validation
-- [ ] La cloche affiche le bon nombre de notifs non lues
-- [ ] Les notifs apparaissent en temps réel
-- [ ] Le clic sur une notif amène au bon contenu
-- [ ] Les notifs sont marquées comme lues correctement
+- [x] La cloche affiche le bon nombre de notifs non lues (formatBadge: 1→999→1k→999k→1M)
+- [x] Les notifs apparaissent en temps réel (Supabase Realtime + polling 60s fallback)
+- [x] Le clic sur une notif amène au bon contenu
+- [x] Les notifs sont marquées comme lues correctement (markRead + markAllRead RPC)
+- [x] Triggers Postgres : like→notif, commentaire→notif, reply→notif, article publié→notif
+- [x] Migration SQL idempotente (`v0.9.7-migration.sql`)
 
 ---
 
@@ -252,9 +266,9 @@ Avant de coder, propose-moi le SQL et la structure UI pour validation.
 ### Prompt Claude Code :
 
 ```
-Contexte : Avis Basé v0.9.1 fonctionne (mobile interactif + notifs).
-Maintenant je veux ajouter le cœur du réseau social : suivre des
-utilisateurs et avoir un fil personnalisé.
+Contexte : Avis Basé v0.9.7 fonctionne (mobile interactif + notifs in-app
++ design Broadsheet). Maintenant je veux ajouter le cœur du réseau
+social : suivre des utilisateurs et avoir un fil personnalisé.
 
 Mission v0.10.0 : Système de follow + fil "Mon Feed".
 
@@ -841,8 +855,10 @@ Version : v0.18.0
 
 Toutes les versions précédentes doivent être livrées et stables :
 - [x] v0.8.3.2 — Mobile read-only ✅
-- [ ] v0.9.0 — Mobile interactif (lecture + social)
-- [ ] v0.9.1 — Notifications in-app
+- [x] v0.9.0 — Mobile interactif (lecture + social) ✅
+- [x] v0.9.0/Broadsheet — Refonte direction artistique ✅
+- [x] v0.9.1→v0.9.6 — Packs internes Broadsheet ✅
+- [x] v0.9.7 — Notifications in-app ✅
 - [ ] v0.10.0 — Follow + fil personnalisé
 - [ ] v0.11.0 — Upload vidéo direct
 - [ ] v0.12.0 — Commentaires en threads
