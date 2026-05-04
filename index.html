@@ -1045,11 +1045,10 @@ body.admin .card__admin{display:flex}
   color:#FDFAF3;
 }
 .cred-chip__grade{font-family:var(--ff);font-weight:700}
-.cred-chip--A{background:#2D7A3E}
-.cred-chip--B{background:#6B9A3E}
-.cred-chip--C{background:#8B5A00}
-.cred-chip--D{background:#8C1C13}
-.cred-chip--E{background:#6B5C48}
+.cred-chip--base{background:#2D7A3E}
+.cred-chip--bon{background:#6B9A3E}
+.cred-chip--moyen{background:#8B5A00}
+.cred-chip--faible{background:#8C1C13}
 
 .user-cred-chip{
   display:inline-flex;align-items:center;gap:4px;
@@ -1058,11 +1057,14 @@ body.admin .card__admin{display:flex}
   flex-shrink:0;
   border:1px solid;
 }
-.user-cred-chip--nouveau{background:var(--surface-alt);color:var(--ink-muted);border-color:var(--rule)}
-.user-cred-chip--contributeur{background:var(--success-soft);color:var(--success);border-color:rgba(45,122,62,0.3)}
-.user-cred-chip--verificateur{background:rgba(12,68,124,0.1);color:#0C447C;border-color:rgba(12,68,124,0.25)}
-[data-theme="dark"] .user-cred-chip--verificateur{background:rgba(181,212,244,0.1);color:#B5D4F4;border-color:rgba(181,212,244,0.3)}
-.user-cred-chip--reference{background:var(--warn-soft);color:var(--warn);border-color:rgba(139,90,0,0.3)}
+.user-cred-chip--bas-du-front,.user-cred-chip--louche{background:rgba(140,28,19,0.1);color:#8C1C13;border-color:rgba(140,28,19,0.25)}
+[data-theme="dark"] .user-cred-chip--bas-du-front,[data-theme="dark"] .user-cred-chip--louche{color:#E8A09A;background:rgba(140,28,19,0.15)}
+.user-cred-chip--ok,.user-cred-chip--bien-vu{background:var(--surface-alt);color:var(--ink-muted);border-color:var(--rule)}
+.user-cred-chip--correct,.user-cred-chip--tres-bon{background:rgba(107,154,62,0.1);color:#4A7A2D;border-color:rgba(107,154,62,0.25)}
+[data-theme="dark"] .user-cred-chip--correct,[data-theme="dark"] .user-cred-chip--tres-bon{color:#A8D88A;background:rgba(107,154,62,0.15)}
+.user-cred-chip--classique,.user-cred-chip--masterclasse{background:rgba(12,68,124,0.1);color:#0C447C;border-color:rgba(12,68,124,0.25)}
+[data-theme="dark"] .user-cred-chip--classique,[data-theme="dark"] .user-cred-chip--masterclasse{background:rgba(181,212,244,0.1);color:#B5D4F4;border-color:rgba(181,212,244,0.3)}
+.user-cred-chip--base{background:var(--warn-soft);color:var(--warn);border-color:rgba(139,90,0,0.3)}
 .user-cred-chip__pct{font-family:var(--ff);font-size:0.76rem;font-weight:700}
 
 .user-level-badge{
@@ -3663,17 +3665,17 @@ body.is-mobile .notif-bell{width:32px;height:32px}
               <strong id="navUserUsername">...</strong>
               <span class="nav-menu__user-status" id="navUserStatus">Connecté</span>
             </div>
-            <div class="user-cred-chip user-cred-chip--nouveau" id="navUserCredChip" title="Votre score de crédibilité">
+            <div class="user-cred-chip user-cred-chip--bas-du-front" id="navUserCredChip" title="Votre niveau de Basitude">
               <span id="navUserCredPct">0%</span>
             </div>
           </div>
           <div id="navUserScoreSection" style="display:none">
             <div class="user-score-section">
-              <div class="user-score-section__title">Crédibilité</div>
+              <div class="user-score-section__title">Basitude</div>
               <div id="navCredProgressWrap">
                 <div class="cred-progress">
                   <div class="cred-progress__bar"><div class="cred-progress__fill" id="navCredFill" style="width:0%"></div></div>
-                  <div class="cred-progress__labels"><span id="navCredLevel">Nouveau</span><span id="navCredPctLabel">0%</span></div>
+                  <div class="cred-progress__labels"><span id="navCredLevel">Bas du front</span><span id="navCredPctLabel">0%</span></div>
                 </div>
               </div>
             </div>
@@ -4459,7 +4461,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
       <li><strong>Toute affirmation = source.</strong> Pas d'allégation gratuite.</li>
       <li><strong>Modération communautaire transparente.</strong> Toutes les actions sont auditées.</li>
       <li><strong>Pas d'algorithme manipulateur.</strong> Tu vois ce que tu choisis de voir.</li>
-      <li><strong>Score de crédibilité automatique.</strong> Chaque article est noté sur la base de ses sources.</li>
+      <li><strong>Niveau de Basitude automatique.</strong> Chaque article est noté sur la base de ses sources.</li>
     </ul>
 
     <h3>🤝 Ce qu'on attend des contributeurs</h3>
@@ -5709,7 +5711,7 @@ function articleCardHtml(a, featured = false) {
       <div class="article-card__meta">
         ${toneLabel ? `<span class="article-card__tone">${escapeHtml(toneLabel)}</span><span class="article-card__meta-sep">·</span>` : ''}
         <span class="article-card__theme">${escapeHtml(themeLabel)}</span>
-        ${(() => { const c = computeCredibility(a.citedSources); const cls = c.grade.startsWith('A') ? 'A' : c.grade === 'B' ? 'B' : c.grade === 'C' ? 'C' : c.grade === 'D' ? 'D' : 'E'; return `<span class="article-card__meta-sep">·</span><span class="cred-chip cred-chip--${cls}" title="Score de crédibilité : ${c.total}/100"><span class="cred-chip__grade">${c.grade}</span> ${c.total}</span>`; })()}
+        ${(() => { const c = computeCredibility(a.citedSources); const cls = c.total >= 90 ? 'base' : c.total >= 70 ? 'bon' : c.total >= 50 ? 'moyen' : 'faible'; return `<span class="article-card__meta-sep">·</span><span class="cred-chip cred-chip--${cls}" title="Basitude : ${c.total}/100 — ${c.grade}"><span class="cred-chip__grade">${c.grade}</span></span>`; })()}
       </div>
       <h3 class="article-card__title">${titleHtml}</h3>
       ${subtitleHtml ? `<p class="article-card__subtitle">${subtitleHtml}</p>` : ''}
@@ -6227,7 +6229,7 @@ function renderArticlePage(a) {
 
   const authorCredScore = a.authorCredScore || 0;
   const authorLevel = getUserLevel(authorCredScore);
-  const authorCredBadge = a.status === 'published' ? `<span class="user-level-badge user-level-badge--${authorLevel.key}" title="Crédibilité auteur : ${authorCredScore}%">${authorLevel.icon} ${authorLevel.label} · ${authorCredScore}%</span>` : '';
+  const authorCredBadge = a.status === 'published' ? `<span class="user-level-badge user-level-badge--${authorLevel.key}" title="Basitude : ${authorCredScore}%">${authorLevel.icon} ${authorLevel.label} · ${authorCredScore}%</span>` : '';
 
   body.innerHTML = `
     <a class="article-page__back" id="articleBackBtn">← Retour aux articles</a>
@@ -7342,12 +7344,17 @@ async function loadMyProfile() {
 // V0.8.2 — Crédibilité utilisateur
 // ═══════════════════════════════════════════════════════
 
-// Niveaux utilisateur selon score 0-100%
+// Niveaux de Basitude (score 0-100%)
 const USER_LEVELS = [
-  { key: 'nouveau',      label: 'Nouveau',      icon: '🌱', min: 0,  max: 30  },
-  { key: 'contributeur', label: 'Contributeur', icon: '✍️',  min: 30, max: 60  },
-  { key: 'verificateur', label: 'Vérificateur', icon: '🔍', min: 60, max: 80  },
-  { key: 'reference',    label: 'Référence',    icon: '⭐', min: 80, max: 101 }
+  { key: 'bas-du-front', label: 'Bas du front',   icon: '🧱', min: 0,  max: 10  },
+  { key: 'louche',       label: 'Louche',          icon: '👀', min: 10, max: 25  },
+  { key: 'ok',           label: 'OK',              icon: '🤷', min: 25, max: 35  },
+  { key: 'bien-vu',      label: 'Bien vu',         icon: '👍', min: 35, max: 50  },
+  { key: 'correct',      label: 'Correct',         icon: '✅', min: 50, max: 60  },
+  { key: 'tres-bon',     label: 'Très très bon',   icon: '🔥', min: 60, max: 70  },
+  { key: 'classique',    label: 'Classique',        icon: '🏛️', min: 70, max: 80  },
+  { key: 'masterclasse', label: 'Masterclasse',     icon: '🎓', min: 80, max: 90  },
+  { key: 'base',         label: 'Basé',             icon: '👑', min: 90, max: 101 }
 ];
 
 function getUserLevel(pct) {
@@ -7391,7 +7398,7 @@ function updateNavCredDisplay() {
 
   if (chip) {
     chip.className = `user-cred-chip user-cred-chip--${level.key}`;
-    chip.title = `${level.icon} ${level.label} · ${pct}% de crédibilité`;
+    chip.title = `${level.icon} ${level.label} · ${pct}% de Basitude`;
     chip.style.display = 'inline-flex';
   }
   if (pctEl) pctEl.textContent = pct + '%';
@@ -7426,7 +7433,7 @@ function openCredScoreModal() {
   const html = `<div class="v8-backdrop" id="credScoreBackdrop">
     <div class="v8-modal" role="dialog" aria-modal="true">
       <button class="v8-modal__close" id="credScoreClose" aria-label="Fermer">×</button>
-      <h2>Ma crédibilité</h2>
+      <h2>Ma Basitude</h2>
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:16px;background:var(--surface-alt);border-radius:12px">
         <div style="font-size:2.8rem;line-height:1">${level.icon}</div>
         <div>
@@ -7443,8 +7450,8 @@ function openCredScoreModal() {
         ${rowsHtml}
       </div>
       <p style="font-size:0.76rem;color:var(--text-muted);margin-top:12px;line-height:1.5">
-        Les interactions sont pondérées par la crédibilité de l'utilisateur qui interagit.<br>
-        Formule : poids = crédibilité_interactant / 100
+        Les interactions sont pondérées par le niveau de Basitude de l'utilisateur qui interagit.<br>
+        Formule : poids = Basitude_interactant / 100
       </p>
     </div>
   </div>`;
@@ -7793,8 +7800,8 @@ function renderReliableCol() {
 
   col.innerHTML = `
     <div class="reliable-header">
-      <div class="reliable-header__title">🧠 Auteurs fiables</div>
-      <div class="reliable-header__sub">Top auteurs par crédibilité</div>
+      <div class="reliable-header__title">👑 Auteurs Basés</div>
+      <div class="reliable-header__sub">Top auteurs par Basitude</div>
     </div>
     ${topAuthors.length ? authorCards : '<p style="font-size:0.85rem;color:var(--text-muted)">Aucun auteur disponible.</p>'}
   `;
@@ -7876,8 +7883,8 @@ function computeCredibility(citedSources) {
   const reliabilityScore = count === 0 ? 0 : Math.round((avgTier / 5) * 30);
 
   const total = countScore + diversityScore + reliabilityScore;
-  const grade = total >= 90 ? 'A+' : total >= 80 ? 'A' : total >= 70 ? 'B' : total >= 60 ? 'C' : total >= 50 ? 'D' : 'E';
-  const gradeColor = total >= 80 ? '#2D7A3E' : total >= 60 ? '#B8860B' : total >= 40 ? '#C8102E' : '#6B6B6B';
+  const grade = total >= 90 ? 'Basé' : total >= 80 ? 'Masterclasse' : total >= 70 ? 'Classique' : total >= 60 ? 'Très bon' : total >= 50 ? 'Bien vu' : total >= 35 ? 'OK' : total >= 25 ? 'Louche' : total >= 10 ? 'Bas du front' : 'Bas du front';
+  const gradeColor = total >= 90 ? '#2D7A3E' : total >= 70 ? '#4A7A2D' : total >= 50 ? '#B8860B' : total >= 35 ? '#8B7355' : '#C8102E';
   const known = domains.filter(d => CREDIBILITY_DB[d] !== undefined).length;
   return {
     total, grade, gradeColor,
@@ -7907,7 +7914,7 @@ function renderCredibilityCard(citedSources) {
         <div class="cred-card__grade-score">${s.total}/100</div>
       </div>
       <div class="cred-card__title">
-        <h3>Score de crédibilité</h3>
+        <h3>Niveau de Basitude</h3>
         <p>Calculé automatiquement à partir des sources citées</p>
       </div>
       <button class="cred-card__info" id="credInfoBtn" aria-label="Détails">?</button>
