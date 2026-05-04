@@ -3353,6 +3353,191 @@ body.reading .reading-progress{opacity:1}
   .article-card__title{font-size:13pt !important;color:#000 !important}
   .article-card__subtitle{font-size:10pt !important;color:#333 !important}
 }
+
+/* ═══════════════════════════════════════════
+   V0.9.7 — Notifications in-app (bell + panel)
+   Design system : Broadsheet (encre, papier, filets)
+═══════════════════════════════════════════ */
+.notif-wrap{position:relative;display:inline-flex}
+
+.notif-bell{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;
+  border:1px solid var(--rule);
+  background:transparent;
+  color:var(--ink-muted);
+  border-radius:2px;
+  transition:all var(--tr);
+  cursor:pointer;
+  position:relative;
+}
+.notif-bell:hover{border-color:var(--ink);color:var(--ink)}
+.notif-bell svg{transition:transform 0.4s cubic-bezier(0.16,1,0.3,1)}
+.notif-bell:hover svg{transform:rotate(-10deg)}
+.notif-bell.has-unread{color:var(--accent);border-color:var(--accent)}
+
+.notif-bell__badge{
+  position:absolute;top:-6px;right:-6px;
+  min-width:16px;height:16px;
+  border-radius:8px;
+  background:var(--accent);color:#FDFAF3;
+  font-size:0.56rem;font-weight:700;letter-spacing:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 4px;
+  border:1.5px solid var(--bg);
+  font-variant-numeric:tabular-nums;
+  line-height:1;
+}
+.notif-bell__badge[data-count="0"]{display:none}
+@keyframes notifBellPulse{
+  0%{transform:scale(1)}
+  35%{transform:scale(1.22) rotate(-6deg)}
+  70%{transform:scale(0.96) rotate(4deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+.notif-bell.pulse svg{animation:notifBellPulse 0.7s cubic-bezier(0.16,1,0.3,1)}
+
+/* Panel — papier journal détaché */
+.notif-panel{
+  position:absolute;top:calc(100% + 10px);right:0;
+  width:380px;max-width:calc(100vw - 24px);
+  max-height:min(540px,calc(100vh - 110px));
+  background:var(--bg);
+  border:1px solid var(--ink);
+  border-radius:2px;
+  box-shadow:0 12px 36px rgba(26,17,8,0.18);
+  display:none;flex-direction:column;
+  overflow:hidden;
+  z-index:920;
+}
+[data-theme="dark"] .notif-panel{box-shadow:0 12px 36px rgba(0,0,0,0.55)}
+.notif-panel.open{display:flex;animation:notifFadeIn 0.18s ease-out}
+@keyframes notifFadeIn{
+  from{opacity:0;transform:translateY(-6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.notif-panel__head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;
+  border-bottom:1px solid var(--rule);
+  flex-shrink:0;
+  background:var(--paper,var(--surface-alt));
+}
+.notif-panel__title{
+  font-family:var(--ff,Georgia,serif);
+  font-size:0.92rem;font-weight:700;
+  letter-spacing:0.02em;
+  color:var(--ink);
+  text-transform:uppercase;
+}
+.notif-panel__mark-all{
+  background:transparent;border:0;
+  color:var(--ink-muted);
+  font-size:0.7rem;font-weight:600;letter-spacing:0.04em;
+  text-transform:uppercase;
+  cursor:pointer;padding:5px 7px;
+  border-radius:2px;
+  transition:all var(--tr);
+}
+.notif-panel__mark-all:hover{color:var(--accent)}
+.notif-panel__mark-all:disabled{opacity:0.35;cursor:default;color:var(--ink-light)}
+
+.notif-panel__list{flex:1;overflow-y:auto}
+.notif-panel__empty{
+  padding:44px 22px;text-align:center;
+  color:var(--ink-muted);font-size:0.84rem;
+  font-style:italic;font-family:var(--ff,Georgia,serif);
+}
+.notif-panel__empty-icon{
+  font-size:1.6rem;margin-bottom:8px;opacity:0.4;
+  color:var(--rule);
+}
+.notif-panel__loading{
+  padding:28px;text-align:center;
+  color:var(--ink-muted);font-size:0.78rem;
+  font-style:italic;
+}
+
+/* Item — un chapeau d'article miniature */
+.notif-item{
+  display:flex;gap:11px;
+  padding:11px 14px;cursor:pointer;
+  transition:background var(--tr);
+  border-bottom:1px solid var(--rule-light);
+  position:relative;
+}
+.notif-item:last-child{border-bottom:0}
+.notif-item:hover{background:var(--surface-alt)}
+.notif-item.unread{background:var(--accent-soft)}
+.notif-item.unread:hover{background:var(--surface-alt)}
+
+.notif-item__avatar{
+  width:32px;height:32px;
+  border-radius:50%;
+  flex-shrink:0;
+  background:var(--surface);background-size:cover;background-position:center;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:0.78rem;
+  color:var(--ink-muted);
+  border:1px solid var(--rule);
+  font-family:var(--ff,Georgia,serif);
+}
+.notif-item__avatar--system{
+  background:var(--accent-soft);
+  color:var(--accent);
+  border-color:var(--accent);
+  font-size:0.95rem;
+}
+
+.notif-item__body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.notif-item__text{
+  font-size:0.82rem;line-height:1.42;
+  color:var(--ink);
+  word-break:break-word;
+}
+.notif-item__text strong{font-weight:700}
+.notif-item__preview{font-style:italic;color:var(--ink-muted)}
+.notif-item__time{
+  font-size:0.66rem;letter-spacing:0.04em;
+  color:var(--ink-light);
+  text-transform:uppercase;
+  font-variant-numeric:tabular-nums;
+}
+
+.notif-item__dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--accent);
+  align-self:center;flex-shrink:0;display:none;
+}
+.notif-item.unread .notif-item__dot{display:block}
+
+/* Mobile : sheet montant depuis le bas */
+.notif-backdrop{
+  position:fixed;inset:0;
+  background:rgba(26,17,8,0.45);
+  z-index:910;display:none;
+}
+.notif-backdrop.open{display:block;animation:notifFadeIn 0.2s}
+
+body.is-mobile .notif-panel{
+  position:fixed;top:auto;bottom:0;left:0;right:0;
+  width:100%;max-width:100%;
+  max-height:78vh;
+  border-radius:8px 8px 0 0;
+  border-left:0;border-right:0;border-bottom:0;
+  border-top:3px double var(--ink);
+}
+body.is-mobile .notif-panel.open{animation:notifSheetUp 0.24s ease-out}
+@keyframes notifSheetUp{
+  from{transform:translateY(100%)}
+  to{transform:translateY(0)}
+}
+body.is-mobile .notif-bell{width:32px;height:32px}
+@media(max-width:768px){
+  .notif-bell{width:32px;height:32px}
+}
+
 </style>
 </head>
 <body>
@@ -3367,10 +3552,29 @@ body.reading .reading-progress{opacity:1}
       <span class="masthead__ornament">·</span>
       <span id="mhVolume">Vol. 1</span>
       <span class="masthead__ornament">·</span>
-      <span class="beta-tag">v0.9.0</span>
+      <span class="beta-tag">v0.9.7</span>
     </div>
     <div class="masthead__top-right">
       <span class="sync-ind" id="syncInd"><span class="sync-dot off" id="syncDot"></span><span id="syncLabel">Hors ligne</span></span>
+
+      <!-- V0.9.7 — Cloche notifications (visible si connecté) -->
+      <div class="notif-wrap" id="notifWrap" style="display:none">
+        <button class="notif-bell" id="notifBtn" aria-label="Notifications" aria-haspopup="true" aria-expanded="false">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="notif-bell__badge" id="notifBadge" data-count="0">0</span>
+        </button>
+        <div class="notif-panel" id="notifPanel" role="dialog" aria-label="Notifications">
+          <div class="notif-panel__head">
+            <span class="notif-panel__title">Notifications</span>
+            <button class="notif-panel__mark-all" id="notifMarkAll" disabled>Tout marquer lu</button>
+          </div>
+          <div class="notif-panel__list" id="notifList">
+            <p class="notif-panel__loading">Chargement…</p>
+          </div>
+        </div>
+      </div>
+      <div class="notif-backdrop" id="notifBackdrop"></div>
+
       <button class="mh-action" id="themeToggle" aria-label="Thème">
         <svg id="themeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
       </button>
@@ -3675,7 +3879,7 @@ body.reading .reading-progress{opacity:1}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.84-.1z"/></svg>
         @avis_base.nth
       </a>
-      <p class="footer__version">© <span id="yr"></span> · Beta · v0.9.0 — Broadsheet edition · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a></p>
+      <p class="footer__version">© <span id="yr"></span> · Beta · v0.9.7 — Broadsheet edition · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a></p>
     </div>
   </div>
 </footer>
@@ -7980,6 +8184,326 @@ async function submitReportContent() {
   closeReportContentModal();
 }
 
+// ═══════════════════════════════════════════════════════════
+// V0.9.7 — Notifications in-app
+// ═══════════════════════════════════════════════════════════
+const Notif = {
+  list: [],
+  unread: 0,
+  channel: null,
+  pollTimer: null,
+  open: false,
+  loaded: false,
+
+  // ── Helpers ──────────────────────────────────────────────
+  formatBadge(n) {
+    if (!n || n < 1) return '0';
+    if (n < 1000)    return String(n);
+    if (n < 1_000_000)     return Math.floor(n / 1000) + 'k';
+    if (n < 1_000_000_000) return Math.floor(n / 1_000_000) + 'M';
+    return '999M+';
+  },
+
+  truncate(str, n = 60) {
+    const s = String(str || '');
+    return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s;
+  },
+
+  formatText(n) {
+    const actor = n.actor?.username || 'Quelqu\'un';
+    const a = `<strong>${escapeHtml(actor)}</strong>`;
+    const preview = n.target_preview ? `<span class="notif-item__preview">«&nbsp;${escapeHtml(this.truncate(n.target_preview, 50))}&nbsp;»</span>` : '';
+    switch (n.type) {
+      case 'like':
+        if (n.target_type === 'article') return `${a} a aimé ton article ${preview}`;
+        if (n.target_type === 'comment') return `${a} a aimé ton commentaire ${preview}`;
+        return `${a} a aimé ton contenu`;
+      case 'comment':
+        return `${a} a commenté ton article ${preview}`;
+      case 'reply':
+        return `${a} a répondu à ton commentaire ${preview}`;
+      case 'article_validated':
+        return `Ton article ${preview} a été publié 🎉`;
+      default:
+        return `${a} a interagi avec ton contenu`;
+    }
+  },
+
+  avatarHtml(n) {
+    if (n.type === 'article_validated') {
+      return '<div class="notif-item__avatar notif-item__avatar--system" aria-hidden="true">✓</div>';
+    }
+    const u = n.actor;
+    if (u?.avatar_url) {
+      return `<div class="notif-item__avatar" style="background-image:url('${escapeHtml(u.avatar_url)}')" aria-hidden="true"></div>`;
+    }
+    const initial = (u?.username || '?')[0].toUpperCase();
+    return `<div class="notif-item__avatar" aria-hidden="true">${escapeHtml(initial)}</div>`;
+  },
+
+  // ── Data ─────────────────────────────────────────────────
+  async load() {
+    if (!currentUser) { this.list = []; this.unread = 0; this.renderBadge(); return; }
+    const sel = 'id, type, target_type, target_id, target_preview, read, created_at, actor:profiles!notifications_actor_id_fkey(id, username, avatar_url)';
+    const { data, error } = await supa
+      .from('notifications')
+      .select(sel)
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (error) {
+      console.warn('Notif.load:', error.message);
+      this.list = []; this.unread = 0;
+    } else {
+      this.list = data || [];
+    }
+    // Compteur exact (pas limité aux 20)
+    const { count, error: cErr } = await supa
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id)
+      .eq('read', false);
+    if (!cErr) this.unread = count || 0;
+    this.loaded = true;
+    this.renderBadge();
+    if (this.open) this.renderList();
+  },
+
+  async markRead(id) {
+    const item = this.list.find(x => x.id === id);
+    if (!item || item.read) return;
+    item.read = true;
+    this.unread = Math.max(0, this.unread - 1);
+    this.renderBadge();
+    this.renderList();
+    const { error } = await supa.from('notifications').update({ read: true }).eq('id', id);
+    if (error) console.warn('Notif.markRead:', error.message);
+  },
+
+  async markAllRead() {
+    if (this.unread === 0) return;
+    this.list.forEach(n => n.read = true);
+    this.unread = 0;
+    this.renderBadge();
+    this.renderList();
+    const { error } = await supa.rpc('mark_all_notifications_read');
+    if (error) {
+      // Fallback : update direct
+      await supa.from('notifications').update({ read: true })
+        .eq('user_id', currentUser.id).eq('read', false);
+    }
+  },
+
+  // ── Navigation au clic ──────────────────────────────────
+  async openTarget(n) {
+    this.markRead(n.id);
+    this.closePanel();
+
+    // Cible = article (direct ou via comment)
+    let targetArticleId = null;
+    let scrollToComment = null;
+
+    if (n.target_type === 'article') {
+      targetArticleId = n.target_id;
+    } else if (n.target_type === 'comment') {
+      scrollToComment = n.target_id;
+      // Récupère l'article_id du commentaire
+      const { data, error } = await supa
+        .from('comments')
+        .select('article_id')
+        .eq('id', n.target_id)
+        .maybeSingle();
+      if (error || !data?.article_id) {
+        showToast('Contenu introuvable', true);
+        return;
+      }
+      targetArticleId = data.article_id;
+    } else if (n.target_type === 'clip') {
+      // v0.9.7 : pas encore de notif clip, mais prêt pour futur
+      targetArticleId = null;
+      showToast('Clip introuvable', true);
+      return;
+    }
+
+    if (!targetArticleId) return;
+    const article = articles.find(a => a.id === targetArticleId);
+    if (!article) {
+      showToast('Article introuvable', true);
+      return;
+    }
+    if (typeof openArticlePage === 'function') openArticlePage(article.slug);
+
+    // Scroll vers le commentaire après chargement
+    if (scrollToComment) {
+      setTimeout(() => {
+        const el = document.getElementById('comment-' + scrollToComment);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.style.background = 'var(--accent-soft)';
+          setTimeout(() => el.style.background = '', 1800);
+        }
+      }, 700);
+    }
+  },
+
+  // ── Realtime + polling fallback ─────────────────────────
+  subscribe() {
+    if (!currentUser || this.channel) return;
+    try {
+      this.channel = supa.channel('notif:' + currentUser.id)
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: 'user_id=eq.' + currentUser.id
+        }, () => {
+          this.load().then(() => this.pulseBell());
+        })
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'notifications',
+          filter: 'user_id=eq.' + currentUser.id
+        }, () => { this.load(); })
+        .subscribe();
+    } catch (e) {
+      console.warn('Notif.subscribe:', e);
+    }
+    // Fallback polling 60s (au cas où realtime down)
+    this.pollTimer = setInterval(() => { if (currentUser) this.load(); }, 60_000);
+  },
+
+  unsubscribe() {
+    if (this.channel) { try { supa.removeChannel(this.channel); } catch {} this.channel = null; }
+    if (this.pollTimer) { clearInterval(this.pollTimer); this.pollTimer = null; }
+  },
+
+  // ── Rendu ────────────────────────────────────────────────
+  renderBadge() {
+    const wrap = document.getElementById('notifWrap');
+    const btn = document.getElementById('notifBtn');
+    const badge = document.getElementById('notifBadge');
+    const markAll = document.getElementById('notifMarkAll');
+    if (!wrap || !btn || !badge) return;
+    badge.textContent = this.formatBadge(this.unread);
+    badge.dataset.count = String(this.unread);
+    btn.classList.toggle('has-unread', this.unread > 0);
+    if (markAll) markAll.disabled = this.unread === 0;
+  },
+
+  renderList() {
+    const list = document.getElementById('notifList');
+    if (!list) return;
+    if (!this.loaded) {
+      list.innerHTML = '<p class="notif-panel__loading">Chargement…</p>';
+      return;
+    }
+    if (this.list.length === 0) {
+      list.innerHTML = `
+        <div class="notif-panel__empty">
+          <div class="notif-panel__empty-icon">🕊️</div>
+          Tu n'as pas encore de notifications.<br>
+          <span style="font-size:0.78rem">Continue à lire et débattre — ça viendra.</span>
+        </div>`;
+      return;
+    }
+    const html = this.list.map(n => `
+      <div class="notif-item ${n.read ? '' : 'unread'}" data-notif-id="${n.id}" role="button" tabindex="0">
+        ${this.avatarHtml(n)}
+        <div class="notif-item__body">
+          <div class="notif-item__text">${this.formatText(n)}</div>
+          <div class="notif-item__time">${timeAgo(n.created_at)}</div>
+        </div>
+        <span class="notif-item__dot" aria-hidden="true"></span>
+      </div>
+    `).join('');
+    list.innerHTML = html;
+    list.querySelectorAll('.notif-item').forEach(el => {
+      const id = el.dataset.notifId;
+      const n = this.list.find(x => x.id === id);
+      if (!n) return;
+      el.addEventListener('click', () => this.openTarget(n));
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.openTarget(n); }
+      });
+    });
+  },
+
+  // ── Panel open/close ─────────────────────────────────────
+  togglePanel() {
+    if (this.open) this.closePanel(); else this.openPanel();
+  },
+
+  openPanel() {
+    const panel = document.getElementById('notifPanel');
+    const btn = document.getElementById('notifBtn');
+    const backdrop = document.getElementById('notifBackdrop');
+    if (!panel || !btn) return;
+    this.open = true;
+    panel.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    if (document.body.classList.contains('is-mobile') && backdrop) backdrop.classList.add('open');
+    this.renderList();
+    // Lazy load à la première ouverture si pas encore chargé
+    if (!this.loaded) this.load();
+  },
+
+  closePanel() {
+    const panel = document.getElementById('notifPanel');
+    const btn = document.getElementById('notifBtn');
+    const backdrop = document.getElementById('notifBackdrop');
+    this.open = false;
+    if (panel) panel.classList.remove('open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    if (backdrop) backdrop.classList.remove('open');
+  },
+
+  pulseBell() {
+    const btn = document.getElementById('notifBtn');
+    if (!btn) return;
+    btn.classList.remove('pulse');
+    void btn.offsetWidth; // restart animation
+    btn.classList.add('pulse');
+    setTimeout(() => btn.classList.remove('pulse'), 800);
+  },
+
+  // ── Visibilité (auth) ────────────────────────────────────
+  refreshUI() {
+    const wrap = document.getElementById('notifWrap');
+    if (!wrap) return;
+    if (currentUser && currentProfile) {
+      wrap.style.display = 'inline-flex';
+    } else {
+      wrap.style.display = 'none';
+      this.closePanel();
+      this.list = []; this.unread = 0; this.loaded = false;
+      this.renderBadge();
+    }
+  },
+
+  // ── Wiring DOM (appelé au DOMContentLoaded) ──────────────
+  bindHandlers() {
+    document.getElementById('notifBtn')?.addEventListener('click', e => {
+      e.stopPropagation();
+      this.togglePanel();
+    });
+    document.getElementById('notifMarkAll')?.addEventListener('click', e => {
+      e.stopPropagation();
+      this.markAllRead();
+    });
+    document.getElementById('notifBackdrop')?.addEventListener('click', () => this.closePanel());
+    // Click outside panel = close
+    document.addEventListener('click', e => {
+      if (!this.open) return;
+      if (e.target.closest('#notifWrap')) return;
+      this.closePanel();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && this.open) this.closePanel();
+    });
+  },
+};
+
 // ─── Wiring V0.9.0 (à appeler au DOMContentLoaded) ─────────
 function bindV09Handlers() {
   // Charter
@@ -8111,6 +8635,8 @@ function refreshUserUI() {
   }
   // Sync v0.7 nav menu
   syncNavMenu();
+  // V0.9.7 — visibilité cloche notifications
+  if (typeof Notif !== 'undefined') Notif.refreshUI();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -8783,6 +9309,9 @@ async function init() {
   await loadFavorites(); // V0.9.0
   refreshUserUI();
 
+  // V0.9.7 — démarrer notifications si connecté
+  if (currentUser) { Notif.load(); Notif.subscribe(); }
+
   await loadCharter();
   // v0.6 : Load articles + themes + tones FIRST (main content)
   await loadArticleThemes();
@@ -8833,6 +9362,9 @@ async function init() {
     await loadMyVotes();
     await loadFavorites(); // V0.9.0
     refreshUserUI();
+    // V0.9.7 — (re)bind notifications selon l'état
+    if (currentUser) { Notif.load(); Notif.subscribe(); }
+    else { Notif.unsubscribe(); }
     if (isAdmin()) {
       await loadSubmissions();
       await loadReports();
@@ -10219,6 +10751,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // V0.9.0 — Wiring profil/favoris/charte/report
   if (typeof bindV09Handlers === 'function') bindV09Handlers();
 
+  // V0.9.7 — Wiring notifications
+  if (typeof Notif !== 'undefined') Notif.bindHandlers();
+
   // ═══ v0.7 NAV MENU ═══
   document.getElementById('navMenuBtn')?.addEventListener('click', e => {
     e.stopPropagation();
@@ -10598,7 +11133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('%cAvis Basé v0.9.0 (beta — mobile lecture & interactions)', 'color:#C8102E;font-size:16px;font-weight:bold');
+  console.log('%cAvis Basé v0.9.7 (beta — Broadsheet · notifications in-app)', 'color:#C8102E;font-size:16px;font-weight:bold');
   console.log('%cMédia collaboratif · @avis_base.nth', 'color:#888;font-size:11px');
   init();
 });
