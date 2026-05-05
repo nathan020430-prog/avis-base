@@ -7220,6 +7220,15 @@ async function publishArticleFromEditor() {
 
   const resetButton = () => { btn.disabled = false; labelEl.textContent = origLabel; };
 
+  // Failsafe : si l'update Supabase ne répond pas en 15s, on débloque l'UI
+  let failsafeTriggered = false;
+  const failsafe = setTimeout(() => {
+    failsafeTriggered = true;
+    resetButton();
+    showToast('Opération trop longue (>15s). Vérifie ta connexion ou recharge la page.', true);
+    console.error('[publish/save] failsafe triggered after 15s');
+  }, 15000);
+
   try {
     const wc = countWords(body);
     const rm = readingMinutes(wc);
@@ -7259,6 +7268,8 @@ async function publishArticleFromEditor() {
       };
       console.debug('[article submit] payload:', payload);
       const { data, error } = await supa.from('articles').insert(payload).select().maybeSingle();
+      if (failsafeTriggered) return;
+      clearTimeout(failsafe);
       resetButton();
       if (error) {
         console.error('[article submit] insert error:', error);
@@ -7294,6 +7305,8 @@ async function publishArticleFromEditor() {
       }
       console.debug('[article update] payload:', payload);
       const { error } = await supa.from('articles').update(payload).eq('id', articleEditorState.editingId);
+      if (failsafeTriggered) return;
+      clearTimeout(failsafe);
       resetButton();
       if (error) {
         console.error('[article update] error:', error);
@@ -7306,14 +7319,17 @@ async function publishArticleFromEditor() {
       renderArticles();
     }
   } catch (e) {
+    if (failsafeTriggered) return;
+    clearTimeout(failsafe);
     console.error('[article submit] exception:', e);
     resetButton();
     showToast('Erreur inattendue : ' + (e?.message || e), true);
   }
 }
 
-// Admin : enregistrer les modifs ET publier directement (2 appels séparés)
+// Admin : enregistrer les modifs ET publier directement
 async function approveArticleFromEditor() {
+  console.log('[approve] click');
   if (!isAdmin()) { showToast('Permission refusée.', true); return; }
   if (!supa) { showToast('Connexion Supabase indisponible.', true); return; }
   if (!currentUser) { showToast('Tu dois être connecté.', true); return; }
@@ -7330,9 +7346,20 @@ async function approveArticleFromEditor() {
   if (!videoUrl) { showToast('La vidéo source est obligatoire.', true); return; }
   if (body.length < 20) { showToast('Écris quelques phrases dans le corps de l\'article.', true); return; }
 
+  if (!confirm('Publier cet article maintenant (avec les modifications en cours) ?')) return;
+
   const btn = document.getElementById('articleEditorApproveBtn');
   const resetBtn = () => { if (btn) { btn.disabled = false; btn.textContent = '✅ Publier'; } };
   if (btn) { btn.disabled = true; btn.textContent = 'Publication…'; }
+
+  // Failsafe : si l'update Supabase ne répond pas en 15s, on débloque l'UI
+  let failsafeTriggered = false;
+  const failsafe = setTimeout(() => {
+    failsafeTriggered = true;
+    resetBtn();
+    showToast('Publication trop longue (>15s). Vérifie ta connexion ou recharge la page.', true);
+    console.error('[approve] failsafe triggered after 15s');
+  }, 15000);
 
   try {
     const wc = countWords(body);
@@ -7344,35 +7371,34 @@ async function approveArticleFromEditor() {
       favicon: s.favicon || null, kind: s.kind || 'autre'
     }));
 
-    // Étape 1 : sauvegarder le contenu édité
-    const { error: saveErr } = await supa.from('articles').update({
+    // Un seul update combiné : contenu + statut published
+    const payload = {
       title, subtitle, body_markdown: body,
       word_count: wc, reading_time_minutes: rm,
       video_source_url: videoUrl, video_source_type: videoType,
       cited_sources: cleanCited,
       theme_slug: articleEditorState.themeSlug || 'autre',
       tone_slug: articleEditorState.toneSlug || null,
-      cover_image: articleEditorState.coverImage || null
-    }).eq('id', id);
-
-    if (saveErr) {
-      console.error('[approve] save error:', saveErr);
-      resetBtn();
-      showToast('Erreur sauvegarde : ' + saveErr.message, true);
-      return;
-    }
-
-    // Étape 2 : publier (même appel que le bouton admin du dashboard)
-    const { error: pubErr } = await supa.from('articles').update({
+      cover_image: articleEditorState.coverImage || null,
       status: 'published',
       published_at: new Date().toISOString(),
       reviewed_at: new Date().toISOString()
-    }).eq('id', id);
+    };
 
+    console.log('[approve] sending update for id:', id);
+    const { error } = await supa.from('articles').update(payload).eq('id', id);
+    console.log('[approve] update returned, error:', error);
+
+    if (failsafeTriggered) return; // déjà géré par le failsafe
+    clearTimeout(failsafe);
     resetBtn();
-    if (pubErr) {
-      console.error('[approve] publish error:', pubErr);
-      showToast('Contenu sauvegardé mais erreur de publication : ' + pubErr.message, true);
+
+    if (error) {
+      console.error('[approve] error:', error);
+      const hint = error.code === '42501' ? ' (RLS — ta session est peut-être expirée, reconnecte-toi)'
+                 : error.code === '23514' ? ' (contrainte CHECK — statut invalide ?)'
+                 : '';
+      showToast('Erreur publication : ' + error.message + hint, true);
       return;
     }
 
@@ -7381,6 +7407,8 @@ async function approveArticleFromEditor() {
     await loadArticles();
     renderArticles();
   } catch (e) {
+    if (failsafeTriggered) return;
+    clearTimeout(failsafe);
     console.error('[approve] exception:', e);
     resetBtn();
     showToast('Erreur inattendue : ' + (e?.message || String(e)), true);
