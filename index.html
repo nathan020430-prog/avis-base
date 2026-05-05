@@ -275,17 +275,7 @@ img{max-width:100%;display:block}
 /* ═══════════════════════════════════════════
    STICKY MINI-BAR (visible on scroll)
 ═══════════════════════════════════════════ */
-.minibar{
-  position:sticky;top:0;z-index:90;
-  background:rgba(244,239,228,0.94);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--rule);
-  padding:10px 40px;
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
-  font-size:0.78rem;
-  transition:transform 0.3s, opacity 0.3s;
-}
-[data-theme="dark"] .minibar{background:rgba(21,17,11,0.92)}
+/* (Définition .minibar consolidée plus bas — ligne ~2840) */
 .minibar__brand{
   font-family:var(--ff);font-size:1.1rem;font-weight:400;
   letter-spacing:-0.01em;
@@ -1034,6 +1024,27 @@ body.admin .card__admin{display:flex}
 .rec-badge--reliable{background:var(--success-soft);color:var(--success);border:1px solid rgba(45,122,62,0.2)}
 .rec-badge--top{background:var(--warn-soft);color:var(--warn);border:1px solid rgba(139,90,0,0.2)}
 [data-theme="dark"] .rec-badge--popular{color:var(--accent-dark)}
+
+/* ═══════════════════════════════════════════
+   FOLLOW BUTTON (V0.10.0)
+═══════════════════════════════════════════ */
+.follow-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:4px 14px;border-radius:2px;
+  font-size:0.72rem;font-weight:700;font-family:inherit;
+  letter-spacing:0.03em;cursor:pointer;
+  border:1px solid var(--ink);color:var(--ink);background:transparent;
+  transition:all var(--tr);min-width:70px;
+}
+.follow-btn:hover{background:var(--ink);color:var(--bg)}
+.follow-btn--active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.follow-btn--active:hover{background:transparent;color:var(--ink);border-color:var(--rule)}
+.follow-btn--sm{padding:3px 10px;font-size:0.66rem;min-width:58px}
+.myfeed-empty{text-align:center;padding:60px 20px;color:var(--ink-muted)}
+.myfeed-empty__title{font-family:var(--ff);font-size:1.4rem;margin-bottom:8px;color:var(--ink)}
+.myfeed-empty__sub{font-size:0.85rem;margin-bottom:20px;line-height:1.6}
+.myfeed-empty__cta{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border:1px solid var(--ink);border-radius:2px;font-weight:700;font-size:0.82rem;cursor:pointer;background:transparent;color:var(--ink);font-family:inherit;transition:all var(--tr)}
+.myfeed-empty__cta:hover{background:var(--ink);color:var(--bg)}
 
 /* ═══════════════════════════════════════════
    CRED CHIP (credibility score)
@@ -2816,17 +2827,17 @@ body.is-mobile #navMenuBtnLabel{display:none !important}
 
 /* ── Sticky minibar visible au scroll ── */
 .minibar{
-  position:fixed;top:0;left:0;right:0;z-index:90;
+  position:fixed !important;top:0;left:0;right:0;z-index:90;
   background:rgba(244,239,228,0.96);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-bottom:1px solid var(--rule);
   padding:10px 40px;
   display:flex;align-items:center;justify-content:space-between;gap:14px;
-  transform:translateY(-100%);
+  transform:translateY(-100%) !important;
   transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
   font-size:0.78rem;
 }
-.minibar.on{transform:translateY(0)}
+.minibar.on{transform:translateY(0) !important}
 [data-theme="dark"] .minibar{background:rgba(21,17,11,0.94)}
 .minibar__brand{
   font-family:var(--ff);font-size:1.05rem;font-weight:400;letter-spacing:-0.01em;
@@ -3556,7 +3567,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
       <span class="masthead__ornament">·</span>
       <span id="mhVolume">Vol. 1</span>
       <span class="masthead__ornament">·</span>
-      <span class="beta-tag">v0.9.7</span>
+      <span class="beta-tag">v0.10.0</span>
     </div>
     <div class="masthead__top-right">
       <span class="sync-ind" id="syncInd"><span class="sync-dot off" id="syncDot"></span><span id="syncLabel">Hors ligne</span></span>
@@ -3600,6 +3611,10 @@ body.is-mobile .notif-bell{width:32px;height:32px}
           <button class="nav-menu__item" data-nav="home">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
             Retour à la une
+          </button>
+          <button class="nav-menu__item" data-nav="myfeed" id="navMyFeedBtn" style="display:none">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            Mon Feed
           </button>
           <button class="nav-menu__item" data-nav="recent">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -3886,7 +3901,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.84-.1z"/></svg>
         @avis_base.nth
       </a>
-      <p class="footer__version">© <span id="yr"></span> · Beta · v0.9.7 — Broadsheet edition · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a></p>
+      <p class="footer__version">© <span id="yr"></span> · Beta · v0.10.0 — Broadsheet edition · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a></p>
     </div>
   </div>
 </footer>
@@ -4585,6 +4600,7 @@ const ARTICLES_PER_PAGE = 9;
 let currentArticleSlug = null;
 let mySubmissions = [];
 let reports = [];
+let feedMode = 'discover'; // 'discover' | 'myfeed'
 let currentUser = null;
 let currentProfile = null;
 let charter = '';
@@ -5654,6 +5670,11 @@ function getFilteredArticles() {
     return false;
   });
 
+  if (feedMode === 'myfeed' && typeof Follow !== 'undefined') {
+    const ids = Follow.followingIds;
+    list = list.filter(a => ids.has(a.authorId));
+  }
+
   if (articleThemeFilter !== 'all') list = list.filter(a => a.themeSlug === articleThemeFilter);
   list = list.filter(articlePassesTimeFilter);
 
@@ -5719,6 +5740,7 @@ function articleCardHtml(a, featured = false) {
         <span class="article-card__author">
           <span class="article-card__author-avatar">${initials}</span>
           <strong>${escapeHtml(author)}</strong>
+          ${currentUser && a.authorId !== currentUser.id ? `<button class="follow-btn follow-btn--sm${typeof Follow!=='undefined'&&Follow.isFollowing(a.authorId)?' follow-btn--active':''}" data-follow-uid="${a.authorId}" aria-pressed="${typeof Follow!=='undefined'&&Follow.isFollowing(a.authorId)}" onclick="event.stopPropagation();Follow.toggle('${a.authorId}')">${typeof Follow!=='undefined'&&Follow.isFollowing(a.authorId)?'Suivi':'Suivre'}</button>` : ''}
         </span>
         <span class="article-card__stats">
           <span class="article-card__stat">📖 ${a.wordCount} mots · ${a.readingMinutes} min</span>
@@ -5752,7 +5774,7 @@ function renderArticles() {
   if (!grid) return;
 
   // V0.8.2 — Homepage 3 colonnes : affiché uniquement quand pas de filtre actif
-  const isDefaultView = currentView === 'articles' && !searchQuery && articleThemeFilter === 'all' && articleTimeFilter === 'all';
+  const isDefaultView = currentView === 'articles' && feedMode === 'discover' && !searchQuery && articleThemeFilter === 'all' && articleTimeFilter === 'all';
   const homepageExtras = document.getElementById('homepageExtras');
   if (homepageLayout) {
     if (isDefaultView) {
@@ -5826,7 +5848,10 @@ function renderArticles() {
     if (pager) pager.style.display = 'none';
     const desc = document.getElementById('emptyArticlesDesc');
     const writeBtn = document.getElementById('emptyWriteBtn');
-    if (articleThemeFilter !== 'all' || articleTimeFilter !== 'all' || searchQuery) {
+    if (feedMode === 'myfeed') {
+      desc.innerHTML = '<div class="myfeed-empty"><div class="myfeed-empty__title">Ton feed est vide</div><div class="myfeed-empty__sub">Suis des auteurs pour voir leurs articles ici.</div><button class="myfeed-empty__cta" onclick="handleNavAction(\'home\')">Découvrir des articles</button></div>';
+      if (writeBtn) writeBtn.style.display = 'none';
+    } else if (articleThemeFilter !== 'all' || articleTimeFilter !== 'all' || searchQuery) {
       desc.textContent = 'Aucun article ne correspond à ta recherche.';
       if (writeBtn) writeBtn.style.display = 'none';
     } else if (articles.length === 0) {
@@ -6248,6 +6273,7 @@ function renderArticlePage(a) {
       </div>
       <div class="article-page__byline-stats">
         ${authorCredBadge}
+        ${currentUser && a.authorId !== currentUser.id ? `<button class="follow-btn follow-btn--sm${typeof Follow!=='undefined'&&Follow.isFollowing(a.authorId)?' follow-btn--active':''}" data-follow-uid="${a.authorId}" onclick="Follow.toggle('${a.authorId}')">${typeof Follow!=='undefined'&&Follow.isFollowing(a.authorId)?'Suivi':'Suivre'}</button>` : ''}
         👁 ${formatViews(a.reads)}
         ${editBtn}
         ${sendReviewBtn}
@@ -8236,6 +8262,8 @@ const Notif = {
         return `${a} a répondu à ton commentaire ${preview}`;
       case 'article_validated':
         return `Ton article ${preview} a été publié 🎉`;
+      case 'follow':
+        return `${a} te suit`;
       default:
         return `${a} a interagi avec ton contenu`;
     }
@@ -8331,7 +8359,7 @@ const Notif = {
       }
       targetArticleId = data.article_id;
     } else if (n.target_type === 'clip') {
-      // v0.9.7 : pas encore de notif clip, mais prêt pour futur
+      // v0.10.0 : pas encore de notif clip, mais prêt pour futur
       targetArticleId = null;
       showToast('Clip introuvable', true);
       return;
@@ -8514,6 +8542,73 @@ const Notif = {
       if (e.key === 'Escape' && this.open) this.closePanel();
     });
   },
+};
+
+// ═══════════════════════════════════════════════════════════
+// V0.10.0 — Système de follow
+// ═══════════════════════════════════════════════════════════
+const Follow = {
+  followingIds: new Set(),
+  loaded: false,
+
+  async load() {
+    if (!currentUser || !supa) return;
+    const { data } = await supa.from('follows').select('following_id').eq('follower_id', currentUser.id);
+    this.followingIds = new Set((data || []).map(r => r.following_id));
+    this.loaded = true;
+    this.refreshUI();
+  },
+
+  isFollowing(userId) {
+    return this.followingIds.has(userId);
+  },
+
+  async toggle(userId) {
+    if (!currentUser || !supa || userId === currentUser.id) return;
+    const was = this.isFollowing(userId);
+    // Optimistic update
+    if (was) this.followingIds.delete(userId); else this.followingIds.add(userId);
+    this.updateButtons(userId);
+
+    if (was) {
+      const { error } = await supa.from('follows').delete().eq('follower_id', currentUser.id).eq('following_id', userId);
+      if (error) { this.followingIds.add(userId); this.updateButtons(userId); }
+    } else {
+      const { error } = await supa.from('follows').insert({ follower_id: currentUser.id, following_id: userId });
+      if (error) { this.followingIds.delete(userId); this.updateButtons(userId); }
+    }
+  },
+
+  updateButtons(userId) {
+    document.querySelectorAll(`[data-follow-uid="${userId}"]`).forEach(btn => {
+      const f = this.isFollowing(userId);
+      btn.classList.toggle('follow-btn--active', f);
+      btn.textContent = f ? 'Suivi' : 'Suivre';
+      btn.setAttribute('aria-pressed', f);
+    });
+  },
+
+  refreshUI() {
+    const myFeedBtn = document.getElementById('navMyFeedBtn');
+    if (myFeedBtn) myFeedBtn.style.display = currentUser ? '' : 'none';
+    document.querySelectorAll('[data-follow-uid]').forEach(btn => {
+      const uid = btn.dataset.followUid;
+      if (uid === currentUser?.id) { btn.style.display = 'none'; return; }
+      btn.style.display = '';
+      const f = this.isFollowing(uid);
+      btn.classList.toggle('follow-btn--active', f);
+      btn.textContent = f ? 'Suivi' : 'Suivre';
+      btn.setAttribute('aria-pressed', f);
+    });
+  },
+
+  reset() {
+    this.followingIds.clear();
+    this.loaded = false;
+    const myFeedBtn = document.getElementById('navMyFeedBtn');
+    if (myFeedBtn) myFeedBtn.style.display = 'none';
+    feedMode = 'discover';
+  }
 };
 
 // ─── Wiring V0.9.0 (à appeler au DOMContentLoaded) ─────────
@@ -8788,6 +8883,7 @@ function handleNavAction(action) {
   closeNavMenu();
   switch(action) {
     case 'home':
+      feedMode = 'discover';
       articleThemeFilter = 'all'; articleTimeFilter = 'all'; searchQuery = '';
       const searchEl = document.getElementById('search');
       if (searchEl) searchEl.value = '';
@@ -8798,6 +8894,7 @@ function handleNavAction(action) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       break;
     case 'recent':
+      feedMode = 'discover';
       articleSortBy = 'date-desc';
       articleTimeFilter = 'all'; articleThemeFilter = 'all';
       const s1 = document.getElementById('articleSort');
@@ -8807,11 +8904,22 @@ function handleNavAction(action) {
       break;
     case 'popular':
       articleSortBy = 'reads-desc';
+      feedMode = 'discover';
       articleTimeFilter = 'all'; articleThemeFilter = 'all';
       const s2 = document.getElementById('articleSort');
       if (s2) s2.value = 'reads-desc';
       renderArticles();
       document.getElementById('searchBar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      break;
+    case 'myfeed':
+      if (!currentUser) { openAuthModal('login'); return; }
+      feedMode = 'myfeed';
+      articleSortBy = 'date-desc'; articleTimeFilter = 'all'; articleThemeFilter = 'all';
+      searchQuery = '';
+      const s3 = document.getElementById('search');
+      if (s3) s3.value = '';
+      renderArticles();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       break;
   }
 }
@@ -9327,7 +9435,7 @@ async function init() {
   refreshUserUI();
 
   // V0.9.7 — démarrer notifications si connecté
-  if (currentUser) { Notif.load(); Notif.subscribe(); }
+  if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); }
 
   await loadCharter();
   // v0.6 : Load articles + themes + tones FIRST (main content)
@@ -9380,8 +9488,8 @@ async function init() {
     await loadFavorites(); // V0.9.0
     refreshUserUI();
     // V0.9.7 — (re)bind notifications selon l'état
-    if (currentUser) { Notif.load(); Notif.subscribe(); }
-    else { Notif.unsubscribe(); }
+    if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); }
+    else { Notif.unsubscribe(); Follow.reset(); }
     if (isAdmin()) {
       await loadSubmissions();
       await loadReports();
@@ -11150,7 +11258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('%cAvis Basé v0.9.7 (beta — Broadsheet · notifications in-app)', 'color:#C8102E;font-size:16px;font-weight:bold');
+  console.log('%cAvis Basé v0.10.0 (beta — Broadsheet · follow + feed perso)', 'color:#C8102E;font-size:16px;font-weight:bold');
   console.log('%cMédia collaboratif · @avis_base.nth', 'color:#888;font-size:11px');
   init();
 });

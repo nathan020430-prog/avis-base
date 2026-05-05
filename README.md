@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.10.0** — Système de follow + fil personnalisé « Mon Feed » + niveaux de Basitude
 - **v0.9.7** — Notifications in-app (cloche dans le masthead, badge non-lues, panel realtime, triggers Postgres)
 - **v0.9.6** — Mobile fluidity (viewport, inputs, paint)
 - **v0.9.5** — Mobile fluidity (perf et tactile)
@@ -67,7 +68,8 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 2. `schema_v083.sql` (V0.8.3 — schéma complet refactor)
 3. `hotfix_v0832_comments.sql` (V0.8.3.2 — commentaires polymorphes)
 4. `v0.9.0-migration.sql` (V0.9.0 — profils enrichis + favoris)
-5. **`v0.9.7-migration.sql`** (V0.9.7 — notifications in-app : table, RLS, triggers, RPC) ← **NOUVEAU**
+5. `v0.9.7-migration.sql` (V0.9.7 — notifications in-app : table, RLS, triggers, RPC)
+6. **`v0.10.0-migration.sql`** (V0.10.0 — follows, compteurs, trigger notif follow) ← **NOUVEAU**
 
 ## Développement local
 
@@ -82,4 +84,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.9.7
+© Avis Basé · Beta · v0.10.0
