@@ -4162,9 +4162,14 @@ body.is-mobile .notif-bell{width:32px;height:32px}
       <span class="editor__status-dot" id="articleEditorStatusDot"></span>
       <span id="articleEditorStatusLabel">Prêt</span>
     </div>
-    <button class="editor__publish" id="articleEditorPublish" disabled>
-      <span id="articleEditorPublishLabel">Envoyer en relecture →</span>
-    </button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="editor__publish" id="articleEditorPublish" disabled>
+        <span id="articleEditorPublishLabel">Envoyer en relecture →</span>
+      </button>
+      <button class="editor__publish editor__publish--ready" id="articleEditorApproveBtn" style="display:none" disabled>
+        ✅ Publier
+      </button>
+    </div>
   </div>
 
   <div class="editor__scroll">
@@ -6827,6 +6832,7 @@ async function deleteSource(id) {
 let articleEditorState = {
   mode: 'new', // 'new' | 'edit'
   editingId: null,
+  canAdminPublish: false, // true quand admin édite un article non-publié
   title: '', subtitle: '', bodyMarkdown: '',
   videoSourceUrl: '', videoSourceMeta: null,
   citedSources: [],
@@ -6840,6 +6846,7 @@ const ARTICLE_DRAFT_KEY = 'avis_article_draft_';
 function resetArticleEditorState() {
   articleEditorState.mode = 'new';
   articleEditorState.editingId = null;
+  articleEditorState.canAdminPublish = false;
   articleEditorState.title = '';
   articleEditorState.subtitle = '';
   articleEditorState.bodyMarkdown = '';
@@ -6890,6 +6897,7 @@ async function openArticleEditorForEdit(id) {
   resetArticleEditorState();
   articleEditorState.mode = 'edit';
   articleEditorState.editingId = a.id;
+  articleEditorState.canAdminPublish = isAdmin() && a.status !== 'published';
   articleEditorState.title = a.title || '';
   articleEditorState.subtitle = a.subtitle || '';
   articleEditorState.bodyMarkdown = a.bodyMarkdown || '';
@@ -6970,10 +6978,16 @@ function renderArticleEditor() {
   renderVideoSlot();
   renderCitedSources();
 
-  // Update title label
+  // Update title label + bouton admin publish
   const pubLabel = document.getElementById('articleEditorPublishLabel');
-  if (articleEditorState.mode === 'edit') pubLabel.textContent = 'Enregistrer →';
-  else pubLabel.textContent = 'Envoyer en relecture →';
+  const approveBtn = document.getElementById('articleEditorApproveBtn');
+  if (articleEditorState.mode === 'edit') {
+    pubLabel.textContent = 'Enregistrer →';
+    if (approveBtn) approveBtn.style.display = articleEditorState.canAdminPublish ? 'inline-flex' : 'none';
+  } else {
+    pubLabel.textContent = 'Envoyer en relecture →';
+    if (approveBtn) approveBtn.style.display = 'none';
+  }
 
   updateArticleStats();
   updateArticlePublishButton();
@@ -7133,6 +7147,8 @@ function updateArticlePublishButton() {
     && articleEditorState.bodyMarkdown.trim().length >= 20;
   btn.disabled = !valid;
   btn.classList.toggle('editor__publish--ready', valid);
+  const approveBtn = document.getElementById('articleEditorApproveBtn');
+  if (approveBtn) approveBtn.disabled = !valid;
 }
 
 function insertMarkdownSyntax(kind) {
@@ -7292,6 +7308,60 @@ async function publishArticleFromEditor() {
   } catch (e) {
     console.error('[article submit] exception:', e);
     resetButton();
+    showToast('Erreur inattendue : ' + (e?.message || e), true);
+  }
+}
+
+// Admin : enregistrer les modifs ET publier directement
+async function approveArticleFromEditor() {
+  if (!isAdmin()) return;
+  const title = articleEditorState.title.trim();
+  const subtitle = articleEditorState.subtitle.trim();
+  const body = articleEditorState.bodyMarkdown.trim();
+  const videoUrl = articleEditorState.videoSourceUrl.trim();
+
+  if (title.length < 3) { showToast('Le titre doit faire au moins 3 caractères.', true); return; }
+  if (subtitle.length < 5) { showToast('Le chapô doit faire au moins 5 caractères.', true); return; }
+  if (!videoUrl) { showToast('La vidéo source est obligatoire.', true); return; }
+  if (body.length < 20) { showToast('Écris au moins quelques phrases dans le corps de l\'article.', true); return; }
+
+  const btn = document.getElementById('articleEditorApproveBtn');
+  const origLabel = btn.textContent.trim();
+  btn.disabled = true;
+  btn.textContent = 'Publication…';
+
+  try {
+    const wc = countWords(body);
+    const rm = readingMinutes(wc);
+    const kind = detectSourceKind(videoUrl);
+    const videoType = kind === 'youtube' ? 'youtube' : kind === 'twitter' ? 'twitter' : 'web';
+    const cleanCited = articleEditorState.citedSources.map(s => ({
+      url: s.url, title: s.title || '', label: s.label || s.title || extractDomain(s.url),
+      favicon: s.favicon || null, kind: s.kind || 'autre'
+    }));
+    const payload = {
+      title, subtitle, body_markdown: body,
+      word_count: wc, reading_time_minutes: rm,
+      video_source_url: videoUrl, video_source_type: videoType,
+      cited_sources: cleanCited,
+      theme_slug: articleEditorState.themeSlug || 'autre',
+      tone_slug: articleEditorState.toneSlug || null,
+      cover_image: articleEditorState.coverImage || null,
+      status: 'published',
+      published_at: new Date().toISOString(),
+      reviewed_at: new Date().toISOString()
+    };
+    const { error } = await supa.from('articles').update(payload).eq('id', articleEditorState.editingId);
+    btn.disabled = false;
+    btn.textContent = origLabel;
+    if (error) { console.error('[article approve] error:', error); showToast('Erreur publication : ' + error.message, true); return; }
+    showToast('✅ Article publié !');
+    closeArticleEditor();
+    await loadArticles();
+    renderArticles();
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = origLabel;
     showToast('Erreur inattendue : ' + (e?.message || e), true);
   }
 }
@@ -11168,6 +11238,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─ ═══ ARTICLE EDITOR ═══ ─
   document.getElementById('articleEditorBack').addEventListener('click', () => closeArticleEditor());
   document.getElementById('articleEditorPublish').addEventListener('click', publishArticleFromEditor);
+  document.getElementById('articleEditorApproveBtn').addEventListener('click', approveArticleFromEditor);
 
   document.getElementById('articleEditorTitle').addEventListener('input', e => {
     articleEditorState.title = e.target.value;
