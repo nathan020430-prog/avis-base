@@ -7230,9 +7230,24 @@ async function publishArticleFromEditor() {
   }, 15000);
 
   try {
-    // Check session avant l'update — si JWT expiré, le client peut hang sur le refresh
+    // Check session avant l'update — si JWT expiré OU state corrompu, getSession() peut hang
     console.log('[publish/save] checking auth session…');
-    const { data: sess } = await supa.auth.getSession();
+    const sessionResult = await Promise.race([
+      supa.auth.getSession(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('getSession_timeout')), 3000))
+    ]).catch(e => ({ _hang: true, _err: e }));
+
+    if (sessionResult._hang) {
+      console.error('[publish/save] auth state corrompu — getSession a hang. Reset localStorage.');
+      clearTimeout(failsafe);
+      resetButton();
+      // Nettoyer toutes les clés Supabase du localStorage
+      Object.keys(localStorage).filter(k => k.startsWith('sb-') || k.includes('supabase')).forEach(k => localStorage.removeItem(k));
+      showToast('Session corrompue détectée. Rechargement dans 2s…', true);
+      setTimeout(() => location.reload(), 2000);
+      return;
+    }
+    const sess = sessionResult.data;
     if (!sess?.session) {
       clearTimeout(failsafe);
       resetButton();
@@ -7375,9 +7390,23 @@ async function approveArticleFromEditor() {
   }, 15000);
 
   try {
-    // Check session avant l'update — si JWT expiré, le client peut hang sur le refresh
+    // Check session avant l'update — si JWT expiré OU state corrompu, getSession() peut hang
     console.log('[approve] checking auth session…');
-    const { data: sess } = await supa.auth.getSession();
+    const sessionResult = await Promise.race([
+      supa.auth.getSession(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('getSession_timeout')), 3000))
+    ]).catch(e => ({ _hang: true, _err: e }));
+
+    if (sessionResult._hang) {
+      console.error('[approve] auth state corrompu — getSession a hang. Reset localStorage.');
+      clearTimeout(failsafe);
+      resetBtn();
+      Object.keys(localStorage).filter(k => k.startsWith('sb-') || k.includes('supabase')).forEach(k => localStorage.removeItem(k));
+      showToast('Session corrompue détectée. Rechargement dans 2s…', true);
+      setTimeout(() => location.reload(), 2000);
+      return;
+    }
+    const sess = sessionResult.data;
     if (!sess?.session) {
       clearTimeout(failsafe);
       resetBtn();
