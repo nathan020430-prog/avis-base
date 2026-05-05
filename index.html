@@ -7225,11 +7225,23 @@ async function publishArticleFromEditor() {
   const failsafe = setTimeout(() => {
     failsafeTriggered = true;
     resetButton();
-    showToast('Opération trop longue (>15s). Vérifie ta connexion ou recharge la page.', true);
+    showToast('Opération trop longue (>15s). Session expirée ? Reconnecte-toi (en haut à droite).', true);
     console.error('[publish/save] failsafe triggered after 15s');
   }, 15000);
 
   try {
+    // Check session avant l'update — si JWT expiré, le client peut hang sur le refresh
+    console.log('[publish/save] checking auth session…');
+    const { data: sess } = await supa.auth.getSession();
+    if (!sess?.session) {
+      clearTimeout(failsafe);
+      resetButton();
+      showToast('Session expirée. Reconnecte-toi.', true);
+      openAuthModal('login');
+      return;
+    }
+    console.log('[publish/save] session OK, expires_at:', new Date(sess.session.expires_at * 1000).toISOString());
+
     const wc = countWords(body);
     const rm = readingMinutes(wc);
 
@@ -7304,7 +7316,8 @@ async function publishArticleFromEditor() {
         payload.submitted_at = new Date().toISOString();
       }
       console.debug('[article update] payload:', payload);
-      const { error } = await supa.from('articles').update(payload).eq('id', articleEditorState.editingId);
+      const { data: updRows, error } = await supa.from('articles').update(payload).eq('id', articleEditorState.editingId).select('id');
+      console.debug('[article update] returned, rows:', updRows?.length, 'error:', error);
       if (failsafeTriggered) return;
       clearTimeout(failsafe);
       resetButton();
@@ -7357,11 +7370,23 @@ async function approveArticleFromEditor() {
   const failsafe = setTimeout(() => {
     failsafeTriggered = true;
     resetBtn();
-    showToast('Publication trop longue (>15s). Vérifie ta connexion ou recharge la page.', true);
+    showToast('Publication trop longue (>15s). Session expirée ? Reconnecte-toi.', true);
     console.error('[approve] failsafe triggered after 15s');
   }, 15000);
 
   try {
+    // Check session avant l'update — si JWT expiré, le client peut hang sur le refresh
+    console.log('[approve] checking auth session…');
+    const { data: sess } = await supa.auth.getSession();
+    if (!sess?.session) {
+      clearTimeout(failsafe);
+      resetBtn();
+      showToast('Session expirée. Reconnecte-toi.', true);
+      openAuthModal('login');
+      return;
+    }
+    console.log('[approve] session OK, expires_at:', new Date(sess.session.expires_at * 1000).toISOString());
+
     const wc = countWords(body);
     const rm = readingMinutes(wc);
     const kind = detectSourceKind(videoUrl);
@@ -7386,8 +7411,8 @@ async function approveArticleFromEditor() {
     };
 
     console.log('[approve] sending update for id:', id);
-    const { error } = await supa.from('articles').update(payload).eq('id', id);
-    console.log('[approve] update returned, error:', error);
+    const { data: updRows, error } = await supa.from('articles').update(payload).eq('id', id).select('id');
+    console.log('[approve] update returned, rows:', updRows?.length, 'error:', error);
 
     if (failsafeTriggered) return; // déjà géré par le failsafe
     clearTimeout(failsafe);
