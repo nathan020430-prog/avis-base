@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<meta name="theme-color" content="#F4EFE4" id="themeMeta"/>
+<meta name="theme-color" content="#FAFAF7" id="themeMeta" media="(prefers-color-scheme: light)"/>
+<meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)"/>
 <title>Avis Basé — Le média collaboratif qui source tout</title>
 <meta name="description" id="metaDescription" content="Média collaboratif qui vérifie et source l'actualité. Articles écrits par la communauté, sources citées sur TikTok @avis_base.nth."/>
 <meta name="author" content="Avis Basé — Communauté"/>
@@ -27,6 +28,25 @@
 <meta name="twitter:title" content="Avis Basé — Le média collaboratif qui source tout" id="twTitle"/>
 <meta name="twitter:description" content="Média collaboratif qui vérifie et source l'actualité. Chaque article cite ses sources." id="twDescription"/>
 <meta name="twitter:image" content="https://avis-base.com/og-default.png" id="twImage"/>
+
+<!-- PWA — Progressive Web App -->
+<link rel="manifest" href="/manifest.json"/>
+<meta name="application-name" content="Avis Basé"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+
+<!-- iOS — installation home screen -->
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Avis Basé"/>
+<link rel="apple-touch-icon" href="/icon.svg"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png"/>
+
+<!-- Favicons -->
+<link rel="icon" type="image/svg+xml" href="/icon.svg"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png"/>
 
 <!-- JSON-LD structured data (NewsMediaOrganization) -->
 <script type="application/ld+json">
@@ -3553,6 +3573,146 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   .notif-bell{width:32px;height:32px}
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   DM — Système de messagerie privée
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Bouton inbox dans la nav */
+.nav-inbox-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--r);color:var(--ink);background:transparent;border:1px solid transparent;cursor:pointer;transition:background var(--tr),border-color var(--tr)}
+.nav-inbox-btn:hover{background:var(--surface);border-color:var(--rule)}
+.nav-inbox-btn svg{width:18px;height:18px}
+.nav-inbox-badge{position:absolute;top:2px;right:2px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--accent);color:#FDFAF3;font-size:0.62rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid var(--bg)}
+.nav-inbox-badge.visible{display:inline-flex}
+
+/* Drawer / panel DM */
+.dm-drawer{position:fixed;inset:0;z-index:9000;display:none;pointer-events:none}
+.dm-drawer.open{display:block;pointer-events:auto}
+.dm-drawer__backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.4);opacity:0;transition:opacity 0.25s ease}
+.dm-drawer.open .dm-drawer__backdrop{opacity:1}
+.dm-drawer__panel{position:absolute;top:0;right:0;bottom:0;width:min(420px,100vw);background:var(--bg);border-left:1px solid var(--rule);box-shadow:-12px 0 32px rgba(0,0,0,0.12);display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1)}
+.dm-drawer.open .dm-drawer__panel{transform:translateX(0)}
+@media(max-width:600px){.dm-drawer__panel{width:100vw}}
+
+.dm-drawer__header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--rule);background:var(--surface);flex-shrink:0}
+.dm-drawer__title{font-family:var(--ff);font-size:1.2rem;font-weight:500;flex:1;display:flex;align-items:center;gap:8px}
+.dm-drawer__close{width:32px;height:32px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-muted);background:transparent;border:none}
+.dm-drawer__close:hover{background:var(--surface-alt);color:var(--ink)}
+.dm-drawer__back{width:32px;height:32px;border-radius:var(--r);display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-muted);background:transparent;border:none}
+.dm-drawer__back:hover{background:var(--surface-alt);color:var(--ink)}
+.dm-drawer.in-thread .dm-drawer__back{display:inline-flex}
+
+.dm-drawer__body{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;position:relative}
+.dm-view{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1)}
+.dm-view--list{transform:translateX(0)}
+.dm-view--thread{transform:translateX(100%);visibility:hidden}
+.dm-drawer.in-thread .dm-view--list{transform:translateX(-30%);opacity:0.4}
+.dm-drawer.in-thread .dm-view--thread{transform:translateX(0);visibility:visible}
+
+.dm-search{padding:10px 14px;border-bottom:1px solid var(--rule)}
+.dm-search input{width:100%;height:36px;padding:0 12px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);font-size:0.85rem;color:var(--ink)}
+.dm-search input:focus{border-color:var(--ink);outline:none}
+.dm-conv-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.dm-conv-empty{padding:48px 24px;text-align:center;color:var(--ink-muted);font-size:0.88rem}
+.dm-conv-empty svg{width:48px;height:48px;margin:0 auto 16px;display:block;opacity:0.4}
+.dm-conv-item{display:flex;gap:12px;padding:12px 14px;border-bottom:1px solid var(--rule-light);cursor:pointer;transition:background var(--tr);position:relative}
+.dm-conv-item:hover{background:var(--surface)}
+.dm-conv-item.unread{background:var(--accent-soft)}
+.dm-conv-item.unread:hover{background:var(--accent-soft)}
+.dm-conv-avatar{width:42px;height:42px;border-radius:50%;background:var(--surface-alt);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--ink-muted);overflow:hidden;border:1px solid var(--rule)}
+.dm-conv-avatar img{width:100%;height:100%;object-fit:cover}
+.dm-conv-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.dm-conv-row1{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dm-conv-name{font-weight:600;font-size:0.92rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-conv-time{font-size:0.7rem;color:var(--ink-muted);flex-shrink:0}
+.dm-conv-preview{font-size:0.82rem;color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.dm-conv-item.unread .dm-conv-preview{color:var(--ink);font-weight:500}
+.dm-conv-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:6px}
+
+.dm-thread-header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--rule);background:var(--surface);flex-shrink:0}
+.dm-thread-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--ink-muted);border:1px solid var(--rule);flex-shrink:0}
+.dm-thread-avatar img{width:100%;height:100%;object-fit:cover}
+.dm-thread-info{flex:1;min-width:0}
+.dm-thread-name{font-weight:600;font-size:0.95rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-thread-status{font-size:0.7rem;color:var(--ink-muted)}
+.dm-thread-status.typing{color:var(--accent);font-style:italic}
+.dm-thread-menu{width:32px;height:32px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-muted);position:relative;background:transparent;border:none}
+.dm-thread-menu:hover{background:var(--surface-alt);color:var(--ink)}
+.dm-thread-menu-popup{position:absolute;top:100%;right:0;margin-top:4px;background:var(--bg);border:1px solid var(--rule);border-radius:var(--r);box-shadow:var(--shadow);min-width:180px;display:none;z-index:10;overflow:hidden}
+.dm-thread-menu-popup.open{display:block}
+.dm-thread-menu-item{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:0.85rem;color:var(--ink);cursor:pointer;background:transparent;border:none;width:100%;text-align:left}
+.dm-thread-menu-item:hover{background:var(--surface)}
+.dm-thread-menu-item.danger{color:var(--accent)}
+
+.dm-messages{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;display:flex;flex-direction:column;gap:6px}
+.dm-msg{display:flex;flex-direction:column;max-width:78%;animation:dm-msg-in 0.18s ease-out}
+.dm-msg--mine{align-self:flex-end;align-items:flex-end}
+.dm-msg--theirs{align-self:flex-start;align-items:flex-start}
+.dm-msg__bubble{padding:8px 12px;border-radius:14px;font-size:0.92rem;line-height:1.45;word-wrap:break-word;overflow-wrap:break-word;white-space:pre-wrap}
+.dm-msg--mine .dm-msg__bubble{background:var(--accent);color:#FDFAF3;border-bottom-right-radius:4px}
+.dm-msg--theirs .dm-msg__bubble{background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-bottom-left-radius:4px}
+.dm-msg__attach{margin-top:4px;border-radius:10px;overflow:hidden;max-width:240px;cursor:pointer;text-decoration:none}
+.dm-msg__attach img{display:block;max-width:240px;max-height:280px;border-radius:10px}
+.dm-msg__attach-file{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;font-size:0.84rem;color:var(--ink);text-decoration:none}
+.dm-msg__time{font-size:0.66rem;color:var(--ink-muted);margin:2px 6px;display:flex;align-items:center;gap:4px}
+.dm-msg__time-sep{padding:8px 0;text-align:center;font-size:0.7rem;color:var(--ink-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.05em;align-self:stretch;max-width:none}
+.dm-msg__check{display:inline-flex;align-items:center;color:var(--ink-muted)}
+.dm-msg--mine.read .dm-msg__check{color:var(--accent)}
+@keyframes dm-msg-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.dm-typing{display:flex;align-items:center;gap:4px;padding:10px 14px;align-self:flex-start;background:var(--surface);border:1px solid var(--rule);border-radius:14px;border-bottom-left-radius:4px;margin-top:4px}
+.dm-typing__dot{width:6px;height:6px;border-radius:50%;background:var(--ink-muted);animation:dm-typing 1.2s infinite}
+.dm-typing__dot:nth-child(2){animation-delay:0.2s}
+.dm-typing__dot:nth-child(3){animation-delay:0.4s}
+@keyframes dm-typing{0%,60%,100%{opacity:0.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+.dm-compose{display:flex;align-items:flex-end;gap:8px;padding:10px;border-top:1px solid var(--rule);background:var(--surface);flex-shrink:0}
+.dm-compose__attach{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-muted);flex-shrink:0;background:transparent;border:none}
+.dm-compose__attach:hover{background:var(--surface-alt);color:var(--ink)}
+.dm-compose__textarea{flex:1;resize:none;min-height:38px;max-height:120px;padding:9px 12px;background:var(--bg);border:1px solid var(--rule);border-radius:18px;font-size:0.92rem;font-family:var(--fs);color:var(--ink);line-height:1.4}
+.dm-compose__textarea:focus{outline:none;border-color:var(--ink)}
+.dm-compose__send{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#FDFAF3;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;flex-shrink:0;transition:background var(--tr),transform var(--tr)}
+.dm-compose__send:hover{background:var(--accent-dark)}
+.dm-compose__send:disabled{background:var(--rule);cursor:not-allowed;color:var(--ink-muted)}
+.dm-compose__send:not(:disabled):active{transform:scale(0.9)}
+
+.dm-attach-preview{padding:10px 14px;border-top:1px solid var(--rule);background:var(--surface-alt);display:none;align-items:center;gap:10px;flex-shrink:0}
+.dm-attach-preview.visible{display:flex}
+.dm-attach-preview__thumb{width:48px;height:48px;border-radius:8px;background:var(--surface);overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--ink-muted);flex-shrink:0}
+.dm-attach-preview__thumb img{width:100%;height:100%;object-fit:cover}
+.dm-attach-preview__info{flex:1;min-width:0;font-size:0.82rem}
+.dm-attach-preview__name{font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-attach-preview__size{color:var(--ink-muted);font-size:0.74rem}
+.dm-attach-preview__remove{width:28px;height:28px;border-radius:50%;background:var(--bg);border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-muted);flex-shrink:0}
+.dm-attach-preview__remove:hover{color:var(--accent);border-color:var(--accent)}
+
+.dm-blocked-banner{padding:14px 16px;background:var(--accent-soft);border-top:1px solid var(--rule);text-align:center;font-size:0.84rem;color:var(--ink)}
+.dm-blocked-banner button{margin-top:6px;padding:5px 10px;background:transparent;border:1px solid var(--ink);color:var(--ink);border-radius:var(--r);font-size:0.78rem;cursor:pointer}
+
+.author-msg-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:transparent;border:1px solid var(--rule);color:var(--ink);font-size:0.78rem;border-radius:var(--r);cursor:pointer;font-weight:500;transition:background var(--tr),border-color var(--tr)}
+.author-msg-btn:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.author-msg-btn svg{width:14px;height:14px}
+
+.dm-conv-list::-webkit-scrollbar,.dm-messages::-webkit-scrollbar{width:6px}
+.dm-conv-list::-webkit-scrollbar-thumb,.dm-messages::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px}
+
+.dm-report-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9100;display:none;align-items:center;justify-content:center;padding:20px}
+.dm-report-modal.open{display:flex}
+.dm-report-card{background:var(--bg);border-radius:var(--rl);max-width:420px;width:100%;padding:24px;box-shadow:var(--shadow)}
+.dm-report-card h3{font-family:var(--ff);font-size:1.2rem;margin-bottom:6px;font-weight:500}
+.dm-report-card p{font-size:0.84rem;color:var(--ink-muted);margin-bottom:14px}
+.dm-report-card label{display:block;font-size:0.82rem;color:var(--ink);margin:10px 0 5px;font-weight:500}
+.dm-report-card select,.dm-report-card textarea{width:100%;padding:8px 10px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);font-size:0.85rem;color:var(--ink);font-family:var(--fs)}
+.dm-report-card textarea{resize:vertical;min-height:70px}
+.dm-report-card__actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.dm-report-card__actions button{padding:7px 14px;border-radius:var(--r);font-size:0.84rem;cursor:pointer;font-weight:500;border:1px solid var(--rule);background:transparent;color:var(--ink)}
+.dm-report-card__actions button.primary{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
+.dm-report-card__actions button.primary:hover{background:var(--accent-dark)}
+
+@media(max-width:768px){
+  .dm-drawer__panel{width:100vw;border-left:none}
+  .dm-msg{max-width:85%}
+}
+
 </style>
 </head>
 <body>
@@ -3590,6 +3750,12 @@ body.is-mobile .notif-bell{width:32px;height:32px}
       </div>
       <button class="mh-action" id="themeToggle" aria-label="Thème">
         <svg id="themeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+
+      <!-- DM — Inbox button -->
+      <button class="nav-inbox-btn" id="navInboxBtn" aria-label="Messages" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="nav-inbox-badge" id="navInboxBadge">0</span>
       </button>
 
       <!-- Menu déroulant universel -->
@@ -3768,6 +3934,10 @@ body.is-mobile .notif-bell{width:32px;height:32px}
     <button class="minibar__hide-mobile" data-mini-nav="recent">Récents</button>
     <button class="minibar__hide-mobile" data-mini-nav="popular">Tendances</button>
     <button data-mini-nav="top">↑ Haut de page</button>
+    <button class="nav-inbox-btn" id="minibarInboxBtn" aria-label="Messages" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="nav-inbox-badge" id="minibarInboxBadge">0</span>
+    </button>
     <button class="minibar__menu-btn" id="minibarMenuBtn" aria-label="Menu">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       Menu
@@ -4579,6 +4749,120 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 </div>
 
 <div class="toast" id="toast"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span id="toastMsg">Action réussie</span></div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     DM — Drawer / Panel de messagerie privée
+     ═════════════════════════════════════════════════════════════════ -->
+<div class="dm-drawer" id="dmDrawer" role="dialog" aria-modal="true" aria-label="Messagerie privée">
+  <div class="dm-drawer__backdrop" id="dmBackdrop"></div>
+  <div class="dm-drawer__panel">
+    <div class="dm-drawer__header">
+      <button class="dm-drawer__back" id="dmBackBtn" aria-label="Retour">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="dm-drawer__title" id="dmDrawerTitle">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Messages</span>
+      </div>
+      <button class="dm-drawer__close" id="dmCloseBtn" aria-label="Fermer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="dm-drawer__body">
+      <div class="dm-view dm-view--list">
+        <div class="dm-search">
+          <input type="search" id="dmSearchInput" placeholder="Rechercher une conversation…" autocomplete="off"/>
+        </div>
+        <div class="dm-conv-list" id="dmConvList">
+          <div class="dm-conv-empty" id="dmConvEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <div>Aucune conversation pour l'instant.</div>
+            <div style="margin-top:8px;font-size:0.78rem">Clique sur "Message" sur le profil d'un auteur pour démarrer.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dm-view dm-view--thread" id="dmThreadView">
+        <div class="dm-thread-header">
+          <div class="dm-thread-avatar" id="dmThreadAvatar">?</div>
+          <div class="dm-thread-info">
+            <div class="dm-thread-name" id="dmThreadName">—</div>
+            <div class="dm-thread-status" id="dmThreadStatus"></div>
+          </div>
+          <button class="dm-thread-menu" id="dmThreadMenu" aria-label="Options">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            <div class="dm-thread-menu-popup" id="dmThreadMenuPopup">
+              <button class="dm-thread-menu-item" data-action="archive">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+                <span id="dmArchiveLabel">Archiver</span>
+              </button>
+              <button class="dm-thread-menu-item danger" data-action="block">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                <span id="dmBlockLabel">Bloquer</span>
+              </button>
+              <button class="dm-thread-menu-item danger" data-action="report">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                Signaler
+              </button>
+            </div>
+          </button>
+        </div>
+
+        <div class="dm-messages" id="dmMessages"></div>
+
+        <div class="dm-attach-preview" id="dmAttachPreview">
+          <div class="dm-attach-preview__thumb" id="dmAttachThumb"></div>
+          <div class="dm-attach-preview__info">
+            <div class="dm-attach-preview__name" id="dmAttachName">—</div>
+            <div class="dm-attach-preview__size" id="dmAttachSize"></div>
+          </div>
+          <button class="dm-attach-preview__remove" id="dmAttachRemove" aria-label="Retirer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="dm-blocked-banner" id="dmBlockedBanner" style="display:none">
+          <div id="dmBlockedText">Tu as bloqué cet utilisateur.</div>
+          <button id="dmUnblockBtn">Débloquer</button>
+        </div>
+
+        <form class="dm-compose" id="dmComposeForm">
+          <input type="file" id="dmAttachInput" accept="image/*,application/pdf,text/plain" hidden/>
+          <button type="button" class="dm-compose__attach" id="dmAttachBtn" aria-label="Joindre un fichier">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <textarea class="dm-compose__textarea" id="dmComposeText" placeholder="Écris un message…" rows="1" maxlength="4000"></textarea>
+          <button type="submit" class="dm-compose__send" id="dmSendBtn" aria-label="Envoyer" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dm-report-modal" id="dmReportModal" role="dialog" aria-modal="true">
+  <div class="dm-report-card">
+    <h3>Signaler un utilisateur</h3>
+    <p>Décris brièvement le problème. Notre équipe examinera ton signalement sans lire le contenu de tes conversations.</p>
+    <label for="dmReportReason">Raison</label>
+    <select id="dmReportReason">
+      <option value="harassment">Harcèlement</option>
+      <option value="spam">Spam ou publicité</option>
+      <option value="hate">Discours haineux</option>
+      <option value="threats">Menaces ou violence</option>
+      <option value="impersonation">Usurpation d'identité</option>
+      <option value="other">Autre</option>
+    </select>
+    <label for="dmReportDesc">Détails (optionnel)</label>
+    <textarea id="dmReportDesc" maxlength="500" placeholder="Précise si nécessaire…"></textarea>
+    <div class="dm-report-card__actions">
+      <button id="dmReportCancel">Annuler</button>
+      <button class="primary" id="dmReportSubmit">Envoyer</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const SUPABASE_URL      = 'https://panjgsqwitwduxckgbbq.supabase.co';
@@ -6290,6 +6574,7 @@ function renderArticlePage(a) {
           <svg viewBox="0 0 24 24" fill="${isFavorited('article', a.id) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
           <span class="save-btn__lbl">${isFavorited('article', a.id) ? 'Sauvegardé' : 'Sauvegarder'}</span>
         </button>
+        ${a.authorId && a.authorId !== currentUser.id ? `<button class="author-msg-btn" id="artMessageBtn" data-author-id="${a.authorId}" title="Envoyer un message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Message</button>` : ''}
         ${a.authorId !== currentUser.id ? `<button class="article-report-btn" id="artReportBtn">⚠️ Signaler</button>` : ''}
       </div>
     ` : ''}
@@ -6310,6 +6595,10 @@ function renderArticlePage(a) {
   // V0.9.0 — Save & Report
   document.getElementById('artSaveBtn')?.addEventListener('click', e => toggleFavorite('article', a.id, e.currentTarget));
   document.getElementById('artReportBtn')?.addEventListener('click', () => openReportContentModal('article', a.id));
+  document.getElementById('artMessageBtn')?.addEventListener('click', (e) => {
+    const id = e.currentTarget.dataset.authorId;
+    if (id && window.openDM) window.openDM(id);
+  });
 }
 
 async function submitArticleForReview(id) {
@@ -9033,6 +9322,11 @@ function syncNavMenu() {
       mainBadge.style.display = count > 0 && admin ? 'flex' : 'none';
     }
   }
+
+  // Sync DM inbox (visible uniquement si connecté)
+  try {
+    if (typeof DM !== 'undefined' && DM && DM.onAuthChange) DM.onAuthChange(connected ? currentUser : null);
+  } catch(e) { /* DM module pas encore chargé */ }
 }
 
 function toggleNavMenu() {
@@ -11432,10 +11726,623 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('%cAvis Basé v0.10.0 (beta — Broadsheet · follow + feed perso)', 'color:#C8102E;font-size:16px;font-weight:bold');
+  console.log('%cAvis Basé v0.11.0 (PWA + DM)', 'color:#C8102E;font-size:16px;font-weight:bold');
   console.log('%cMédia collaboratif · @avis_base.nth', 'color:#888;font-size:11px');
   init();
 });
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PWA — Service Worker + install prompt
+   ═══════════════════════════════════════════════════════════════════════ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then((reg) => {
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          if (!newSW) return;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+              newSW.postMessage('SKIP_WAITING');
+            }
+          });
+        });
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) reg.update().catch(() => {});
+        });
+      })
+      .catch((err) => console.warn('SW registration failed:', err));
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloading) return;
+      reloading = true;
+      window.location.reload();
+    });
+  });
+}
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  window.dispatchEvent(new CustomEvent('avis:install-available'));
+});
+window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; });
+window.promptInstall = async function() {
+  if (!deferredInstallPrompt) return false;
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  return outcome === 'accepted';
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DM — Système de messagerie privée (1-à-1)
+   Module autonome : utilise `supa` et `currentUser` du scope global.
+   ═══════════════════════════════════════════════════════════════════════ */
+const DM = (() => {
+  let conversations = [];
+  let currentConvId = null;
+  let currentMessages = [];
+  let currentOther = null;
+  let unreadTotal = 0;
+  let pendingAttachment = null;
+  let typingTimer = null;
+  let typingState = false;
+  let realtimeChannel = null;
+  let listChannel = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  function escapeHtmlDM(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function avatarHtml(user) {
+    if (user && user.avatar_url) return `<img src="${escapeHtmlDM(user.avatar_url)}" alt="" onerror="this.style.display='none'"/>`;
+    return escapeHtmlDM(initials(user && user.username));
+  }
+  function initials(name) {
+    if (!name) return '?';
+    return name.trim().slice(0, 2).toUpperCase();
+  }
+  function formatTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso); const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    if (sameDay) return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const diff = (now - d) / 86400000;
+    if (diff < 7) return d.toLocaleDateString('fr-FR', { weekday: 'short' });
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+  }
+  function formatDateSep(iso) {
+    const d = new Date(iso);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const target = new Date(d); target.setHours(0,0,0,0);
+    const diff = (today - target) / 86400000;
+    if (diff === 0) return "Aujourd'hui";
+    if (diff === 1) return "Hier";
+    if (diff < 7) return d.toLocaleDateString('fr-FR', { weekday: 'long' });
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: diff > 365 ? 'numeric' : undefined });
+  }
+  function bytesFmt(b) {
+    if (!b) return '';
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1048576).toFixed(2) + ' MB';
+  }
+
+  function showToastDM(msg, isErr) {
+    if (typeof showToast === 'function') showToast(msg, !!isErr);
+    else console[isErr ? 'warn' : 'log']('DM:', msg);
+  }
+
+  function requireAuth() {
+    if (!currentUser) {
+      if (typeof openAuthModal === 'function') openAuthModal('login');
+      else showToastDM('Connexion requise', true);
+      return false;
+    }
+    return true;
+  }
+
+  function openDrawer() {
+    if (!requireAuth()) return;
+    $('dmDrawer').classList.add('open');
+    showList();
+    loadConversations();
+  }
+  function closeDrawer() {
+    $('dmDrawer').classList.remove('open');
+    leaveCurrentThread();
+  }
+  function showList() {
+    $('dmDrawer').classList.remove('in-thread');
+  }
+  function showThread() {
+    $('dmDrawer').classList.add('in-thread');
+  }
+
+  async function loadConversations() {
+    if (!supa || !currentUser) return;
+    try {
+      const { data, error } = await supa.rpc('dm_list_conversations');
+      if (error) throw error;
+      conversations = data || [];
+      renderConversationList();
+      updateUnreadBadge();
+    } catch (e) {
+      console.warn('DM loadConversations error:', e.message);
+    }
+  }
+
+  function renderConversationList() {
+    const list = $('dmConvList');
+    const empty = $('dmConvEmpty');
+    if (!list) return;
+    const search = ($('dmSearchInput')?.value || '').trim().toLowerCase();
+    const filtered = conversations
+      .filter(c => !c.is_archived)
+      .filter(c => !search || (c.other_username || '').toLowerCase().includes(search) || (c.last_message_preview || '').toLowerCase().includes(search));
+
+    if (!filtered.length) {
+      list.innerHTML = '';
+      list.appendChild(empty || (() => { const d=document.createElement('div'); d.className='dm-conv-empty'; d.textContent='Aucune conversation.'; return d; })());
+      return;
+    }
+    if (empty) empty.remove();
+    list.innerHTML = filtered.map(c => {
+      const unread = c.unread_count > 0;
+      return `
+        <div class="dm-conv-item${unread ? ' unread' : ''}" data-conv-id="${c.conversation_id}" data-other-id="${c.other_user_id}">
+          <div class="dm-conv-avatar">${avatarHtml({ username: c.other_username, avatar_url: c.other_avatar_url })}</div>
+          <div class="dm-conv-meta">
+            <div class="dm-conv-row1">
+              <span class="dm-conv-name">${escapeHtmlDM(c.other_username || 'Utilisateur')}</span>
+              <span class="dm-conv-time">${formatTime(c.last_message_at)}</span>
+            </div>
+            <div class="dm-conv-preview">${escapeHtmlDM(c.last_message_preview || '— Démarrer la conversation —')}</div>
+          </div>
+          ${unread ? '<div class="dm-conv-unread-dot" aria-label="Non lu"></div>' : ''}
+        </div>
+      `;
+    }).join('');
+
+    list.querySelectorAll('.dm-conv-item').forEach(el => {
+      el.addEventListener('click', () => openThread(el.dataset.convId, el.dataset.otherId));
+    });
+  }
+
+  function updateUnreadBadge() {
+    unreadTotal = conversations.reduce((s, c) => s + (c.unread_count || 0), 0);
+    [$('navInboxBadge'), $('minibarInboxBadge')].forEach(b => {
+      if (!b) return;
+      if (unreadTotal > 0) {
+        b.textContent = unreadTotal > 99 ? '99+' : String(unreadTotal);
+        b.classList.add('visible');
+      } else {
+        b.classList.remove('visible');
+      }
+    });
+  }
+
+  async function openThread(convId, otherId) {
+    if (!supa || !currentUser) return;
+    leaveCurrentThread();
+    currentConvId = convId;
+    const conv = conversations.find(c => c.conversation_id === convId);
+    if (conv) {
+      currentOther = {
+        id: conv.other_user_id, username: conv.other_username,
+        avatar_url: conv.other_avatar_url, role: conv.other_role,
+        is_blocked_by_me: conv.is_blocked_by_me
+      };
+    } else if (otherId) {
+      const { data } = await supa.from('profiles').select('id,username,avatar_url,role').eq('id', otherId).single();
+      currentOther = data ? { ...data, is_blocked_by_me: false } : null;
+    }
+    if (!currentOther) { showList(); return; }
+    showThread();
+    renderThreadHeader();
+    $('dmMessages').innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-muted);font-size:0.84rem">Chargement…</div>';
+    await loadMessages();
+    subscribeRealtime();
+    await markRead();
+  }
+
+  function leaveCurrentThread() {
+    if (realtimeChannel) { try { supa.removeChannel(realtimeChannel); } catch(e){} realtimeChannel = null; }
+    if (typingTimer) { clearTimeout(typingTimer); typingTimer = null; }
+    if (typingState && currentConvId) { setTyping(false); }
+    currentConvId = null;
+    currentOther = null;
+    currentMessages = [];
+  }
+
+  function renderThreadHeader() {
+    $('dmThreadAvatar').innerHTML = avatarHtml(currentOther);
+    $('dmThreadName').textContent = currentOther.username || 'Utilisateur';
+    $('dmThreadStatus').textContent = '';
+    $('dmThreadStatus').classList.remove('typing');
+    $('dmBlockLabel').textContent = currentOther.is_blocked_by_me ? 'Débloquer' : 'Bloquer';
+    if (currentOther.is_blocked_by_me) {
+      $('dmBlockedBanner').style.display = 'block';
+      $('dmComposeForm').style.display = 'none';
+    } else {
+      $('dmBlockedBanner').style.display = 'none';
+      $('dmComposeForm').style.display = 'flex';
+    }
+  }
+
+  async function loadMessages() {
+    const { data, error } = await supa.from('dm_messages')
+      .select('*')
+      .eq('conversation_id', currentConvId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: true })
+      .limit(200);
+    if (error) { console.warn('loadMessages error', error); return; }
+    currentMessages = data || [];
+    renderMessages();
+  }
+
+  function renderMessages() {
+    const box = $('dmMessages');
+    if (!box) return;
+    if (!currentMessages.length) {
+      box.innerHTML = `<div style="text-align:center;padding:30px 20px;color:var(--ink-muted);font-size:0.85rem">Aucun message. Dis bonjour à ${escapeHtmlDM(currentOther.username)} 👋</div>`;
+      return;
+    }
+    let html = '';
+    let prevDay = '';
+    const otherReadAt = currentOther?._otherLastReadAt || null;
+
+    currentMessages.forEach((m) => {
+      const day = new Date(m.created_at).toDateString();
+      if (day !== prevDay) {
+        html += `<div class="dm-msg__time-sep">${formatDateSep(m.created_at)}</div>`;
+        prevDay = day;
+      }
+      const mine = m.sender_id === currentUser.id;
+      const read = mine && otherReadAt && new Date(m.created_at) <= new Date(otherReadAt);
+      let attachHtml = '';
+      if (m.attachment_url && m.attachment_type === 'image') {
+        attachHtml = `<a class="dm-msg__attach" href="${escapeHtmlDM(m.attachment_url)}" target="_blank" rel="noopener"><img src="${escapeHtmlDM(m.attachment_url)}" alt="${escapeHtmlDM(m.attachment_name || 'image')}"/></a>`;
+      } else if (m.attachment_url) {
+        attachHtml = `<a class="dm-msg__attach-file" href="${escapeHtmlDM(m.attachment_url)}" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>${escapeHtmlDM(m.attachment_name || 'Fichier')}</span></a>`;
+      }
+      html += `
+        <div class="dm-msg dm-msg--${mine ? 'mine' : 'theirs'}${read ? ' read' : ''}" data-msg-id="${m.id}">
+          ${m.content ? `<div class="dm-msg__bubble">${escapeHtmlDM(m.content)}</div>` : ''}
+          ${attachHtml}
+          <div class="dm-msg__time">
+            ${new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+            ${mine ? `<span class="dm-msg__check" aria-label="${read ? 'Lu' : 'Envoyé'}">${read
+              ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/><polyline points="22 11 13 18"/></svg>'
+              : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
+            }</span>` : ''}
+          </div>
+        </div>`;
+    });
+    box.innerHTML = html;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function subscribeRealtime() {
+    if (!supa || !currentConvId) return;
+    realtimeChannel = supa.channel('dm-conv-' + currentConvId)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'dm_messages',
+        filter: 'conversation_id=eq.' + currentConvId
+      }, (payload) => {
+        const msg = payload.new;
+        if (currentMessages.some(m => m.id === msg.id)) return;
+        currentMessages.push(msg);
+        renderMessages();
+        if (msg.sender_id !== currentUser.id) markRead();
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'dm_participants',
+        filter: 'conversation_id=eq.' + currentConvId
+      }, (payload) => {
+        const p = payload.new;
+        if (p.user_id === currentUser.id) return;
+        if (p.is_typing && p.typing_at && (Date.now() - new Date(p.typing_at).getTime()) < 8000) {
+          $('dmThreadStatus').textContent = 'en train d\'écrire…';
+          $('dmThreadStatus').classList.add('typing');
+        } else {
+          $('dmThreadStatus').textContent = '';
+          $('dmThreadStatus').classList.remove('typing');
+        }
+        if (p.last_read_at) {
+          if (currentOther) currentOther._otherLastReadAt = p.last_read_at;
+          renderMessages();
+        }
+      })
+      .subscribe();
+  }
+
+  function subscribeListChannel() {
+    if (!supa || !currentUser || listChannel) return;
+    listChannel = supa.channel('dm-list-' + currentUser.id)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'dm_messages' },
+        async () => { await loadConversations(); })
+      .subscribe();
+  }
+
+  async function sendMessage(text, attachment) {
+    if (!supa || !currentUser || !currentConvId) return false;
+    const payload = {
+      conversation_id: currentConvId,
+      sender_id: currentUser.id,
+      content: text || ''
+    };
+    if (attachment) {
+      payload.attachment_url = attachment.url;
+      payload.attachment_type = attachment.type;
+      payload.attachment_name = attachment.name;
+      payload.attachment_size = attachment.size;
+    }
+    const { data, error } = await supa.from('dm_messages').insert(payload).select().single();
+    if (error) {
+      if ((error.message || '').includes('row-level security')) showToastDM("Tu ne peux pas envoyer de message à cet utilisateur.", true);
+      else showToastDM("Échec de l'envoi : " + error.message, true);
+      return false;
+    }
+    if (data && !currentMessages.some(m => m.id === data.id)) {
+      currentMessages.push(data);
+      renderMessages();
+    }
+    return true;
+  }
+
+  async function markRead() {
+    if (!supa || !currentConvId) return;
+    try {
+      await supa.rpc('dm_mark_read', { conv_id: currentConvId });
+      const c = conversations.find(c => c.conversation_id === currentConvId);
+      if (c) { c.unread_count = 0; renderConversationList(); updateUnreadBadge(); }
+    } catch (e) { /* silent */ }
+  }
+
+  async function setTyping(typing) {
+    if (!supa || !currentConvId) return;
+    if (typing === typingState) return;
+    typingState = typing;
+    try { await supa.rpc('dm_set_typing', { conv_id: currentConvId, typing }); } catch(e){}
+  }
+  function handleTypingDebounced() {
+    setTyping(true);
+    if (typingTimer) clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => setTyping(false), 4000);
+  }
+
+  async function uploadAttachment(file) {
+    if (!supa || !currentConvId) return null;
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+    const path = `${currentConvId}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { error } = await supa.storage.from('dm-attachments').upload(path, file, { cacheControl: '3600', upsert: false });
+    if (error) { showToastDM('Upload échoué : ' + error.message, true); return null; }
+    const { data: urlData } = await supa.storage.from('dm-attachments').createSignedUrl(path, 60 * 60 * 24 * 30);
+    const isImage = file.type.startsWith('image/');
+    return {
+      url: urlData?.signedUrl || null,
+      type: isImage ? 'image' : 'file',
+      name: file.name,
+      size: file.size
+    };
+  }
+
+  function setAttachmentPreview(file) {
+    pendingAttachment = { file };
+    $('dmAttachName').textContent = file.name;
+    $('dmAttachSize').textContent = bytesFmt(file.size);
+    const thumb = $('dmAttachThumb');
+    if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      thumb.innerHTML = `<img src="${url}" alt=""/>`;
+    } else {
+      thumb.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+    }
+    $('dmAttachPreview').classList.add('visible');
+    updateSendButton();
+  }
+  function clearAttachmentPreview() {
+    pendingAttachment = null;
+    $('dmAttachPreview').classList.remove('visible');
+    $('dmAttachInput').value = '';
+    updateSendButton();
+  }
+  function updateSendButton() {
+    const text = ($('dmComposeText')?.value || '').trim();
+    $('dmSendBtn').disabled = !text && !pendingAttachment;
+  }
+
+  async function toggleBlock() {
+    if (!currentOther) return;
+    const blocking = !currentOther.is_blocked_by_me;
+    const action = blocking ? 'bloquer' : 'débloquer';
+    if (!confirm(`Veux-tu vraiment ${action} ${currentOther.username} ?`)) return;
+    try {
+      if (blocking) await supa.rpc('dm_block_user', { target_id: currentOther.id, block_reason: null });
+      else await supa.rpc('dm_unblock_user', { target_id: currentOther.id });
+      currentOther.is_blocked_by_me = blocking;
+      renderThreadHeader();
+      await loadConversations();
+      showToastDM(blocking ? 'Utilisateur bloqué.' : 'Utilisateur débloqué.');
+    } catch (e) {
+      showToastDM('Action échouée : ' + e.message, true);
+    }
+  }
+
+  function openReportModal() {
+    if (!currentOther) return;
+    $('dmReportModal').classList.add('open');
+    $('dmReportReason').value = 'harassment';
+    $('dmReportDesc').value = '';
+  }
+  function closeReportModal() { $('dmReportModal').classList.remove('open'); }
+  async function submitReport() {
+    if (!currentOther) return;
+    try {
+      await supa.rpc('dm_report_user', {
+        target_id: currentOther.id, conv_id: currentConvId,
+        msg_id: null, report_reason: $('dmReportReason').value,
+        report_description: $('dmReportDesc').value.trim() || null
+      });
+      closeReportModal();
+      showToastDM('Signalement envoyé. Merci.');
+    } catch (e) {
+      showToastDM('Échec : ' + e.message, true);
+    }
+  }
+
+  async function toggleArchive() {
+    if (!currentConvId) return;
+    const conv = conversations.find(c => c.conversation_id === currentConvId);
+    const newState = !(conv?.is_archived);
+    try {
+      await supa.rpc('dm_archive_conversation', { conv_id: currentConvId, archived: newState });
+      showToastDM(newState ? 'Conversation archivée.' : 'Désarchivée.');
+      showList();
+      leaveCurrentThread();
+      await loadConversations();
+    } catch (e) {
+      showToastDM('Action échouée : ' + e.message, true);
+    }
+  }
+
+  async function startConversationWith(otherUserId) {
+    if (!requireAuth()) return;
+    if (otherUserId === currentUser.id) { showToastDM("Tu ne peux pas t'envoyer un message.", true); return; }
+    try {
+      const { data, error } = await supa.rpc('dm_open_conversation', { other_user_id: otherUserId });
+      if (error) {
+        if ((error.message || '').includes('blocked')) showToastDM("Impossible d'envoyer un message (utilisateur bloqué).", true);
+        else showToastDM('Erreur : ' + error.message, true);
+        return;
+      }
+      $('dmDrawer').classList.add('open');
+      await loadConversations();
+      openThread(data, otherUserId);
+    } catch (e) {
+      showToastDM('Erreur : ' + e.message, true);
+    }
+  }
+
+  function init() {
+    $('navInboxBtn')?.addEventListener('click', openDrawer);
+    $('minibarInboxBtn')?.addEventListener('click', openDrawer);
+    $('dmCloseBtn')?.addEventListener('click', closeDrawer);
+    $('dmBackdrop')?.addEventListener('click', closeDrawer);
+    $('dmBackBtn')?.addEventListener('click', () => { showList(); leaveCurrentThread(); });
+    $('dmSearchInput')?.addEventListener('input', renderConversationList);
+
+    const ta = $('dmComposeText');
+    ta?.addEventListener('input', () => {
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+      updateSendButton();
+      handleTypingDebounced();
+    });
+    ta?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('dmSendBtn').click(); }
+    });
+    $('dmComposeForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = $('dmComposeText').value.trim();
+      if (!text && !pendingAttachment) return;
+      $('dmSendBtn').disabled = true;
+      let attach = null;
+      if (pendingAttachment) {
+        attach = await uploadAttachment(pendingAttachment.file);
+        if (!attach) { $('dmSendBtn').disabled = false; return; }
+      }
+      const ok = await sendMessage(text, attach);
+      if (ok) {
+        $('dmComposeText').value = '';
+        ta.style.height = 'auto';
+        clearAttachmentPreview();
+        setTyping(false);
+      }
+      $('dmSendBtn').disabled = false;
+    });
+
+    $('dmAttachBtn')?.addEventListener('click', () => $('dmAttachInput').click());
+    $('dmAttachInput')?.addEventListener('change', (e) => {
+      const f = e.target.files?.[0];
+      if (!f) return;
+      if (f.size > 10485760) { showToastDM('Fichier trop lourd (max 10 MB).', true); return; }
+      setAttachmentPreview(f);
+    });
+    $('dmAttachRemove')?.addEventListener('click', clearAttachmentPreview);
+
+    const menuBtn = $('dmThreadMenu');
+    const menuPopup = $('dmThreadMenuPopup');
+    menuBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menuPopup.classList.toggle('open');
+    });
+    document.addEventListener('click', () => menuPopup?.classList.remove('open'));
+    menuPopup?.addEventListener('click', (e) => e.stopPropagation());
+    menuPopup?.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        menuPopup.classList.remove('open');
+        const a = btn.dataset.action;
+        if (a === 'block') toggleBlock();
+        else if (a === 'report') openReportModal();
+        else if (a === 'archive') toggleArchive();
+      });
+    });
+
+    $('dmUnblockBtn')?.addEventListener('click', toggleBlock);
+    $('dmReportCancel')?.addEventListener('click', closeReportModal);
+    $('dmReportSubmit')?.addEventListener('click', submitReport);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if ($('dmReportModal').classList.contains('open')) { closeReportModal(); return; }
+        if ($('dmDrawer').classList.contains('open')) {
+          if ($('dmDrawer').classList.contains('in-thread')) { showList(); leaveCurrentThread(); }
+          else closeDrawer();
+        }
+      }
+    });
+  }
+
+  return {
+    init,
+    open: openDrawer,
+    startConversationWith,
+    refreshUnread: async () => { await loadConversations(); },
+    onAuthChange: (user) => {
+      if (user) {
+        if ($('navInboxBtn')) $('navInboxBtn').style.display = 'inline-flex';
+        if ($('minibarInboxBtn')) $('minibarInboxBtn').style.display = 'inline-flex';
+        loadConversations();
+        subscribeListChannel();
+      } else {
+        if ($('navInboxBtn')) $('navInboxBtn').style.display = 'none';
+        if ($('minibarInboxBtn')) $('minibarInboxBtn').style.display = 'none';
+        if (listChannel) { try { supa.removeChannel(listChannel); } catch(e){} listChannel = null; }
+        leaveCurrentThread();
+        closeDrawer();
+        conversations = [];
+        unreadTotal = 0;
+        updateUnreadBadge();
+      }
+    }
+  };
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.DM_initialized) return;
+  window.DM_initialized = true;
+  DM.init();
+  setTimeout(() => DM.onAuthChange(currentUser), 100);
+});
+
+window.openDM = (userId) => DM.startConversationWith(userId);
+window.openInbox = () => DM.open();
 </script>
 </body>
 </html>

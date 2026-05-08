@@ -1,0 +1,90 @@
+{
+  "name": "Avis Basé — Le média collaboratif qui source tout",
+  "short_name": "Avis Basé",
+  "description": "Média collaboratif qui vérifie et source l'actualité. Articles écrits par la communauté.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4EFE4",
+  "theme_color": "#FAFAF7",
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "categories": ["news", "social", "education"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Page d'accueil — Articles vérifiés et sourcés"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Écrire un article",
+      "short_name": "Écrire",
+      "description": "Rédiger un nouvel article sourcé",
+      "url": "/?action=write",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Articles populaires",
+      "short_name": "Top",
+      "description": "Voir les articles les plus lus",
+      "url": "/?sort=reads-desc",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
+}

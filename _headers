@@ -16,6 +16,27 @@
 /
   Cache-Control: public, max-age=0, must-revalidate
 
+# Service Worker : JAMAIS de cache (sinon impossible de mettre à jour l'app)
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+  Service-Worker-Allowed: /
+
+# Manifest PWA : cache court
+/manifest.json
+  Cache-Control: public, max-age=3600
+  Content-Type: application/manifest+json
+
+# Icônes : cache long
+/icon.svg
+  Cache-Control: public, max-age=2592000
+  Content-Type: image/svg+xml
+
+/icon-*.png
+  Cache-Control: public, max-age=2592000
+
+/favicon-*.png
+  Cache-Control: public, max-age=2592000
+
 # Fichiers SQL : ne devraient pas être servis publiquement, mais au cas où
 /*.sql
   X-Robots-Tag: noindex
