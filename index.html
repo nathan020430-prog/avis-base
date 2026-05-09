@@ -6971,13 +6971,74 @@ function renderArticlePage(a) {
 }
 
 async function submitArticleForReview(id) {
+  if (!supa) { showToast('Connexion serveur indisponible.', true); return; }
+  if (!currentUser) { showToast('Tu dois être connecté.', true); openAuthModal('login'); return; }
+  if (!id) { showToast('ID article manquant.', true); return; }
   if (!confirm('Envoyer cet article en relecture ?\n\nUne fois envoyé, tu pourras toujours le modifier tant qu\'il n\'est pas approuvé.')) return;
-  const { error } = await supa.from('articles').update({ status: 'review', submitted_at: new Date().toISOString() }).eq('id', id);
-  if (error) { console.error('[submit review] error:', error); showToast('Erreur : ' + error.message, true); return; }
-  showToast('📤 Article envoyé en relecture ! Un admin va le vérifier.');
-  closeModal('articlePageModal');
-  await loadArticles();
-  renderArticles();
+
+  // Failsafe : débloque l'UI si l'opération hang
+  let failsafeTriggered = false;
+  const failsafe = setTimeout(() => {
+    failsafeTriggered = true;
+    showToast('Opération trop longue (>15s). Session expirée ? Reconnecte-toi.', true);
+    console.error('[submit review] failsafe triggered after 15s');
+  }, 15000);
+
+  try {
+    // Check session avant l'update — getSession() peut hang si state corrompu
+    console.log('[submit review] checking auth session…');
+    const sessionResult = await Promise.race([
+      supa.auth.getSession(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('getSession_timeout')), 3000))
+    ]).catch(e => ({ _hang: true, _err: e }));
+
+    if (sessionResult._hang) {
+      console.error('[submit review] auth state corrompu — reset localStorage.');
+      clearTimeout(failsafe);
+      Object.keys(localStorage).filter(k => k.startsWith('sb-') || k.includes('supabase')).forEach(k => localStorage.removeItem(k));
+      showToast('Session corrompue. Rechargement dans 2s…', true);
+      setTimeout(() => location.reload(), 2000);
+      return;
+    }
+    const sess = sessionResult.data;
+    if (!sess?.session) {
+      clearTimeout(failsafe);
+      showToast('Session expirée. Reconnecte-toi.', true);
+      openAuthModal('login');
+      return;
+    }
+
+    console.log('[submit review] sending update for id:', id);
+    const { data: updRows, error } = await supa.from('articles')
+      .update({ status: 'review', submitted_at: new Date().toISOString() })
+      .eq('id', id)
+      .select('id');
+    console.log('[submit review] returned, rows:', updRows?.length, 'error:', error);
+
+    if (failsafeTriggered) return;
+    clearTimeout(failsafe);
+
+    if (error) {
+      console.error('[submit review] error:', error);
+      const hint = error.code === '42501' ? ' (RLS — pas le droit ou session expirée)'
+                 : error.code === '23514' ? ' (statut invalide)' : '';
+      showToast('Erreur : ' + error.message + hint, true);
+      return;
+    }
+    if (!updRows || updRows.length === 0) {
+      showToast('Aucune modification appliquée. L\'article n\'existe peut-être plus, ou tu n\'es pas l\'auteur.', true);
+      return;
+    }
+    showToast('📤 Article envoyé en relecture ! Un admin va le vérifier.');
+    closeModal('articlePageModal');
+    await loadArticles();
+    renderArticles();
+  } catch (e) {
+    if (failsafeTriggered) return;
+    clearTimeout(failsafe);
+    console.error('[submit review] exception:', e);
+    showToast('Erreur inattendue : ' + (e?.message || e), true);
+  }
 }
 
 async function deleteArticle(id) {
@@ -7546,8 +7607,35 @@ function openArticleEditorForSubmit() {
 
 async function openArticleEditorForEdit(id) {
   if (blockIfMobile()) return; // V0.8.3 — édition désactivée sur mobile
-  const a = articles.find(x => x.id === id);
+  if (!id) { showToast('ID article manquant', true); return; }
+
+  // Cherche d'abord dans le cache local
+  let a = articles.find(x => x.id === id);
+
+  // Fallback : fetch depuis la BD si pas en cache (article fraîchement créé, cache stale, etc.)
+  if (!a && supa) {
+    console.log('[edit] article non en cache, fetch BD pour id:', id);
+    try {
+      const { data, error } = await supa.from('articles').select('*').eq('id', id).maybeSingle();
+      if (error) { console.error('[edit] fetch error:', error); showToast('Erreur chargement : ' + error.message, true); return; }
+      if (!data) { showToast('Article introuvable', true); return; }
+      // Convertit la ligne BD en objet local
+      a = (typeof fromDbArticle === 'function') ? fromDbArticle(data) : {
+        id: data.id, slug: data.slug, title: data.title, subtitle: data.subtitle,
+        bodyMarkdown: data.body_markdown, videoSourceUrl: data.video_source_url,
+        citedSources: data.cited_sources || [], themeSlug: data.theme_slug,
+        toneSlug: data.tone_slug, coverImage: data.cover_image,
+        authorId: data.author_id, status: data.status
+      };
+    } catch (e) {
+      console.error('[edit] fetch exception:', e);
+      showToast('Erreur chargement : ' + (e?.message || e), true);
+      return;
+    }
+  }
+
   if (!a) { showToast('Article introuvable', true); return; }
+
   // Vérifier permissions
   const canEdit = (currentUser && a.authorId === currentUser.id && ['draft','review','needs_changes'].includes(a.status)) || isAdmin();
   if (!canEdit) { showToast('Tu ne peux pas modifier cet article', true); return; }
@@ -7579,17 +7667,32 @@ function closeArticleEditor() {
   if (articleEditorState.saveTimer) { clearTimeout(articleEditorState.saveTimer); articleEditorState.saveTimer = null; }
 }
 
+function articleDraftKey() {
+  if (!currentUser) return null;
+  // Clé spécifique à l'article en mode édition, sinon clé générique pour 'new'
+  if (articleEditorState.mode === 'edit' && articleEditorState.editingId) {
+    return ARTICLE_DRAFT_KEY + currentUser.id + '_edit_' + articleEditorState.editingId;
+  }
+  return ARTICLE_DRAFT_KEY + currentUser.id;
+}
+
 function saveArticleDraft() {
-  if (articleEditorState.mode !== 'new' || !currentUser) return;
+  if (!currentUser) return;
+  if (articleEditorState.mode !== 'new' && articleEditorState.mode !== 'edit') return;
   setArticleEditorStatus('saving');
   const d = {
+    mode: articleEditorState.mode,
+    editingId: articleEditorState.editingId,
     title: articleEditorState.title, subtitle: articleEditorState.subtitle,
     bodyMarkdown: articleEditorState.bodyMarkdown, videoSourceUrl: articleEditorState.videoSourceUrl,
     videoSourceMeta: articleEditorState.videoSourceMeta, citedSources: articleEditorState.citedSources,
     themeSlug: articleEditorState.themeSlug, toneSlug: articleEditorState.toneSlug,
     coverImage: articleEditorState.coverImage, savedAt: Date.now()
   };
-  try { localStorage.setItem(ARTICLE_DRAFT_KEY + currentUser.id, JSON.stringify(d)); } catch {}
+  try {
+    const key = articleDraftKey();
+    if (key) localStorage.setItem(key, JSON.stringify(d));
+  } catch {}
   setTimeout(() => setArticleEditorStatus('saved'), 400);
 }
 
@@ -7999,7 +8102,13 @@ async function publishArticleFromEditor() {
         showToast('Erreur modification : ' + error.message, true);
         return;
       }
+      if (!updRows || updRows.length === 0) {
+        showToast('Aucune modification appliquée. Article supprimé ou pas le droit ?', true);
+        return;
+      }
       showToast('✏️ Article modifié avec succès');
+      // Nettoie le draft d'édition
+      try { localStorage.removeItem(ARTICLE_DRAFT_KEY + currentUser.id + '_edit_' + articleEditorState.editingId); } catch {}
       closeArticleEditor();
       await loadArticles();
       renderArticles();
@@ -8114,7 +8223,13 @@ async function approveArticleFromEditor() {
       return;
     }
 
+    if (!updRows || updRows.length === 0) {
+      showToast('Aucune modification appliquée. Article supprimé ou permission refusée.', true);
+      return;
+    }
     showToast('✅ Article publié !');
+    // Nettoie le draft d'édition s'il existe
+    try { if (currentUser) localStorage.removeItem(ARTICLE_DRAFT_KEY + currentUser.id + '_edit_' + id); } catch {}
     closeArticleEditor();
     await loadArticles();
     renderArticles();
