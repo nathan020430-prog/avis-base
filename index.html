@@ -6907,6 +6907,7 @@ function renderArticlePage(a) {
 
   const isOwnerOrAdmin = (currentUser && a.authorId === currentUser.id) || isAdmin();
   const editBtn = isOwnerOrAdmin ? `<button class="btn btn--ghost btn--sm" id="editArticleBtn">✏️ Modifier</button>` : '';
+  const deleteBtn = isOwnerOrAdmin ? `<button class="btn btn--ghost btn--sm" id="deleteArticleBtn" style="color:var(--accent);border-color:var(--accent)">🗑 Supprimer</button>` : '';
   const sendReviewBtn = (currentUser && a.authorId === currentUser.id && (a.status === 'draft' || a.status === 'needs_changes'))
     ? `<button class="btn btn--accent btn--sm" id="sendReviewBtn">📤 Envoyer en relecture</button>` : '';
 
@@ -6934,6 +6935,7 @@ function renderArticlePage(a) {
         ${currentUser && a.authorId !== currentUser.id ? `<button class="follow-btn follow-btn--sm${typeof Follow!=='undefined'&&Follow.isFollowing(a.authorId)?' follow-btn--active':''}" data-follow-uid="${a.authorId}" onclick="Follow.toggle('${a.authorId}')">${typeof Follow!=='undefined'&&Follow.isFollowing(a.authorId)?'Suivi':'Suivre'}</button>` : ''}
         👁 ${formatViews(a.reads)}
         ${editBtn}
+        ${deleteBtn}
         ${sendReviewBtn}
       </div>
     </div>
@@ -6956,6 +6958,10 @@ function renderArticlePage(a) {
 
   document.getElementById('articleBackBtn')?.addEventListener('click', () => { closeModal('articlePageModal'); });
   document.getElementById('editArticleBtn')?.addEventListener('click', () => { closeModal('articlePageModal'); openArticleEditorForEdit(a.id); });
+  document.getElementById('deleteArticleBtn')?.addEventListener('click', async () => {
+    const ok = await deleteArticle(a.id);
+    if (ok) closeModal('articlePageModal');
+  });
   document.getElementById('sendReviewBtn')?.addEventListener('click', () => submitArticleForReview(a.id));
   document.getElementById('artLikeBtn')?.addEventListener('click', e => { heartPop(e.currentTarget); toggleVote('article', a.id, 1); });
   document.getElementById('artDislikeBtn')?.addEventListener('click', () => toggleVote('article', a.id, -1));
@@ -7042,14 +7048,84 @@ async function submitArticleForReview(id) {
 }
 
 async function deleteArticle(id) {
+  if (!supa) { showToast('Connexion serveur indisponible.', true); return false; }
+  if (!currentUser) { showToast('Tu dois être connecté.', true); openAuthModal('login'); return false; }
+  if (!id) { showToast('ID article manquant.', true); return false; }
   const a = articles.find(x => x.id === id);
-  if (!a) return;
-  if (!confirm(`Supprimer "${a.title}" ?\n\nCette action est définitive.`)) return;
-  const { error } = await supa.from('articles').delete().eq('id', id);
-  if (error) { showToast('Erreur : ' + error.message, true); return; }
-  showToast('Article supprimé');
-  await loadArticles();
-  renderArticles();
+  if (!a) { showToast('Article introuvable dans le cache.', true); return false; }
+
+  // Vérification permission côté client (la BD revérifie via RLS)
+  const canDelete = isAdmin() || (currentUser && a.authorId === currentUser.id);
+  if (!canDelete) { showToast('Tu n\'as pas le droit de supprimer cet article.', true); return false; }
+
+  if (!confirm(`Supprimer "${a.title}" ?\n\nCette action est définitive.`)) return false;
+
+  // Failsafe 15s
+  let failsafeTriggered = false;
+  const failsafe = setTimeout(() => {
+    failsafeTriggered = true;
+    showToast('Suppression trop longue (>15s). Session expirée ? Reconnecte-toi.', true);
+    console.error('[delete article] failsafe triggered');
+  }, 15000);
+
+  try {
+    // Check session (anti-hang)
+    console.log('[delete article] checking session…');
+    const sessionResult = await Promise.race([
+      supa.auth.getSession(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('getSession_timeout')), 3000))
+    ]).catch(e => ({ _hang: true, _err: e }));
+
+    if (sessionResult._hang) {
+      console.error('[delete article] auth state corrompu — reset.');
+      clearTimeout(failsafe);
+      Object.keys(localStorage).filter(k => k.startsWith('sb-') || k.includes('supabase')).forEach(k => localStorage.removeItem(k));
+      showToast('Session corrompue. Rechargement dans 2s…', true);
+      setTimeout(() => location.reload(), 2000);
+      return false;
+    }
+    const sess = sessionResult.data;
+    if (!sess?.session) {
+      clearTimeout(failsafe);
+      showToast('Session expirée. Reconnecte-toi.', true);
+      openAuthModal('login');
+      return false;
+    }
+
+    // .select('id') confirme que la ligne a vraiment été supprimée
+    // (sans ça, RLS peut filtrer silencieusement → "Article supprimé" mensonger)
+    console.log('[delete article] sending delete for id:', id);
+    const { data: delRows, error } = await supa.from('articles').delete().eq('id', id).select('id');
+    console.log('[delete article] returned, rows:', delRows?.length, 'error:', error);
+
+    if (failsafeTriggered) return false;
+    clearTimeout(failsafe);
+
+    if (error) {
+      console.error('[delete article] error:', error);
+      const hint = error.code === '42501' ? ' (RLS — pas le droit ou session expirée)' : '';
+      showToast('Erreur suppression : ' + error.message + hint, true);
+      return false;
+    }
+    if (!delRows || delRows.length === 0) {
+      showToast('Aucun article supprimé. Pas le droit (RLS) ou article déjà supprimé.', true);
+      await loadArticles();
+      renderArticles();
+      return false;
+    }
+
+    showToast('Article supprimé');
+    try { if (currentUser) localStorage.removeItem(ARTICLE_DRAFT_KEY + currentUser.id + '_edit_' + id); } catch {}
+    await loadArticles();
+    renderArticles();
+    return true;
+  } catch (e) {
+    if (failsafeTriggered) return false;
+    clearTimeout(failsafe);
+    console.error('[delete article] exception:', e);
+    showToast('Erreur inattendue : ' + (e?.message || e), true);
+    return false;
+  }
 }
 
 
