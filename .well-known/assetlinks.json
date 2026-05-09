@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.avis_base.twa",
+        "sha256_cert_fingerprints": ["17:7B:4C:23:B6:FD:CD:1A:0F:74:04:A9:F4:3E:66:6F:AB:7D:6B:EE:CC:6C:59:2C:4B:FB:CE:F6:12:E1:C2:4C"]
+      }
+    }]

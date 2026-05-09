@@ -23,6 +23,17 @@ npm-debug.log*
 *.key
 *.pem
 
+# Android signing — JAMAIS commit (la perte = re-création du listing Play Store)
+*.keystore
+*.jks
+signing-key-info.txt
+*.aab
+*.apk
+
+# iOS signing
+*.p12
+*.mobileprovision
+
 # Build artifacts (au cas où)
 dist/
 build/

@@ -26,6 +26,12 @@
   Cache-Control: public, max-age=3600
   Content-Type: application/manifest+json
 
+# TWA Asset Links : indispensable pour l'app Android Trusted Web Activity
+# Doit être servi en application/json à la racine /.well-known/
+/.well-known/assetlinks.json
+  Cache-Control: public, max-age=3600
+  Content-Type: application/json
+
 # Icônes : cache long
 /icon.svg
   Cache-Control: public, max-age=2592000
