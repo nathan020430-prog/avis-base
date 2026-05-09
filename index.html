@@ -1088,8 +1088,8 @@ body.admin .card__admin{display:flex}
   flex-shrink:0;
   border:1px solid;
 }
-.user-cred-chip--bas-du-front,.user-cred-chip--louche{background:rgba(140,28,19,0.1);color:#8C1C13;border-color:rgba(140,28,19,0.25)}
-[data-theme="dark"] .user-cred-chip--bas-du-front,[data-theme="dark"] .user-cred-chip--louche{color:#E8A09A;background:rgba(140,28,19,0.15)}
+.user-cred-chip--debutant,.user-cred-chip--louche{background:rgba(140,28,19,0.1);color:#8C1C13;border-color:rgba(140,28,19,0.25)}
+[data-theme="dark"] .user-cred-chip--debutant,[data-theme="dark"] .user-cred-chip--louche{color:#E8A09A;background:rgba(140,28,19,0.15)}
 .user-cred-chip--ok,.user-cred-chip--bien-vu{background:var(--surface-alt);color:var(--ink-muted);border-color:var(--rule)}
 .user-cred-chip--correct,.user-cred-chip--tres-bon{background:rgba(107,154,62,0.1);color:#4A7A2D;border-color:rgba(107,154,62,0.25)}
 [data-theme="dark"] .user-cred-chip--correct,[data-theme="dark"] .user-cred-chip--tres-bon{color:#A8D88A;background:rgba(107,154,62,0.15)}
@@ -4215,7 +4215,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
               <strong id="navUserUsername">...</strong>
               <span class="nav-menu__user-status" id="navUserStatus">Connecté</span>
             </div>
-            <div class="user-cred-chip user-cred-chip--bas-du-front" id="navUserCredChip" title="Votre niveau de Basitude">
+            <div class="user-cred-chip user-cred-chip--debutant" id="navUserCredChip" title="Votre niveau de Basitude">
               <span id="navUserCredPct">0%</span>
             </div>
           </div>
@@ -4225,7 +4225,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
               <div id="navCredProgressWrap">
                 <div class="cred-progress">
                   <div class="cred-progress__bar"><div class="cred-progress__fill" id="navCredFill" style="width:0%"></div></div>
-                  <div class="cred-progress__labels"><span id="navCredLevel">Bas du front</span><span id="navCredPctLabel">0%</span></div>
+                  <div class="cred-progress__labels"><span id="navCredLevel">Débutant</span><span id="navCredPctLabel">0%</span></div>
                 </div>
               </div>
             </div>
@@ -8203,7 +8203,7 @@ async function loadMyProfile() {
 
 // Niveaux de Basitude (score 0-100%)
 const USER_LEVELS = [
-  { key: 'bas-du-front', label: 'Bas du front',   icon: '🧱', min: 0,  max: 10  },
+  { key: 'debutant',     label: 'Débutant',        icon: '🌱', min: 0,  max: 10  },
   { key: 'louche',       label: 'Louche',          icon: '👀', min: 10, max: 25  },
   { key: 'ok',           label: 'OK',              icon: '🤷', min: 25, max: 35  },
   { key: 'bien-vu',      label: 'Bien vu',         icon: '👍', min: 35, max: 50  },
@@ -8740,7 +8740,7 @@ function computeCredibility(citedSources) {
   const reliabilityScore = count === 0 ? 0 : Math.round((avgTier / 5) * 30);
 
   const total = countScore + diversityScore + reliabilityScore;
-  const grade = total >= 90 ? 'Basé' : total >= 80 ? 'Masterclasse' : total >= 70 ? 'Classique' : total >= 60 ? 'Très bon' : total >= 50 ? 'Bien vu' : total >= 35 ? 'OK' : total >= 25 ? 'Louche' : total >= 10 ? 'Bas du front' : 'Bas du front';
+  const grade = total >= 90 ? 'Basé' : total >= 80 ? 'Masterclasse' : total >= 70 ? 'Classique' : total >= 60 ? 'Très bon' : total >= 50 ? 'Bien vu' : total >= 35 ? 'OK' : total >= 25 ? 'Louche' : 'Débutant';
   const gradeColor = total >= 90 ? '#2D7A3E' : total >= 70 ? '#4A7A2D' : total >= 50 ? '#B8860B' : total >= 35 ? '#8B7355' : '#C8102E';
   const known = domains.filter(d => CREDIBILITY_DB[d] !== undefined).length;
   return {
