@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#FAFAF7"/>
+<title>Supprimer mon compte — Avis Basé</title>
+<meta name="description" content="Comment supprimer ton compte Avis Basé et tes données personnelles."/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://avis-base.com/delete-account"/>
+<link rel="icon" type="image/svg+xml" href="/icon.svg"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
+<link rel="apple-touch-icon" href="/icon-180.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#F4EFE4;--surface:#FAFAF7;--surface-alt:#EDE6D5;
+  --ink:#1A1108;--ink-muted:#6B5C44;
+  --accent:#8C1C13;--rule:#D9CFB8;--rule-light:#E5DDC8;
+  --r:6px;--rl:14px;
+  --ff:'Fraunces',Georgia,serif;--fs:'Manrope',-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fs);background:var(--bg);color:var(--ink);line-height:1.65;font-size:16px;-webkit-font-smoothing:antialiased}
+.container{max-width:680px;margin:0 auto;padding:48px 24px 80px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:36px;text-decoration:none;color:var(--ink)}
+.brand-mark{width:40px;height:40px;border-radius:8px;background:#FAFAF7;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;font-family:var(--ff);font-size:1.4rem;font-weight:500;position:relative}
+.brand-mark::after{content:'';position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.brand-name{font-family:var(--ff);font-size:1.3rem;font-weight:400;letter-spacing:-0.01em}
+.brand-name em{color:var(--accent);font-style:italic}
+.kicker{display:block;font-family:var(--fs);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--ink-muted);font-weight:600;margin-bottom:14px}
+h1{font-family:var(--ff);font-size:clamp(2rem,5vw,2.6rem);font-weight:400;letter-spacing:-0.02em;line-height:1.15;margin-bottom:14px}
+.subtitle{font-family:var(--ff);font-style:italic;font-size:1.08rem;color:var(--ink-muted);margin-bottom:32px;font-weight:300}
+h2{font-family:var(--ff);font-size:1.4rem;font-weight:500;letter-spacing:-0.01em;margin:36px 0 14px}
+p{margin-bottom:14px;color:var(--ink)}
+ul{margin:10px 0 14px 0;padding-left:0;list-style:none}
+li{padding-left:22px;position:relative;margin-bottom:8px}
+li::before{content:'·';position:absolute;left:8px;top:-2px;color:var(--accent);font-weight:700;font-size:1.4rem;line-height:1}
+strong{font-weight:600;color:var(--ink)}
+em{font-style:italic;color:var(--ink-muted)}
+a{color:var(--accent);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+a:hover{text-decoration-thickness:2px}
+.action-card{
+  margin:36px 0;padding:28px;
+  background:var(--surface);
+  border:1px solid var(--rule);border-left:4px solid var(--accent);
+  border-radius:0 var(--rl) var(--rl) 0
+}
+.action-card h2{margin-top:0;color:var(--accent)}
+.action-card p{margin-bottom:10px}
+.email-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-top:14px;padding:12px 22px;
+  background:var(--accent);color:#FDFAF3;
+  border-radius:24px;text-decoration:none;font-weight:500;font-size:0.95rem;
+  transition:all 0.2s ease;box-shadow:0 4px 12px rgba(140,28,19,0.25)
+}
+.email-btn:hover{background:#6E150F;text-decoration:none;transform:translateY(-1px);box-shadow:0 6px 16px rgba(140,28,19,0.35)}
+.email-btn svg{width:18px;height:18px}
+.deletion-list{
+  margin:14px 0;padding:18px 22px;
+  background:var(--surface-alt);border-radius:var(--rl)
+}
+.kept-list{
+  margin:14px 0;padding:18px 22px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:var(--rl)
+}
+.timeline{margin:18px 0;border-left:2px solid var(--accent);padding-left:24px}
+.timeline-step{margin-bottom:16px;position:relative}
+.timeline-step::before{
+  content:'';position:absolute;left:-30px;top:6px;width:10px;height:10px;
+  border-radius:50%;background:var(--accent);
+  box-shadow:0 0 0 3px var(--bg)
+}
+.timeline-step strong{display:block;color:var(--ink);margin-bottom:3px}
+.timeline-step span{font-size:0.92rem;color:var(--ink-muted)}
+.back-link{display:inline-block;margin-top:48px;padding:9px 16px;border:1px solid var(--ink);border-radius:20px;color:var(--ink);text-decoration:none;font-size:0.88rem;transition:all 0.2s ease}
+.back-link:hover{background:var(--ink);color:var(--bg);text-decoration:none}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#15110B;--surface:#1F1A12;--surface-alt:#2A2317;--ink:#EDE3CF;--ink-muted:#A59880;--accent:#D44A3D;--rule:#3A2F1F;--rule-light:#2A2317}
+}
+@media(max-width:600px){
+  .container{padding:32px 18px 60px}
+  h1{font-size:1.8rem}
+  .action-card{padding:20px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="brand">
+    <span class="brand-mark">A</span>
+    <span class="brand-name">Avis <em>Basé</em></span>
+  </a>
+
+  <span class="kicker">Suppression de compte</span>
+  <h1>Supprimer mon compte Avis Basé</h1>
+  <p class="subtitle">Tes données t'appartiennent. Voici comment les effacer.</p>
+
+  <p>Tu peux à tout moment demander la suppression de ton compte Avis Basé et de tes données personnelles. C'est gratuit, c'est définitif, et c'est ton droit (RGPD, article 17).</p>
+
+  <div class="action-card">
+    <h2>Demander la suppression</h2>
+    <p>Envoie un email depuis l'<strong>adresse associée à ton compte</strong> avec :</p>
+    <ul>
+      <li>Ton <strong>pseudo</strong> Avis Basé</li>
+      <li>L'objet : <em>« Suppression de mon compte »</em></li>
+      <li>(Optionnel) la raison de ta demande — ça nous aide à améliorer le service</li>
+    </ul>
+    <a class="email-btn" href="mailto:contact@avis-base.com?subject=Suppression%20de%20mon%20compte%20Avis%20Bas%C3%A9&body=Bonjour%2C%0A%0AJe%20souhaite%20supprimer%20mon%20compte%20Avis%20Bas%C3%A9.%0A%0APseudo%20%3A%20%5Bton%20pseudo%5D%0A%0AMerci.">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Envoyer la demande par email
+    </a>
+  </div>
+
+  <h2>Ce qui sera supprimé</h2>
+  <div class="deletion-list">
+    <ul>
+      <li><strong>Ton compte</strong> (email, mot de passe haché, identifiants de session)</li>
+      <li><strong>Ton profil public</strong> (pseudo, bio, avatar, lien social, score de Basitude)</li>
+      <li><strong>Tes brouillons</strong> d'articles non publiés</li>
+      <li><strong>Tes commentaires, votes, favoris, abonnements</strong></li>
+      <li><strong>Tes messages privés</strong> (DM) que tu as envoyés ou reçus</li>
+      <li><strong>Les pièces jointes</strong> que tu as uploadées dans tes messages</li>
+      <li><strong>Tes signalements</strong> (conservés en métadonnées anonymisées)</li>
+    </ul>
+  </div>
+
+  <h2>Ce qui sera conservé (anonymisé)</h2>
+  <div class="kept-list">
+    <ul>
+      <li><strong>Tes articles déjà publiés</strong> deviennent anonymes (auteur "Compte supprimé"). Le contenu reste pour ne pas casser les liens et la mémoire collective. Si tu veux <em>aussi</em> supprimer tes articles, précise-le dans ton email.</li>
+      <li><strong>Logs de sécurité Cloudflare</strong> (IP, navigateur) : 30 jours maximum, anonymisés.</li>
+    </ul>
+  </div>
+
+  <h2>Calendrier</h2>
+  <div class="timeline">
+    <div class="timeline-step">
+      <strong>Jour 0</strong>
+      <span>Tu envoies ta demande par email à <a href="mailto:contact@avis-base.com">contact@avis-base.com</a>.</span>
+    </div>
+    <div class="timeline-step">
+      <strong>Jour 1 à 3</strong>
+      <span>Nous vérifions que la demande vient bien de toi (réponse depuis l'email du compte) et confirmons.</span>
+    </div>
+    <div class="timeline-step">
+      <strong>Jour 7 maximum</strong>
+      <span>Suppression effective de toutes les données personnelles. Tu reçois une confirmation.</span>
+    </div>
+    <div class="timeline-step">
+      <strong>Jour 30 maximum</strong>
+      <span>Effacement complet sur les sauvegardes (backups Supabase). Aucune donnée résiduelle.</span>
+    </div>
+  </div>
+
+  <h2>Avant de supprimer</h2>
+  <p>Si tu hésites :</p>
+  <ul>
+    <li>Tu peux <strong>te déconnecter</strong> sans supprimer (ton compte reste).</li>
+    <li>Tu peux <strong>vider ta bio</strong> et changer ton pseudo en gardant le compte.</li>
+    <li>Tu peux <strong>archiver tes conversations DM</strong> sans les supprimer.</li>
+  </ul>
+  <p>La suppression est <strong>définitive</strong>, on ne peut pas restaurer ton compte après confirmation.</p>
+
+  <h2>Question, doute ?</h2>
+  <p>Réponds-nous sur <a href="mailto:contact@avis-base.com">contact@avis-base.com</a> ou via TikTok <a href="https://www.tiktok.com/@avis_base.nth" target="_blank" rel="noopener">@avis_base.nth</a>. On comprend que c'est parfois pas simple. Si tu veux suspendre temporairement ton compte sans le supprimer, dis-le-nous, on s'arrange.</p>
+
+  <a href="/" class="back-link">← Retour à Avis Basé</a>
+</div>
+</body>
+</html>
