@@ -4319,8 +4319,8 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   margin-top:-46px
 }
 .public-profile__top{
-  display:flex;align-items:flex-end;
-  gap:24px;margin-bottom:18px
+  display:flex;align-items:flex-start;
+  gap:24px;margin-bottom:14px
 }
 .public-profile__avatar{
   width:120px;height:120px;border-radius:50%;
@@ -4333,27 +4333,30 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 .public-profile__avatar img{width:100%;height:100%;object-fit:cover}
 .public-profile__id-block{
   flex:1;min-width:0;
-  padding-bottom:10px
+  padding-top:54px
 }
 .public-profile__username-row{
   display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  margin-bottom:6px
+  margin-bottom:8px
 }
 .public-profile__username{
   font-family:var(--ff);font-size:1.7rem;font-weight:500;
   color:var(--ink);letter-spacing:-0.01em;
-  line-height:1
+  line-height:1.1;
+  word-break:break-word
 }
 .public-profile__level-badge{
   display:inline-flex;align-items:center;gap:5px;
   padding:4px 11px;border-radius:100px;
   font-size:0.74rem;font-weight:700;
   background:var(--accent-soft);color:var(--accent);
-  border:1px solid rgba(140,28,19,0.2)
+  border:1px solid rgba(140,28,19,0.2);
+  white-space:nowrap
 }
 .public-profile__actions{
-  display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;
-  padding-bottom:10px
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin-left:auto;
+  padding-top:54px
 }
 .public-profile__btn{
   display:inline-flex;align-items:center;gap:6px;
@@ -9722,7 +9725,12 @@ function renderPublicProfile(profile, userArticles, stats) {
       if (window.openDM) window.openDM(profile.id);
     });
   } else {
-    actions.innerHTML = `<button class="public-profile__btn public-profile__btn--primary" onclick="openAuthModal('login')">Se connecter pour interagir</button>`;
+    actions.innerHTML = `<button class="public-profile__btn public-profile__btn--primary" id="publicProfileLoginBtn">Se connecter pour interagir</button>`;
+    document.getElementById('publicProfileLoginBtn')?.addEventListener('click', () => {
+      closePublicProfile();
+      // Léger délai pour que la fermeture finisse avant l'ouverture de l'auth
+      setTimeout(() => { if (typeof openAuthModal === 'function') openAuthModal('login'); }, 100);
+    });
   }
 
   // Stats
@@ -13561,7 +13569,10 @@ const DM = (() => {
   }
 
   async function sendMessage(text, attachment) {
-    if (!supa || !currentUser || !currentConvId) return false;
+    if (!supa) { showToastDM("Connexion Supabase manquante.", true); return false; }
+    if (!currentUser) { showToastDM("Tu n'es pas connecté.", true); return false; }
+    if (!currentConvId) { showToastDM("Aucune conversation active.", true); return false; }
+
     const payload = {
       conversation_id: currentConvId,
       sender_id: currentUser.id,
@@ -13573,17 +13584,78 @@ const DM = (() => {
       payload.attachment_name = attachment.name;
       payload.attachment_size = attachment.size;
     }
-    const { data, error } = await supa.from('dm_messages').insert(payload).select().single();
-    if (error) {
-      if ((error.message || '').includes('row-level security')) showToastDM("Tu ne peux pas envoyer de message à cet utilisateur.", true);
-      else showToastDM("Échec de l'envoi : " + error.message, true);
+
+    console.log('[DM send] payload:', payload);
+
+    // Failsafe 10s — débloque l'UI si la requête traîne (session expirée silencieusement)
+    let failsafe = false;
+    const ft = setTimeout(() => {
+      failsafe = true;
+      showToastDM("Envoi trop long (>10s). Session expirée ? Reconnecte-toi.", true);
+      console.error('[DM send] failsafe triggered');
+    }, 10000);
+
+    try {
+      // Check session avant l'insert (anti-hang)
+      const sessionResult = await Promise.race([
+        supa.auth.getSession(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('getSession_timeout')), 3000))
+      ]).catch(e => ({ _hang: true, _err: e }));
+
+      if (sessionResult._hang) {
+        clearTimeout(ft);
+        console.error('[DM send] auth state corrompu — reset');
+        Object.keys(localStorage).filter(k => k.startsWith('sb-') || k.includes('supabase')).forEach(k => localStorage.removeItem(k));
+        showToastDM("Session corrompue. Rechargement…", true);
+        setTimeout(() => location.reload(), 1500);
+        return false;
+      }
+      if (!sessionResult.data?.session) {
+        clearTimeout(ft);
+        showToastDM("Session expirée. Reconnecte-toi.", true);
+        if (typeof openAuthModal === 'function') openAuthModal('login');
+        return false;
+      }
+
+      const { data, error } = await supa.from('dm_messages').insert(payload).select().single();
+      if (failsafe) return false;
+      clearTimeout(ft);
+
+      console.log('[DM send] response:', { data, error });
+
+      if (error) {
+        const code = error.code || '';
+        const msg = error.message || '';
+        let hint = '';
+        if (msg.includes('row-level security') || code === '42501') {
+          hint = " (RLS — l'autre utilisateur t'a bloqué OU ta session a expiré OU la conversation n'est plus accessible)";
+        } else if (code === '23503') {
+          hint = " (référence manquante — conversation supprimée ?)";
+        } else if (code === '23514') {
+          hint = " (contrainte CHECK — message trop long ou vide ?)";
+        } else if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+          hint = " (connexion réseau interrompue)";
+        }
+        console.error('[DM send] error:', error);
+        showToastDM("Échec : " + msg + hint, true);
+        return false;
+      }
+      if (!data) {
+        showToastDM("Aucune donnée retournée — message peut-être bloqué par RLS.", true);
+        return false;
+      }
+      if (data && !currentMessages.some(m => m.id === data.id)) {
+        currentMessages.push(data);
+        renderMessages();
+      }
+      return true;
+    } catch (e) {
+      clearTimeout(ft);
+      if (failsafe) return false;
+      console.error('[DM send] exception:', e);
+      showToastDM("Erreur inattendue : " + (e?.message || e), true);
       return false;
     }
-    if (data && !currentMessages.some(m => m.id === data.id)) {
-      currentMessages.push(data);
-      renderMessages();
-    }
-    return true;
   }
 
   async function markRead() {
