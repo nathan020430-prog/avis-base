@@ -13420,8 +13420,17 @@ const DM = (() => {
 
   function openDrawer() {
     if (!requireAuth()) return;
+    // Reset complet de l'état avant ouverture (évite drawer figé en thread sans data)
+    leaveCurrentThread();
     $('dmDrawer').classList.add('open');
     showList();
+    // Force visibilité du list-view au cas où une transition l'aurait bloqué
+    const listView = document.querySelector('.dm-view--list');
+    if (listView) {
+      listView.style.transform = '';
+      listView.style.opacity = '';
+      listView.style.visibility = '';
+    }
     loadConversations();
   }
   function closeDrawer() {
@@ -13440,18 +13449,25 @@ const DM = (() => {
     try {
       console.log('[DM list] fetching dm_list_conversations…');
       const { data, error } = await supa.rpc('dm_list_conversations');
-      console.log('[DM list] response:', { count: data?.length, error });
+      // Log détaillé EXPANSÉ pour voir le contenu directement
+      console.log('[DM list] response:', {
+        count: data?.length,
+        rows: (data || []).map(r => ({
+          conv: r.conversation_id?.slice(0, 8),
+          other: r.other_username,
+          unread: r.unread_count,
+          archived: r.is_archived,
+          preview: (r.last_message_preview || '').slice(0, 30),
+          last: r.last_message_at
+        })),
+        error: error ? { code: error.code, message: error.message, details: error.details } : null
+      });
       if (error) {
         console.error('[DM list] RPC error:', error);
-        // Toast visible pour informer l'utilisateur
-        if (typeof showToast === 'function') {
-          showToast('Erreur chargement DM : ' + error.message, true);
-        }
-        // On garde l'ancienne liste pour ne pas tout perdre
+        if (typeof showToast === 'function') showToast('Erreur chargement DM : ' + error.message, true);
         return;
       }
       conversations = data || [];
-      console.log('[DM list] conversations:', conversations);
       renderConversationList();
       updateUnreadBadge();
     } catch (e) {
@@ -13466,15 +13482,23 @@ const DM = (() => {
     let empty = $('dmConvEmpty');
     const search = ($('dmSearchInput')?.value || '').trim().toLowerCase();
 
-    // Filtre : on garde les non-archivées + celles archivées QUI ont des non-lus
-    // (sinon un message reçu dans une conv archivée disparaîtrait de la vue)
-    const visible = conversations.filter(c => !c.is_archived || c.unread_count > 0);
+    // NOUVEAU : on affiche TOUTES les conversations, archivées incluses.
+    // L'archivage est visuel (opacité) mais ne masque plus.
+    const visible = conversations.slice();
     const filtered = search
       ? visible.filter(c => (c.other_username || '').toLowerCase().includes(search)
         || (c.last_message_preview || '').toLowerCase().includes(search))
       : visible;
 
-    console.log('[DM render]', { total: conversations.length, visible: visible.length, filtered: filtered.length, archived: conversations.filter(c => c.is_archived).length });
+    console.log('[DM render]', {
+      total: conversations.length,
+      visible: visible.length,
+      filtered: filtered.length,
+      archived: conversations.filter(c => c.is_archived).length,
+      listEl: !!list,
+      listVisible: list.offsetWidth > 0 && list.offsetHeight > 0,
+      listInDom: document.body.contains(list)
+    });
 
     if (!filtered.length) {
       // Recrée l'empty state s'il a été supprimé du DOM
