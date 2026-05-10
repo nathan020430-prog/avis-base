@@ -4068,6 +4068,115 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   box-shadow:0 4px 12px rgba(140,28,19,0.35)
 }
 
+/* ─── Empty state liste (illustration éditoriale) ─── */
+.dm-conv-empty{padding:60px 32px 40px;text-align:center;color:var(--ink-muted);display:flex;flex-direction:column;align-items:center}
+.dm-empty-illu{position:relative;width:80px;height:80px;display:flex;align-items:center;justify-content:center;margin-bottom:22px;color:var(--ink-muted);opacity:0.55}
+.dm-empty-illu svg{width:64px;height:64px}
+.dm-empty-dot{position:absolute;top:18px;right:14px;width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--bg),0 2px 6px rgba(140,28,19,0.4);animation:dm-empty-pulse 2.4s ease-in-out infinite}
+@keyframes dm-empty-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:0.7}}
+.dm-empty-title{font-family:var(--ff);font-size:1.15rem;font-weight:400;color:var(--ink);letter-spacing:-0.01em;margin-bottom:8px}
+.dm-empty-sub{font-size:0.84rem;line-height:1.55;color:var(--ink-muted);max-width:280px}
+.dm-empty-sub strong{color:var(--ink);font-weight:600}
+
+/* ─── Empty state thread (accueil personnalisé) ─── */
+.dm-thread-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:48px 32px;flex:1;justify-content:center}
+.dm-thread-empty__avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--ff);font-weight:500;font-size:1.4rem;margin-bottom:18px;border:1px solid var(--rule);overflow:hidden}
+.dm-thread-empty__avatar img{width:100%;height:100%;object-fit:cover}
+.dm-thread-empty__title{font-family:var(--ff);font-size:1.18rem;font-weight:400;color:var(--ink);margin-bottom:8px;letter-spacing:-0.01em;max-width:260px;line-height:1.3}
+.dm-thread-empty__sub{font-size:0.82rem;color:var(--ink-muted);line-height:1.55;max-width:280px;font-style:italic}
+
+/* ─── Skeleton loader ─── */
+.dm-msg--skeleton{animation:none}
+.dm-msg--skeleton .dm-msg__bubble{
+  background:linear-gradient(90deg,var(--surface) 25%,var(--surface-alt) 50%,var(--surface) 75%);
+  background-size:200% 100%;
+  border:1px solid var(--rule);
+  animation:dm-skel-shimmer 1.6s ease-in-out infinite
+}
+.dm-msg--mine.dm-msg--skeleton .dm-msg__bubble{
+  background:linear-gradient(90deg,var(--accent) 25%,#6E150F 50%,var(--accent) 75%);
+  background-size:200% 100%;
+  border:none;
+  opacity:0.4
+}
+@keyframes dm-skel-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ─── Wrapper messages + scroll-to-bottom ─── */
+.dm-messages-wrap{flex:1;position:relative;display:flex;flex-direction:column;min-height:0}
+.dm-messages-wrap .dm-messages{flex:1}
+.dm-scroll-bottom{
+  position:absolute;bottom:14px;right:14px;
+  width:36px;height:36px;border-radius:50%;
+  background:var(--bg);border:1px solid var(--rule);
+  color:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(26,17,8,0.18);
+  transition:all 0.22s cubic-bezier(0.32,0.72,0,1);
+  z-index:5
+}
+.dm-scroll-bottom:hover{background:var(--ink);color:var(--bg);border-color:var(--ink);transform:translateY(-2px)}
+.dm-scroll-bottom.has-unread{background:var(--accent);color:#FDFAF3;border-color:var(--accent);box-shadow:0 4px 14px rgba(140,28,19,0.4)}
+.dm-scroll-bottom.has-unread::after{content:attr(data-count);position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--ink);color:var(--bg);font-size:0.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+[data-theme="dark"] .dm-scroll-bottom.has-unread::after{background:var(--bg);color:var(--ink);border-color:var(--bg)}
+.dm-scroll-bottom svg{width:16px;height:16px}
+
+/* ─── Séparateur "Nouveaux messages" ─── */
+.dm-msg__unread-sep{
+  display:flex;align-items:center;gap:12px;
+  margin:18px 0 8px;
+  font-size:0.66rem;color:var(--accent);
+  font-weight:700;text-transform:uppercase;letter-spacing:0.12em;
+  font-family:var(--fs);
+  align-self:stretch;max-width:none
+}
+.dm-msg__unread-sep::before,.dm-msg__unread-sep::after{
+  content:'';flex:1;height:1px;background:var(--accent);opacity:0.4
+}
+
+/* ─── Hover actions sur les messages (copier, signaler) ─── */
+.dm-msg{position:relative}
+.dm-msg__actions{
+  position:absolute;top:50%;transform:translateY(-50%);
+  display:flex;gap:4px;
+  background:var(--bg);border:1px solid var(--rule);
+  border-radius:18px;padding:3px;
+  box-shadow:0 4px 14px rgba(26,17,8,0.12);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.18s ease;
+  z-index:3
+}
+.dm-msg--mine .dm-msg__actions{right:calc(100% + 8px)}
+.dm-msg--theirs .dm-msg__actions{left:calc(100% + 8px)}
+.dm-msg:hover .dm-msg__actions{opacity:1;pointer-events:auto}
+.dm-msg__action-btn{
+  width:26px;height:26px;border-radius:50%;
+  background:transparent;border:none;cursor:pointer;
+  color:var(--ink-muted);
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s ease
+}
+.dm-msg__action-btn:hover{background:var(--surface);color:var(--ink)}
+.dm-msg__action-btn.danger:hover{background:var(--accent-soft);color:var(--accent)}
+.dm-msg__action-btn svg{width:13px;height:13px}
+@media(hover:none){
+  /* Pas de hover sur mobile → toujours visible mais discret */
+  .dm-msg__actions{display:none}
+}
+
+/* ─── Compose : compteur de caractères discret ─── */
+.dm-compose{position:relative}
+.dm-compose__char-counter{
+  position:absolute;top:-22px;right:14px;
+  font-size:0.66rem;color:var(--ink-muted);
+  font-variant-numeric:tabular-nums;
+  background:var(--bg);padding:2px 8px;border-radius:8px;
+  border:1px solid var(--rule);
+  opacity:0;transition:opacity 0.2s ease;pointer-events:none
+}
+.dm-compose__char-counter.visible{opacity:1}
+.dm-compose__char-counter.warning{color:var(--accent);border-color:var(--accent)}
+
 /* ─── Mobile ─── */
 @media(max-width:768px){
   .dm-drawer__panel{width:100vw;border-left:none}
@@ -4080,6 +4189,8 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   .dm-thread-header{padding:10px 14px}
   .dm-messages{padding:14px 12px 4px}
   .dm-compose{padding:10px 12px 12px}
+  .dm-thread-empty{padding:32px 24px}
+  .dm-conv-empty{padding:48px 24px 32px}
 }
 
 </style>
@@ -5145,9 +5256,16 @@ body.is-mobile .notif-bell{width:32px;height:32px}
         </div>
         <div class="dm-conv-list" id="dmConvList">
           <div class="dm-conv-empty" id="dmConvEmpty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <div>Aucune conversation pour l'instant.</div>
-            <div style="margin-top:8px;font-size:0.78rem">Clique sur "Message" sur le profil d'un auteur pour démarrer.</div>
+            <div class="dm-empty-illu">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M52 36c0 4.4-3.6 8-8 8H22l-8 8V20c0-4.4 3.6-8 8-8h22c4.4 0 8 3.6 8 8v16z"/>
+                <line x1="22" y1="24" x2="40" y2="24" opacity="0.5"/>
+                <line x1="22" y1="32" x2="34" y2="32" opacity="0.5"/>
+              </svg>
+              <span class="dm-empty-dot" aria-hidden="true"></span>
+            </div>
+            <div class="dm-empty-title">Ta boîte est vide</div>
+            <div class="dm-empty-sub">Ouvre un article et clique sur <strong>Message</strong> à côté du nom d'un auteur pour démarrer une conversation.</div>
           </div>
         </div>
       </div>
@@ -5178,7 +5296,12 @@ body.is-mobile .notif-bell{width:32px;height:32px}
           </button>
         </div>
 
-        <div class="dm-messages" id="dmMessages"></div>
+        <div class="dm-messages-wrap">
+          <div class="dm-messages" id="dmMessages"></div>
+          <button class="dm-scroll-bottom" id="dmScrollBottom" aria-label="Aller au plus récent" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
 
         <div class="dm-attach-preview" id="dmAttachPreview">
           <div class="dm-attach-preview__thumb" id="dmAttachThumb"></div>
@@ -12357,12 +12480,54 @@ const DM = (() => {
     if (!s) return '';
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
+  // 8 palettes éditoriales (couleurs sourcées du thème broadsheet : ocre, sépia, rouge, encre, olive, bordeaux, bleu nuit, vert)
+  const AVATAR_PALETTES_LIGHT = [
+    { from: '#E8DCC4', to: '#B89968', fg: '#3A2D1F' }, // sépia clair
+    { from: '#F0D9B5', to: '#C9854A', fg: '#3A2718' }, // ocre
+    { from: '#E8CCC7', to: '#A85D52', fg: '#3D1F1B' }, // rouge poudré
+    { from: '#D8D2C2', to: '#8C7B5F', fg: '#2D2618' }, // taupe
+    { from: '#D4DCC4', to: '#7A8C5F', fg: '#252D1A' }, // olive
+    { from: '#E0CFCF', to: '#7E4F4F', fg: '#2D1A1A' }, // bordeaux
+    { from: '#C9D2D9', to: '#5A6F7E', fg: '#1A222D' }, // bleu nuit
+    { from: '#D9D2C4', to: '#7E6F4F', fg: '#2D261A' }, // kraft
+  ];
+  const AVATAR_PALETTES_DARK = [
+    { from: '#3A2D1F', to: '#5C4630', fg: '#E8DCC4' },
+    { from: '#3D2E1F', to: '#7A5230', fg: '#F0D9B5' },
+    { from: '#3D1F1B', to: '#7A3D32', fg: '#E8CCC7' },
+    { from: '#2D2618', to: '#5C4B30', fg: '#D8D2C2' },
+    { from: '#252D1A', to: '#4E5C30', fg: '#D4DCC4' },
+    { from: '#2D1A1A', to: '#5C3030', fg: '#E0CFCF' },
+    { from: '#1A222D', to: '#30495C', fg: '#C9D2D9' },
+    { from: '#2D261A', to: '#5C4B30', fg: '#D9D2C4' },
+  ];
+
+  function hashUserId(str) {
+    if (!str) return 0;
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+    return Math.abs(h);
+  }
+
+  function avatarStyle(user) {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const palettes = isDark ? AVATAR_PALETTES_DARK : AVATAR_PALETTES_LIGHT;
+    const key = (user && (user.id || user.username)) || '?';
+    const p = palettes[hashUserId(key) % palettes.length];
+    return `background:linear-gradient(135deg,${p.from} 0%,${p.to} 100%);color:${p.fg}`;
+  }
+
   function avatarHtml(user) {
-    if (user && user.avatar_url) return `<img src="${escapeHtmlDM(user.avatar_url)}" alt="" onerror="this.style.display='none'"/>`;
+    if (user && user.avatar_url) {
+      return `<img src="${escapeHtmlDM(user.avatar_url)}" alt="" onerror="this.style.display='none';this.parentElement.textContent='${escapeHtmlDM(initials(user.username))}'"/>`;
+    }
     return escapeHtmlDM(initials(user && user.username));
   }
+
   function initials(name) {
     if (!name) return '?';
+    const parts = name.trim().split(/[\s_-]+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
     return name.trim().slice(0, 2).toUpperCase();
   }
   function formatTime(iso) {
@@ -12454,7 +12619,7 @@ const DM = (() => {
       const unread = c.unread_count > 0;
       return `
         <div class="dm-conv-item${unread ? ' unread' : ''}" data-conv-id="${c.conversation_id}" data-other-id="${c.other_user_id}">
-          <div class="dm-conv-avatar">${avatarHtml({ username: c.other_username, avatar_url: c.other_avatar_url })}</div>
+          <div class="dm-conv-avatar" style="${avatarStyle({ id: c.other_user_id, username: c.other_username })}">${avatarHtml({ username: c.other_username, avatar_url: c.other_avatar_url })}</div>
           <div class="dm-conv-meta">
             <div class="dm-conv-row1">
               <span class="dm-conv-name">${escapeHtmlDM(c.other_username || 'Utilisateur')}</span>
@@ -12485,6 +12650,9 @@ const DM = (() => {
     });
   }
 
+  let currentMyLastReadAt = null; // snapshot pour le séparateur "nouveaux messages"
+  let initialUnreadCount = 0;
+
   async function openThread(convId, otherId) {
     if (!supa || !currentUser) return;
     leaveCurrentThread();
@@ -12496,14 +12664,29 @@ const DM = (() => {
         avatar_url: conv.other_avatar_url, role: conv.other_role,
         is_blocked_by_me: conv.is_blocked_by_me
       };
+      initialUnreadCount = conv.unread_count || 0;
     } else if (otherId) {
       const { data } = await supa.from('profiles').select('id,username,avatar_url,role').eq('id', otherId).single();
       currentOther = data ? { ...data, is_blocked_by_me: false } : null;
+      initialUnreadCount = 0;
     }
     if (!currentOther) { showList(); return; }
     showThread();
     renderThreadHeader();
-    $('dmMessages').innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-muted);font-size:0.84rem">Chargement…</div>';
+    $('dmMessages').innerHTML = renderSkeletonMessages();
+
+    // Snapshot du last_read_at AVANT markRead (pour le séparateur)
+    if (initialUnreadCount > 0) {
+      const { data: pdata } = await supa.from('dm_participants')
+        .select('last_read_at')
+        .eq('conversation_id', convId)
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+      currentMyLastReadAt = pdata?.last_read_at || null;
+    } else {
+      currentMyLastReadAt = null;
+    }
+
     await loadMessages();
     subscribeRealtime();
     await markRead();
@@ -12519,6 +12702,7 @@ const DM = (() => {
   }
 
   function renderThreadHeader() {
+    $('dmThreadAvatar').setAttribute('style', avatarStyle(currentOther));
     $('dmThreadAvatar').innerHTML = avatarHtml(currentOther);
     $('dmThreadName').textContent = currentOther.username || 'Utilisateur';
     $('dmThreadStatus').textContent = '';
@@ -12545,16 +12729,34 @@ const DM = (() => {
     renderMessages();
   }
 
+  function renderSkeletonMessages() {
+    // 4 bulles fantômes alternées pour simuler une conversation
+    const widths = [60, 80, 45, 70];
+    const sides = ['theirs', 'theirs', 'mine', 'theirs'];
+    return sides.map((side, i) => `
+      <div class="dm-msg dm-msg--${side} dm-msg--skeleton">
+        <div class="dm-msg__bubble dm-skel" style="width:${widths[i]}%;min-height:38px"></div>
+      </div>
+    `).join('');
+  }
+
   function renderMessages() {
     const box = $('dmMessages');
     if (!box) return;
     if (!currentMessages.length) {
-      box.innerHTML = `<div style="text-align:center;padding:30px 20px;color:var(--ink-muted);font-size:0.85rem">Aucun message. Dis bonjour à ${escapeHtmlDM(currentOther.username)} 👋</div>`;
+      box.innerHTML = `
+        <div class="dm-thread-empty">
+          <div class="dm-thread-empty__avatar" style="${avatarStyle(currentOther)}">${avatarHtml(currentOther)}</div>
+          <div class="dm-thread-empty__title">Démarre la conversation avec ${escapeHtmlDM(currentOther.username)}</div>
+          <div class="dm-thread-empty__sub">Tes messages restent privés. Aucun administrateur ne peut les lire.</div>
+        </div>`;
       return;
     }
     let html = '';
     let prevDay = '';
+    let unreadSepInserted = false;
     const otherReadAt = currentOther?._otherLastReadAt || null;
+    const myReadAt = currentMyLastReadAt;
 
     currentMessages.forEach((m) => {
       const day = new Date(m.created_at).toDateString();
@@ -12562,6 +12764,13 @@ const DM = (() => {
         html += `<div class="dm-msg__time-sep">${formatDateSep(m.created_at)}</div>`;
         prevDay = day;
       }
+
+      // Séparateur "Nouveaux messages" avant le 1er message non-lu de l'autre
+      if (!unreadSepInserted && myReadAt && m.sender_id !== currentUser.id && new Date(m.created_at) > new Date(myReadAt)) {
+        html += `<div class="dm-msg__unread-sep">Nouveaux messages</div>`;
+        unreadSepInserted = true;
+      }
+
       const mine = m.sender_id === currentUser.id;
       const read = mine && otherReadAt && new Date(m.created_at) <= new Date(otherReadAt);
       let attachHtml = '';
@@ -12570,6 +12779,15 @@ const DM = (() => {
       } else if (m.attachment_url) {
         attachHtml = `<a class="dm-msg__attach-file" href="${escapeHtmlDM(m.attachment_url)}" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>${escapeHtmlDM(m.attachment_name || 'Fichier')}</span></a>`;
       }
+
+      // Hover actions (desktop only via CSS)
+      const actionsHtml = `
+        <div class="dm-msg__actions">
+          ${m.content ? `<button class="dm-msg__action-btn" data-msg-copy="${m.id}" title="Copier le texte" aria-label="Copier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>` : ''}
+          ${!mine ? `<button class="dm-msg__action-btn danger" data-msg-report="${m.id}" title="Signaler ce message" aria-label="Signaler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></button>` : ''}
+          ${mine ? `<button class="dm-msg__action-btn danger" data-msg-delete="${m.id}" title="Supprimer ce message" aria-label="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>` : ''}
+        </div>`;
+
       html += `
         <div class="dm-msg dm-msg--${mine ? 'mine' : 'theirs'}${read ? ' read' : ''}" data-msg-id="${m.id}">
           ${m.content ? `<div class="dm-msg__bubble">${escapeHtmlDM(m.content)}</div>` : ''}
@@ -12581,10 +12799,92 @@ const DM = (() => {
               : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
             }</span>` : ''}
           </div>
+          ${actionsHtml}
         </div>`;
     });
     box.innerHTML = html;
+
+    // Wire up hover actions
+    box.querySelectorAll('[data-msg-copy]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.msgCopy;
+        const msg = currentMessages.find(m => m.id === id);
+        if (msg && msg.content) {
+          navigator.clipboard.writeText(msg.content)
+            .then(() => showToastDM('Message copié'))
+            .catch(() => showToastDM('Impossible de copier', true));
+        }
+      });
+    });
+    box.querySelectorAll('[data-msg-report]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.msgReport;
+        if (confirm('Signaler ce message à la modération ?')) {
+          reportMessage(id);
+        }
+      });
+    });
+    box.querySelectorAll('[data-msg-delete]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.msgDelete;
+        if (confirm('Supprimer ce message ?')) {
+          deleteMessage(id);
+        }
+      });
+    });
+
+    // Scroll au bas + reset des indicateurs nouveaux msg
     box.scrollTop = box.scrollHeight;
+    updateScrollBottomBtn();
+  }
+
+  async function reportMessage(msgId) {
+    const msg = currentMessages.find(m => m.id === msgId);
+    if (!msg || !currentOther) return;
+    try {
+      await supa.rpc('dm_report_user', {
+        target_id: currentOther.id,
+        conv_id: currentConvId,
+        msg_id: msgId,
+        report_reason: 'other',
+        report_description: 'Signalement message : ' + (msg.content || '[pièce jointe]').slice(0, 200)
+      });
+      showToastDM('Message signalé. Merci.');
+    } catch (e) {
+      showToastDM('Échec du signalement : ' + e.message, true);
+    }
+  }
+
+  async function deleteMessage(msgId) {
+    try {
+      const { error } = await supa.from('dm_messages')
+        .update({ deleted_at: new Date().toISOString(), content: '', attachment_url: null })
+        .eq('id', msgId)
+        .eq('sender_id', currentUser.id);
+      if (error) { showToastDM('Échec : ' + error.message, true); return; }
+      currentMessages = currentMessages.filter(m => m.id !== msgId);
+      renderMessages();
+      showToastDM('Message supprimé');
+    } catch (e) {
+      showToastDM('Erreur : ' + e.message, true);
+    }
+  }
+
+  function updateScrollBottomBtn() {
+    const box = $('dmMessages');
+    const btn = $('dmScrollBottom');
+    if (!box || !btn) return;
+    const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 50;
+    if (atBottom) {
+      btn.style.display = 'none';
+      btn.classList.remove('has-unread');
+      btn.removeAttribute('data-count');
+    } else {
+      btn.style.display = 'flex';
+    }
   }
 
   function subscribeRealtime() {
@@ -12596,8 +12896,23 @@ const DM = (() => {
       }, (payload) => {
         const msg = payload.new;
         if (currentMessages.some(m => m.id === msg.id)) return;
+        // Snapshot du scroll avant render (pour smart-scroll)
+        const box = $('dmMessages');
+        const wasAtBottom = box ? (box.scrollHeight - box.scrollTop - box.clientHeight < 80) : true;
+        const prevScroll = box ? box.scrollTop : 0;
         currentMessages.push(msg);
         renderMessages();
+        // Si l'utilisateur scrolle plus haut, on préserve sa position et on incrément le badge
+        if (!wasAtBottom && msg.sender_id !== currentUser.id) {
+          if (box) box.scrollTop = prevScroll;
+          const btn = $('dmScrollBottom');
+          if (btn) {
+            const current = parseInt(btn.getAttribute('data-count') || '0', 10);
+            btn.setAttribute('data-count', String(current + 1));
+            btn.classList.add('has-unread');
+            btn.style.display = 'flex';
+          }
+        }
         if (msg.sender_id !== currentUser.id) markRead();
       })
       .on('postgres_changes', {
@@ -12798,14 +13113,43 @@ const DM = (() => {
     $('dmSearchInput')?.addEventListener('input', renderConversationList);
 
     const ta = $('dmComposeText');
+    // Compteur de caractères discret (apparaît à partir de 3000 / max 4000)
+    const composeForm = $('dmComposeForm');
+    if (composeForm && !composeForm.querySelector('.dm-compose__char-counter')) {
+      const counter = document.createElement('div');
+      counter.className = 'dm-compose__char-counter';
+      counter.id = 'dmComposeCounter';
+      composeForm.appendChild(counter);
+    }
     ta?.addEventListener('input', () => {
       ta.style.height = 'auto';
       ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
       updateSendButton();
       handleTypingDebounced();
+      // Char counter
+      const len = ta.value.length;
+      const counter = $('dmComposeCounter');
+      if (counter) {
+        if (len >= 3000) {
+          counter.textContent = `${len} / 4000`;
+          counter.classList.add('visible');
+          counter.classList.toggle('warning', len >= 3800);
+        } else {
+          counter.classList.remove('visible');
+        }
+      }
     });
     ta?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('dmSendBtn').click(); }
+    });
+
+    // Scroll-to-bottom button
+    $('dmMessages')?.addEventListener('scroll', () => {
+      updateScrollBottomBtn();
+    });
+    $('dmScrollBottom')?.addEventListener('click', () => {
+      const box = $('dmMessages');
+      box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
     });
     $('dmComposeForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -12823,6 +13167,7 @@ const DM = (() => {
         ta.style.height = 'auto';
         clearAttachmentPreview();
         setTyping(false);
+        $('dmComposeCounter')?.classList.remove('visible', 'warning');
       }
       $('dmSendBtn').disabled = false;
     });
