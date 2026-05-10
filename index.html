@@ -10328,18 +10328,59 @@ const Follow = {
   },
 
   async toggle(userId) {
-    if (!currentUser || !supa || userId === currentUser.id) return;
+    if (!currentUser) {
+      if (typeof openAuthModal === 'function') openAuthModal('login');
+      else if (typeof showToast === 'function') showToast('Connexion requise', true);
+      return;
+    }
+    if (!supa) { if (typeof showToast === 'function') showToast('Connexion serveur indisponible', true); return; }
+    if (userId === currentUser.id) { if (typeof showToast === 'function') showToast("Tu ne peux pas te suivre toi-même", true); return; }
+
     const was = this.isFollowing(userId);
     // Optimistic update
     if (was) this.followingIds.delete(userId); else this.followingIds.add(userId);
     this.updateButtons(userId);
 
-    if (was) {
-      const { error } = await supa.from('follows').delete().eq('follower_id', currentUser.id).eq('following_id', userId);
-      if (error) { this.followingIds.add(userId); this.updateButtons(userId); }
-    } else {
-      const { error } = await supa.from('follows').insert({ follower_id: currentUser.id, following_id: userId });
-      if (error) { this.followingIds.delete(userId); this.updateButtons(userId); }
+    console.log('[follow] toggle', userId, was ? 'unfollow' : 'follow');
+
+    try {
+      if (was) {
+        const { error } = await supa.from('follows').delete().eq('follower_id', currentUser.id).eq('following_id', userId);
+        if (error) {
+          console.error('[follow] unfollow error:', error);
+          this.followingIds.add(userId);
+          this.updateButtons(userId);
+          if (typeof showToast === 'function') {
+            const hint = error.code === '42P01' ? ' (table follows manquante — exécute v0.10.0-migration.sql)' : '';
+            showToast('Échec : ' + error.message + hint, true);
+          }
+        } else {
+          if (typeof showToast === 'function') showToast('Tu ne suis plus cet utilisateur');
+        }
+      } else {
+        const { error } = await supa.from('follows').insert({ follower_id: currentUser.id, following_id: userId });
+        if (error) {
+          console.error('[follow] follow error:', error);
+          this.followingIds.delete(userId);
+          this.updateButtons(userId);
+          if (typeof showToast === 'function') {
+            let hint = '';
+            if (error.code === '42P01') hint = ' (table follows manquante — exécute v0.10.0-migration.sql)';
+            else if (error.code === '23505') hint = ' (déjà suivi)';
+            else if (error.code === '23514') hint = ' (auto-follow non autorisé)';
+            else if (error.code === '42501') hint = ' (RLS — session expirée ?)';
+            showToast('Échec : ' + error.message + hint, true);
+          }
+        } else {
+          if (typeof showToast === 'function') showToast('Abonnement réussi !');
+        }
+      }
+    } catch (e) {
+      console.error('[follow] exception:', e);
+      // Rollback optimistic update
+      if (was) this.followingIds.add(userId); else this.followingIds.delete(userId);
+      this.updateButtons(userId);
+      if (typeof showToast === 'function') showToast('Erreur : ' + (e?.message || e), true);
     }
   },
 
