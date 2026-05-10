@@ -4194,6 +4194,179 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   MASTHEAD TOP-RIGHT — toolbar unifié (override)
+   Toutes les actions (notif, theme, DM, user) ont le même rythme visuel :
+   boutons circulaires 36px, transparents, hover doux.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.masthead__top-right{
+  display:flex;align-items:center;gap:4px;flex-wrap:wrap
+}
+
+/* Sync indicator — version discrète (juste un point qui pulse + label en petit) */
+.masthead__top-right .sync-ind{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;margin-right:6px;
+  background:transparent;border:1px solid var(--rule);
+  border-radius:100px;
+  font-size:0.66rem;font-weight:600;letter-spacing:0.04em;
+  text-transform:uppercase;color:var(--ink-muted);
+  font-family:var(--fs)
+}
+.masthead__top-right .sync-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--success);
+  box-shadow:0 0 0 0 rgba(45,122,62,0.35);
+  animation:syncPulse 2.4s ease-in-out infinite
+}
+.masthead__top-right .sync-dot.off{
+  background:var(--ink-light);box-shadow:none;animation:none
+}
+@keyframes syncPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(45,122,62,0.35)}
+  50%{box-shadow:0 0 0 5px rgba(45,122,62,0)}
+}
+
+/* Tous les boutons-icônes : circulaires 36px, transparents, hover subtle */
+.masthead__top-right .mh-action,
+.masthead__top-right .notif-bell,
+.masthead__top-right .nav-inbox-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:36px;height:36px;
+  padding:0;
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:50%;
+  color:var(--ink);
+  cursor:pointer;
+  transition:background 0.2s ease,border-color 0.2s ease,transform 0.15s ease,color 0.2s ease;
+  position:relative
+}
+.masthead__top-right .mh-action:hover,
+.masthead__top-right .notif-bell:hover,
+.masthead__top-right .nav-inbox-btn:hover{
+  background:var(--surface);border-color:var(--rule);color:var(--ink)
+}
+.masthead__top-right .mh-action:active,
+.masthead__top-right .notif-bell:active,
+.masthead__top-right .nav-inbox-btn:active{
+  transform:scale(0.92)
+}
+.masthead__top-right .mh-action svg,
+.masthead__top-right .notif-bell svg,
+.masthead__top-right .nav-inbox-btn svg{
+  width:17px;height:17px;stroke-width:1.7
+}
+
+/* Notif bell : pulse couleur quand non-lu */
+.masthead__top-right .notif-bell.has-unread{color:var(--accent)}
+.masthead__top-right .notif-bell.has-unread:hover{background:var(--accent-soft);border-color:var(--accent)}
+
+/* Badges (notif + DM) : ajustés pour les boutons circulaires */
+.masthead__top-right .notif-bell__badge,
+.masthead__top-right .nav-inbox-badge{
+  position:absolute;top:-2px;right:-2px;
+  min-width:17px;height:17px;padding:0 5px;
+  border-radius:9px;
+  background:var(--accent);color:#FDFAF3;
+  font-size:0.62rem;font-weight:800;letter-spacing:0.02em;
+  font-variant-numeric:tabular-nums;
+  display:none;align-items:center;justify-content:center;
+  border:2px solid var(--bg);
+  box-shadow:0 1px 3px rgba(140,28,19,0.35);
+  line-height:1
+}
+.masthead__top-right .notif-bell__badge[data-count]:not([data-count="0"]){display:inline-flex}
+.masthead__top-right .nav-inbox-badge.visible{display:inline-flex}
+
+/* User menu pill — version connectée plus raffinée */
+.masthead__top-right .nav-menu__btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:4px 14px 4px 5px;
+  background:transparent;
+  border:1px solid var(--rule);
+  border-radius:100px;
+  color:var(--ink);
+  font-size:0.78rem;font-weight:500;letter-spacing:0;
+  font-family:var(--fs);
+  cursor:pointer;
+  transition:all 0.2s ease;
+  position:relative;
+  margin-left:4px;
+  height:36px
+}
+.masthead__top-right .nav-menu__btn:hover{
+  background:var(--surface);border-color:var(--ink);color:var(--ink)
+}
+.masthead__top-right .nav-menu__btn--connected{
+  background:var(--surface);
+  padding:4px 14px 4px 5px
+}
+.masthead__top-right .nav-menu__btn--connected:hover{background:var(--bg);border-color:var(--ink)}
+
+.masthead__top-right .nav-menu__btn-user{display:none;align-items:center;gap:8px}
+.masthead__top-right .nav-menu__btn-avatar{
+  width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent) 0%,#6E150F 100%);
+  color:#FDFAF3;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff);font-weight:500;font-size:0.78rem;flex-shrink:0;
+  letter-spacing:0;
+  box-shadow:inset 0 -1px 2px rgba(0,0,0,0.15)
+}
+.masthead__top-right .nav-menu__btn-pseudo{
+  font-family:var(--fs);
+  font-size:0.86rem;font-weight:500;color:var(--ink);
+  max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  letter-spacing:0
+}
+.masthead__top-right .nav-menu__btn-chev{
+  color:var(--ink-muted);transition:transform 0.25s ease;
+  flex-shrink:0;margin-left:1px
+}
+.masthead__top-right .nav-menu:has(.nav-menu__dropdown.on) .nav-menu__btn-chev{
+  transform:rotate(180deg);color:var(--ink)
+}
+
+/* Quand le bouton CTA (Rejoindre/Écrire) est dans le masthead */
+.masthead__top-right .masthead__cta-btn{
+  height:36px;padding:0 16px;
+  border-radius:100px;
+  background:var(--accent);color:#FDFAF3;
+  font-size:0.78rem;font-weight:600;letter-spacing:0.01em;
+  border:1px solid var(--accent);
+  cursor:pointer;
+  transition:all 0.2s ease;
+  box-shadow:0 2px 8px rgba(140,28,19,0.22);
+  margin-left:6px
+}
+.masthead__top-right .masthead__cta-btn:hover{
+  background:var(--accent-dark);border-color:var(--accent-dark);
+  box-shadow:0 4px 12px rgba(140,28,19,0.32);transform:translateY(-1px)
+}
+.masthead__top-right .masthead__cta-btn:active{transform:translateY(0)}
+
+/* Mobile : compact, mais préserve les icônes */
+@media(max-width:768px){
+  .masthead__top-right{gap:2px}
+  .masthead__top-right .sync-ind{display:none}
+  .masthead__top-right .mh-action,
+  .masthead__top-right .notif-bell,
+  .masthead__top-right .nav-inbox-btn{width:34px;height:34px}
+  .masthead__top-right .mh-action svg,
+  .masthead__top-right .notif-bell svg,
+  .masthead__top-right .nav-inbox-btn svg{width:16px;height:16px}
+  .masthead__top-right .nav-menu__btn-pseudo{display:none}
+  .masthead__top-right .nav-menu__btn-chev{display:none}
+  .masthead__top-right .nav-menu__btn{padding:3px;height:34px;border-radius:50%;width:34px;justify-content:center}
+  .masthead__top-right .nav-menu__btn-avatar{width:26px;height:26px}
+  .masthead__top-right .masthead__cta-btn{height:34px;font-size:0.74rem;padding:0 12px}
+}
+@media(max-width:480px){
+  .masthead__top-right .beta-tag{display:none}
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
    PROFILE EDIT MODAL — refonte propre
    ═══════════════════════════════════════════════════════════════════════ */
 .profile-edit-modal{max-width:480px}
