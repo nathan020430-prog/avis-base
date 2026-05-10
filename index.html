@@ -13418,34 +13418,22 @@ const DM = (() => {
     return true;
   }
 
-  function openDrawer() {
-    if (!requireAuth()) return;
-    // Reset complet de l'état avant ouverture (évite drawer figé en thread sans data)
-    leaveCurrentThread();
-    $('dmDrawer').classList.add('open');
-    showList();
-
-    // FORCE complète des styles des views (cas de transition figée / état corrompu)
+  function resetDrawerState() {
     const drawer = $('dmDrawer');
+    if (!drawer) return;
+    drawer.classList.remove('in-thread');
+    // Purge des styles inline qui auraient pu être accidentellement laissés
     const listView = document.querySelector('.dm-view--list');
     const threadView = document.querySelector('.dm-view--thread');
-    if (listView) {
-      // Force liste visible
-      listView.style.cssText = 'transform:translateX(0)!important;opacity:1!important;visibility:visible!important;display:flex!important';
-    }
-    if (threadView) {
-      // Force thread caché
-      threadView.style.cssText = 'transform:translateX(100%)!important;opacity:0!important;visibility:hidden!important';
-    }
-    // Re-applique les classes propres
-    drawer.classList.remove('in-thread');
+    if (listView) listView.removeAttribute('style');
+    if (threadView) threadView.removeAttribute('style');
+  }
 
-    // Nettoie les styles forcés après une frame pour que le CSS normal reprenne
-    requestAnimationFrame(() => {
-      if (listView) listView.style.cssText = '';
-      if (threadView) threadView.style.cssText = '';
-    });
-
+  function openDrawer() {
+    if (!requireAuth()) return;
+    leaveCurrentThread();
+    $('dmDrawer').classList.add('open');
+    resetDrawerState();
     loadConversations();
   }
   function closeDrawer() {
@@ -14092,7 +14080,9 @@ const DM = (() => {
         else showToastDM('Erreur : ' + error.message, true);
         return;
       }
+      leaveCurrentThread();
       $('dmDrawer').classList.add('open');
+      resetDrawerState();
       await loadConversations();
       openThread(data, otherUserId);
     } catch (e) {
