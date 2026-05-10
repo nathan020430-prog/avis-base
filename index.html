@@ -3682,7 +3682,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 [data-theme="dark"] .dm-search input:focus{box-shadow:0 0 0 3px rgba(237,227,207,0.06)}
 
 /* ─── Liste conversations ─── */
-.dm-conv-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 0}
+.dm-conv-list{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 0;min-height:100px}
 .dm-conv-empty{
   padding:60px 32px;text-align:center;color:var(--ink-muted)
 }
@@ -13424,13 +13424,28 @@ const DM = (() => {
     leaveCurrentThread();
     $('dmDrawer').classList.add('open');
     showList();
-    // Force visibilité du list-view au cas où une transition l'aurait bloqué
+
+    // FORCE complète des styles des views (cas de transition figée / état corrompu)
+    const drawer = $('dmDrawer');
     const listView = document.querySelector('.dm-view--list');
+    const threadView = document.querySelector('.dm-view--thread');
     if (listView) {
-      listView.style.transform = '';
-      listView.style.opacity = '';
-      listView.style.visibility = '';
+      // Force liste visible
+      listView.style.cssText = 'transform:translateX(0)!important;opacity:1!important;visibility:visible!important;display:flex!important';
     }
+    if (threadView) {
+      // Force thread caché
+      threadView.style.cssText = 'transform:translateX(100%)!important;opacity:0!important;visibility:hidden!important';
+    }
+    // Re-applique les classes propres
+    drawer.classList.remove('in-thread');
+
+    // Nettoie les styles forcés après une frame pour que le CSS normal reprenne
+    requestAnimationFrame(() => {
+      if (listView) listView.style.cssText = '';
+      if (threadView) threadView.style.cssText = '';
+    });
+
     loadConversations();
   }
   function closeDrawer() {
