@@ -4193,6 +4193,343 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   .dm-conv-empty{padding:48px 24px 32px}
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   PROFILE EDIT MODAL — refonte propre
+   ═══════════════════════════════════════════════════════════════════════ */
+.profile-edit-modal{max-width:480px}
+.profile-edit-modal__lead{
+  font-size:0.88rem;color:var(--ink-muted);
+  margin-bottom:22px;line-height:1.5
+}
+.profile-edit-modal__avatar-row{
+  display:flex;align-items:center;gap:14px;
+  padding:14px;margin-bottom:22px;
+  background:var(--surface-alt);
+  border-radius:var(--rl)
+}
+.profile-edit-modal__avatar-preview{
+  width:60px;height:60px;border-radius:50%;
+  background:linear-gradient(135deg,#E8DCC4,#C9B89A);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff);font-size:1.5rem;font-weight:500;color:#3A2D1F;
+  border:1px solid var(--rule);flex-shrink:0;
+  background-size:cover;background-position:center
+}
+.profile-edit-modal__avatar-preview.has-img{font-size:0;color:transparent}
+.profile-edit-modal__avatar-info{flex:1;min-width:0}
+.profile-edit-modal__username{
+  font-family:var(--ff);font-size:1.1rem;font-weight:500;
+  color:var(--ink);margin-bottom:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.profile-edit-modal__hint{
+  font-size:0.76rem;color:var(--ink-muted);
+  font-style:italic;line-height:1.4
+}
+.profile-edit-modal__label{
+  display:block;margin-bottom:18px;
+  font-size:0.78rem;font-weight:700;
+  color:var(--ink);letter-spacing:0.02em;
+  text-transform:uppercase
+}
+.profile-edit-modal__label>span:first-child{
+  display:block;margin-bottom:6px
+}
+.profile-edit-modal__label textarea,
+.profile-edit-modal__label input{
+  width:100%;padding:10px 13px;
+  background:var(--bg);
+  border:1px solid var(--rule);
+  border-radius:var(--r);
+  font-size:0.92rem;font-family:var(--fs);color:var(--ink);
+  font-weight:400;text-transform:none;letter-spacing:0;
+  outline:none;
+  transition:border-color var(--tr),box-shadow var(--tr)
+}
+.profile-edit-modal__label textarea{
+  resize:vertical;min-height:80px;line-height:1.55
+}
+.profile-edit-modal__label textarea:focus,
+.profile-edit-modal__label input:focus{
+  border-color:var(--ink);
+  box-shadow:0 0 0 3px rgba(26,17,8,0.06)
+}
+[data-theme="dark"] .profile-edit-modal__label textarea:focus,
+[data-theme="dark"] .profile-edit-modal__label input:focus{
+  box-shadow:0 0 0 3px rgba(237,227,207,0.06)
+}
+.profile-edit-modal__label .profile-edit-modal__hint{
+  display:block;margin-top:5px;
+  text-transform:none;font-weight:400;letter-spacing:0
+}
+.profile-edit-modal__count{
+  display:block;margin-top:5px;
+  font-size:0.72rem;color:var(--ink-muted);
+  text-align:right;font-variant-numeric:tabular-nums;
+  text-transform:none;font-weight:400;letter-spacing:0
+}
+.profile-edit-modal__actions{
+  display:flex;gap:10px;justify-content:flex-end;
+  margin-top:24px;padding-top:18px;
+  border-top:1px solid var(--rule)
+}
+.profile-edit-modal__actions .btn{padding:9px 18px}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PUBLIC PROFILE — page profil style Instagram
+   ═══════════════════════════════════════════════════════════════════════ */
+.public-profile-modal{
+  max-width:880px;width:100%;
+  max-height:92vh;
+  padding:0;overflow:hidden;
+  display:flex;flex-direction:column
+}
+.public-profile-modal__close{
+  position:absolute;top:16px;right:16px;z-index:5;
+  background:rgba(253,250,243,0.92);
+  backdrop-filter:blur(6px);
+  width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--ink);
+  transition:all 0.2s ease
+}
+.public-profile-modal__close:hover{background:var(--ink);color:var(--bg)}
+.public-profile-modal__scroll{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch
+}
+
+/* Cover band (background ornement) */
+.public-profile__cover{
+  height:120px;
+  background:linear-gradient(135deg,var(--surface-alt) 0%,var(--surface) 50%,var(--accent-soft) 100%);
+  position:relative;
+  border-bottom:1px solid var(--rule)
+}
+.public-profile__cover::after{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle at 30% 50%, rgba(140,28,19,0.05) 0%, transparent 50%);
+  pointer-events:none
+}
+
+/* Header section */
+.public-profile__header{
+  padding:0 32px 24px;
+  position:relative;
+  margin-top:-46px
+}
+.public-profile__top{
+  display:flex;align-items:flex-end;
+  gap:24px;margin-bottom:18px
+}
+.public-profile__avatar{
+  width:120px;height:120px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff);font-size:2.6rem;font-weight:500;
+  border:4px solid var(--bg);
+  flex-shrink:0;overflow:hidden;
+  box-shadow:0 4px 16px rgba(26,17,8,0.12)
+}
+.public-profile__avatar img{width:100%;height:100%;object-fit:cover}
+.public-profile__id-block{
+  flex:1;min-width:0;
+  padding-bottom:10px
+}
+.public-profile__username-row{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin-bottom:6px
+}
+.public-profile__username{
+  font-family:var(--ff);font-size:1.7rem;font-weight:500;
+  color:var(--ink);letter-spacing:-0.01em;
+  line-height:1
+}
+.public-profile__level-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 11px;border-radius:100px;
+  font-size:0.74rem;font-weight:700;
+  background:var(--accent-soft);color:var(--accent);
+  border:1px solid rgba(140,28,19,0.2)
+}
+.public-profile__actions{
+  display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;
+  padding-bottom:10px
+}
+.public-profile__btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 18px;border-radius:22px;
+  font-size:0.86rem;font-weight:500;font-family:var(--fs);
+  cursor:pointer;
+  border:1px solid var(--rule);background:transparent;color:var(--ink);
+  transition:all 0.2s ease
+}
+.public-profile__btn:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.public-profile__btn--primary{
+  background:var(--accent);color:#FDFAF3;border-color:var(--accent);
+  box-shadow:0 2px 8px rgba(140,28,19,0.25)
+}
+.public-profile__btn--primary:hover{background:var(--accent-dark);border-color:var(--accent-dark);color:#FDFAF3}
+.public-profile__btn--active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.public-profile__btn svg{width:14px;height:14px;stroke-width:2}
+
+/* Bio + meta */
+.public-profile__bio{
+  font-size:0.95rem;line-height:1.6;color:var(--ink);
+  margin:4px 0 14px;max-width:600px;
+  white-space:pre-wrap;word-wrap:break-word
+}
+.public-profile__bio:empty{display:none}
+.public-profile__meta{
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  font-size:0.84rem;color:var(--ink-muted);
+  margin-bottom:8px
+}
+.public-profile__meta a{
+  color:var(--accent);text-decoration:none;
+  display:inline-flex;align-items:center;gap:5px
+}
+.public-profile__meta a:hover{text-decoration:underline;text-underline-offset:2px}
+.public-profile__meta svg{width:14px;height:14px}
+.public-profile__joined{display:inline-flex;align-items:center;gap:5px;font-style:italic}
+
+/* Stats row (Instagram style) */
+.public-profile__stats{
+  display:flex;gap:32px;flex-wrap:wrap;
+  padding:18px 32px;
+  background:var(--surface);
+  border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule)
+}
+.public-profile__stat{
+  display:flex;flex-direction:column;align-items:flex-start;
+  cursor:default
+}
+.public-profile__stat-num{
+  font-family:var(--ff);font-size:1.4rem;font-weight:500;
+  color:var(--ink);letter-spacing:-0.01em;line-height:1
+}
+.public-profile__stat-label{
+  font-size:0.72rem;color:var(--ink-muted);
+  text-transform:uppercase;letter-spacing:0.08em;
+  margin-top:4px;font-weight:600
+}
+
+/* Tabs */
+.public-profile__tabs{
+  display:flex;border-bottom:1px solid var(--rule);
+  padding:0 24px
+}
+.public-profile__tab{
+  padding:14px 18px;
+  font-size:0.82rem;font-weight:600;
+  color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.06em;
+  background:transparent;border:none;cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:all 0.2s ease;font-family:var(--fs)
+}
+.public-profile__tab:hover{color:var(--ink)}
+.public-profile__tab--active{color:var(--ink);border-bottom-color:var(--ink)}
+.public-profile__tab-count{
+  margin-left:6px;
+  font-family:var(--ff);font-weight:500;color:var(--ink-muted);
+  font-size:0.85rem;text-transform:none;letter-spacing:0
+}
+
+/* Articles grid */
+.public-profile__articles{
+  padding:24px 32px 40px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px
+}
+.public-profile__article{
+  display:flex;flex-direction:column;
+  background:var(--surface);
+  border:1px solid var(--rule);border-radius:var(--rl);
+  overflow:hidden;cursor:pointer;
+  transition:all 0.22s cubic-bezier(0.32,0.72,0,1);
+  position:relative
+}
+.public-profile__article:hover{
+  transform:translateY(-2px);
+  border-color:var(--ink);
+  box-shadow:0 8px 24px -8px rgba(26,17,8,0.18)
+}
+.public-profile__article-thumb{
+  aspect-ratio:16/10;
+  background:var(--surface-alt);
+  overflow:hidden;
+  border-bottom:1px solid var(--rule);
+  position:relative
+}
+.public-profile__article-thumb img{
+  width:100%;height:100%;object-fit:cover;display:block
+}
+.public-profile__article-thumb-placeholder{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff);font-size:2rem;color:var(--ink-muted);
+  background:var(--surface-alt)
+}
+.public-profile__article-status{
+  position:absolute;top:8px;left:8px;
+  padding:3px 8px;border-radius:2px;
+  font-size:0.62rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+  background:rgba(253,250,243,0.92);backdrop-filter:blur(4px);
+  color:var(--ink)
+}
+.public-profile__article-body{
+  padding:14px 16px 16px;flex:1;
+  display:flex;flex-direction:column;gap:6px
+}
+.public-profile__article-theme{
+  font-size:0.66rem;font-weight:700;letter-spacing:0.08em;
+  color:var(--accent);text-transform:uppercase
+}
+.public-profile__article-title{
+  font-family:var(--ff);font-size:1.04rem;font-weight:500;
+  line-height:1.3;color:var(--ink);letter-spacing:-0.01em;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+}
+.public-profile__article-meta{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  font-size:0.74rem;color:var(--ink-muted);margin-top:auto
+}
+
+/* Empty state articles */
+.public-profile__empty{
+  grid-column:1/-1;
+  padding:60px 32px;text-align:center;
+  color:var(--ink-muted)
+}
+.public-profile__empty svg{
+  width:48px;height:48px;margin:0 auto 14px;display:block;opacity:0.3
+}
+.public-profile__empty-title{
+  font-family:var(--ff);font-size:1.1rem;color:var(--ink);
+  margin-bottom:6px;font-weight:400
+}
+.public-profile__empty-sub{font-size:0.85rem;line-height:1.5}
+
+/* Loading state */
+.public-profile__loading{
+  padding:60px;text-align:center;color:var(--ink-muted);font-size:0.88rem
+}
+
+/* Mobile */
+@media(max-width:768px){
+  .public-profile-modal{max-width:100%;max-height:100vh;height:100vh;border-radius:0}
+  .public-profile__cover{height:90px}
+  .public-profile__header{padding:0 18px 18px;margin-top:-40px}
+  .public-profile__top{flex-direction:column;align-items:flex-start;gap:14px}
+  .public-profile__avatar{width:90px;height:90px;font-size:2rem;border-width:3px}
+  .public-profile__username{font-size:1.4rem}
+  .public-profile__actions{width:100%;padding-bottom:0}
+  .public-profile__btn{flex:1;justify-content:center}
+  .public-profile__stats{gap:22px;padding:14px 18px}
+  .public-profile__stat-num{font-size:1.2rem}
+  .public-profile__tabs{padding:0 12px}
+  .public-profile__articles{padding:18px;grid-template-columns:1fr 1fr;gap:12px}
+}
+
 </style>
 </head>
 <body>
@@ -5280,6 +5617,10 @@ body.is-mobile .notif-bell{width:32px;height:32px}
           <button class="dm-thread-menu" id="dmThreadMenu" aria-label="Options">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
             <div class="dm-thread-menu-popup" id="dmThreadMenuPopup">
+              <button class="dm-thread-menu-item" data-action="view-profile">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Voir le profil
+              </button>
               <button class="dm-thread-menu-item" data-action="archive">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
                 <span id="dmArchiveLabel">Archiver</span>
@@ -5352,6 +5693,44 @@ body.is-mobile .notif-bell{width:32px;height:32px}
     <div class="dm-report-card__actions">
       <button id="dmReportCancel">Annuler</button>
       <button class="primary" id="dmReportSubmit">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PUBLIC PROFILE MODAL — Page profil style Instagram
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="v8-backdrop" id="publicProfileBackdrop" style="display:none">
+  <div class="v8-modal public-profile-modal" role="dialog" aria-modal="true" aria-label="Profil utilisateur">
+    <button class="public-profile-modal__close" id="publicProfileClose" aria-label="Fermer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="public-profile-modal__scroll" id="publicProfileScroll">
+      <div class="public-profile__loading" id="publicProfileLoading">Chargement du profil…</div>
+      <div id="publicProfileContent" style="display:none">
+        <div class="public-profile__cover" id="publicProfileCover"></div>
+        <div class="public-profile__header">
+          <div class="public-profile__top">
+            <div class="public-profile__avatar" id="publicProfileAvatar"></div>
+            <div class="public-profile__id-block">
+              <div class="public-profile__username-row">
+                <h2 class="public-profile__username" id="publicProfileUsername">—</h2>
+                <span class="public-profile__level-badge" id="publicProfileLevel"></span>
+              </div>
+              <div class="public-profile__meta" id="publicProfileMeta"></div>
+            </div>
+            <div class="public-profile__actions" id="publicProfileActions"></div>
+          </div>
+          <div class="public-profile__bio" id="publicProfileBio"></div>
+        </div>
+        <div class="public-profile__stats" id="publicProfileStats"></div>
+        <div class="public-profile__tabs" id="publicProfileTabs">
+          <button class="public-profile__tab public-profile__tab--active" data-profile-tab="articles">
+            Articles <span class="public-profile__tab-count" id="publicProfileArticlesCount">0</span>
+          </button>
+        </div>
+        <div class="public-profile__articles" id="publicProfileArticles"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -6518,7 +6897,7 @@ function articleCardHtml(a, featured = false) {
       <h3 class="article-card__title">${titleHtml}</h3>
       ${subtitleHtml ? `<p class="article-card__subtitle">${subtitleHtml}</p>` : ''}
       <div class="article-card__footer">
-        <span class="article-card__author">
+        <span class="article-card__author" data-profile-uid="${a.authorId || ''}" title="Voir le profil" style="cursor:pointer">
           <span class="article-card__author-avatar">${initials}</span>
           <strong>${escapeHtml(author)}</strong>
           ${currentUser && a.authorId !== currentUser.id ? `<button class="follow-btn follow-btn--sm${typeof Follow!=='undefined'&&Follow.isFollowing(a.authorId)?' follow-btn--active':''}" data-follow-uid="${a.authorId}" aria-pressed="${typeof Follow!=='undefined'&&Follow.isFollowing(a.authorId)}" onclick="event.stopPropagation();Follow.toggle('${a.authorId}')">${typeof Follow!=='undefined'&&Follow.isFollowing(a.authorId)?'Suivi':'Suivre'}</button>` : ''}
@@ -6677,7 +7056,7 @@ function renderArticles() {
 
   grid.querySelectorAll('[data-article-slug]').forEach(c => {
     c.addEventListener('click', e => {
-      if (e.target.closest('[data-article-edit], [data-article-del]')) return;
+      if (e.target.closest('[data-article-edit], [data-article-del], [data-profile-uid], [data-follow-uid]')) return;
       openArticlePage(c.dataset.articleSlug);
     });
   });
@@ -6686,6 +7065,14 @@ function renderArticles() {
   });
   grid.querySelectorAll('[data-article-del]').forEach(b => {
     b.addEventListener('click', e => { e.stopPropagation(); deleteArticle(b.dataset.articleDel); });
+  });
+  // Profile click delegation (author name → openPublicProfile)
+  grid.querySelectorAll('[data-profile-uid]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const uid = el.dataset.profileUid;
+      if (uid && window.openPublicProfile) window.openPublicProfile(uid);
+    });
   });
 }
 
@@ -7048,8 +7435,8 @@ function renderArticlePage(a) {
     <h1 class="article-page__title">${escapeHtml(a.title)}</h1>
     ${a.subtitle ? `<p class="article-page__subtitle">${escapeHtml(a.subtitle)}</p>` : ''}
     <div class="article-page__byline">
-      <div class="article-page__byline-avatar">${initials}</div>
-      <div class="article-page__byline-info">
+      <div class="article-page__byline-avatar" data-profile-uid="${a.authorId || ''}" style="cursor:pointer" title="Voir le profil">${initials}</div>
+      <div class="article-page__byline-info" data-profile-uid="${a.authorId || ''}" style="cursor:pointer" title="Voir le profil">
         <div class="article-page__byline-name">${escapeHtml(a.authorUsername)}</div>
         <div class="article-page__byline-meta">${dateStr} · ${a.wordCount} mots · ${a.readingMinutes} min de lecture</div>
       </div>
@@ -7084,6 +7471,16 @@ function renderArticlePage(a) {
   document.getElementById('deleteArticleBtn')?.addEventListener('click', async () => {
     const ok = await deleteArticle(a.id);
     if (ok) closeModal('articlePageModal');
+  });
+  // Clic sur byline auteur → ouvrir profil
+  body.querySelectorAll('[data-profile-uid]').forEach(el => {
+    el.addEventListener('click', () => {
+      const uid = el.dataset.profileUid;
+      if (uid && window.openPublicProfile) {
+        closeModal('articlePageModal');
+        window.openPublicProfile(uid);
+      }
+    });
   });
   document.getElementById('sendReviewBtn')?.addEventListener('click', () => submitArticleForReview(a.id));
   document.getElementById('artLikeBtn')?.addEventListener('click', e => { heartPop(e.currentTarget); toggleVote('article', a.id, 1); });
@@ -9185,6 +9582,220 @@ function closeProfileEditor() {
   bd.style.display = 'none';
   document.body.style.overflow = '';
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// PUBLIC PROFILE — modal style Instagram avec articles de l'utilisateur
+// ═══════════════════════════════════════════════════════════════════════
+async function openPublicProfile(idOrUsername) {
+  if (!idOrUsername) return;
+  const bd = document.getElementById('publicProfileBackdrop');
+  if (!bd) return;
+  bd.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  document.getElementById('publicProfileLoading').style.display = 'block';
+  document.getElementById('publicProfileContent').style.display = 'none';
+
+  try {
+    // Détection : UUID = id, sinon username
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrUsername);
+    const q = supa.from('profiles').select('*');
+    const { data: profile, error } = isUuid ? await q.eq('id', idOrUsername).maybeSingle() : await q.eq('username', idOrUsername).maybeSingle();
+    if (error) throw error;
+    if (!profile) { showToast('Profil introuvable', true); closePublicProfile(); return; }
+
+    // Articles publiés par cet utilisateur
+    const { data: artData } = await supa.from('articles')
+      .select('id,slug,title,subtitle,cover_image,video_source_url,theme_slug,tone_slug,status,published_at,reads,word_count,reading_time_minutes,cited_sources,likes_count,comments_count,created_at')
+      .eq('author_id', profile.id)
+      .in('status', isAdmin() || currentUser?.id === profile.id ? ['draft','review','needs_changes','published','archived'] : ['published'])
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false });
+    const userArticles = artData || [];
+
+    // Followers / Following counts (si Follow module dispo)
+    let followersCount = 0, followingCount = 0, iFollow = false;
+    try {
+      const { count: fc1 } = await supa.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profile.id);
+      followersCount = fc1 || 0;
+      const { count: fc2 } = await supa.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profile.id);
+      followingCount = fc2 || 0;
+      if (currentUser && currentUser.id !== profile.id) {
+        const { data: fdata } = await supa.from('follows').select('id').eq('follower_id', currentUser.id).eq('following_id', profile.id).maybeSingle();
+        iFollow = !!fdata;
+      }
+    } catch(e) { /* table follows manquante = on ignore */ }
+
+    renderPublicProfile(profile, userArticles, { followersCount, followingCount, iFollow });
+  } catch (e) {
+    console.error('[openPublicProfile] error:', e);
+    showToast('Erreur : ' + (e?.message || e), true);
+    closePublicProfile();
+  }
+}
+
+function closePublicProfile() {
+  const bd = document.getElementById('publicProfileBackdrop');
+  if (!bd) return;
+  bd.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function renderPublicProfile(profile, userArticles, stats) {
+  document.getElementById('publicProfileLoading').style.display = 'none';
+  document.getElementById('publicProfileContent').style.display = 'block';
+
+  const isMe = currentUser && currentUser.id === profile.id;
+
+  // Avatar
+  const avatar = document.getElementById('publicProfileAvatar');
+  const initials = (profile.username || '?').slice(0, 2).toUpperCase();
+  if (profile.avatar_url) {
+    avatar.innerHTML = `<img src="${escapeHtml(profile.avatar_url)}" alt="${escapeHtml(profile.username)}" onerror="this.replaceWith(document.createTextNode('${escapeHtml(initials)}'))"/>`;
+    avatar.style.background = '';
+  } else {
+    // Gradient déterministe basé sur l'id
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const palettes = isDark
+      ? [['#3A2D1F','#5C4630','#E8DCC4'],['#3D2E1F','#7A5230','#F0D9B5'],['#3D1F1B','#7A3D32','#E8CCC7'],['#2D2618','#5C4B30','#D8D2C2'],['#252D1A','#4E5C30','#D4DCC4'],['#2D1A1A','#5C3030','#E0CFCF'],['#1A222D','#30495C','#C9D2D9'],['#2D261A','#5C4B30','#D9D2C4']]
+      : [['#E8DCC4','#B89968','#3A2D1F'],['#F0D9B5','#C9854A','#3A2718'],['#E8CCC7','#A85D52','#3D1F1B'],['#D8D2C2','#8C7B5F','#2D2618'],['#D4DCC4','#7A8C5F','#252D1A'],['#E0CFCF','#7E4F4F','#2D1A1A'],['#C9D2D9','#5A6F7E','#1A222D'],['#D9D2C4','#7E6F4F','#2D261A']];
+    let h = 0;
+    const key = profile.id || profile.username || '?';
+    for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
+    const p = palettes[Math.abs(h) % palettes.length];
+    avatar.innerHTML = escapeHtml(initials);
+    avatar.style.background = `linear-gradient(135deg,${p[0]} 0%,${p[1]} 100%)`;
+    avatar.style.color = p[2];
+  }
+
+  // Username + level
+  document.getElementById('publicProfileUsername').textContent = profile.username || 'Anonyme';
+  const lvl = typeof getUserLevel === 'function' ? getUserLevel(profile.credibility_score || 0) : null;
+  const lvlBadge = document.getElementById('publicProfileLevel');
+  if (lvl) {
+    lvlBadge.textContent = `${lvl.icon} ${lvl.label} · ${profile.credibility_score || 0}%`;
+    lvlBadge.style.display = 'inline-flex';
+  } else {
+    lvlBadge.style.display = 'none';
+  }
+
+  // Bio
+  const bioEl = document.getElementById('publicProfileBio');
+  bioEl.textContent = profile.bio || '';
+
+  // Meta : lien social, date d'inscription
+  const meta = document.getElementById('publicProfileMeta');
+  const joinedDate = profile.created_at ? new Date(profile.created_at) : null;
+  const joinedStr = joinedDate ? joinedDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : '';
+  let metaHtml = '';
+  if (profile.social_link) {
+    const domain = (() => { try { return new URL(profile.social_link).hostname.replace(/^www\./, ''); } catch { return profile.social_link; } })();
+    metaHtml += `<a href="${escapeHtml(profile.social_link)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>${escapeHtml(domain)}</a>`;
+  }
+  if (joinedStr) metaHtml += `<span class="public-profile__joined"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Membre depuis ${joinedStr}</span>`;
+  meta.innerHTML = metaHtml;
+
+  // Actions (Suivre / Message / Modifier)
+  const actions = document.getElementById('publicProfileActions');
+  if (isMe) {
+    actions.innerHTML = `<button class="public-profile__btn public-profile__btn--primary" id="publicProfileEditBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Modifier mon profil</button>`;
+    document.getElementById('publicProfileEditBtn').addEventListener('click', () => { closePublicProfile(); openProfileEditor(); });
+  } else if (currentUser) {
+    actions.innerHTML = `
+      <button class="public-profile__btn ${stats.iFollow ? 'public-profile__btn--active' : 'public-profile__btn--primary'}" id="publicProfileFollowBtn" data-uid="${profile.id}">
+        ${stats.iFollow ? '✓ Suivi' : '+ Suivre'}
+      </button>
+      <button class="public-profile__btn" id="publicProfileMsgBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Message
+      </button>`;
+    document.getElementById('publicProfileFollowBtn')?.addEventListener('click', async () => {
+      if (typeof Follow !== 'undefined' && Follow.toggle) {
+        await Follow.toggle(profile.id);
+        // Re-render après toggle
+        openPublicProfile(profile.id);
+      }
+    });
+    document.getElementById('publicProfileMsgBtn')?.addEventListener('click', () => {
+      closePublicProfile();
+      if (window.openDM) window.openDM(profile.id);
+    });
+  } else {
+    actions.innerHTML = `<button class="public-profile__btn public-profile__btn--primary" onclick="openAuthModal('login')">Se connecter pour interagir</button>`;
+  }
+
+  // Stats
+  const articlesCount = userArticles.filter(a => a.status === 'published').length;
+  document.getElementById('publicProfileStats').innerHTML = `
+    <div class="public-profile__stat">
+      <span class="public-profile__stat-num">${articlesCount}</span>
+      <span class="public-profile__stat-label">Article${articlesCount > 1 ? 's' : ''}</span>
+    </div>
+    <div class="public-profile__stat">
+      <span class="public-profile__stat-num">${profile.credibility_score || 0}<span style="font-size:0.7em;color:var(--ink-muted)">%</span></span>
+      <span class="public-profile__stat-label">Basitude</span>
+    </div>
+    <div class="public-profile__stat">
+      <span class="public-profile__stat-num">${stats.followersCount}</span>
+      <span class="public-profile__stat-label">Abonné${stats.followersCount > 1 ? 's' : ''}</span>
+    </div>
+    <div class="public-profile__stat">
+      <span class="public-profile__stat-num">${stats.followingCount}</span>
+      <span class="public-profile__stat-label">Abonnement${stats.followingCount > 1 ? 's' : ''}</span>
+    </div>
+  `;
+
+  document.getElementById('publicProfileArticlesCount').textContent = articlesCount;
+
+  // Grid articles
+  const grid = document.getElementById('publicProfileArticles');
+  if (!userArticles.length) {
+    grid.innerHTML = `
+      <div class="public-profile__empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div class="public-profile__empty-title">${isMe ? 'Tu n\'as pas encore publié' : 'Aucun article pour l\'instant'}</div>
+        <div class="public-profile__empty-sub">${isMe ? 'Écris ton premier article et partage-le avec la communauté.' : 'Cet utilisateur n\'a pas encore publié d\'article.'}</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = userArticles.map(a => {
+    const slug = a.slug;
+    const ytId = (typeof extractYoutubeId === 'function') ? extractYoutubeId(a.video_source_url) : null;
+    const thumbUrl = a.cover_image || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : null);
+    const thumb = thumbUrl
+      ? `<img src="${escapeHtml(thumbUrl)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'public-profile__article-thumb-placeholder',textContent:'AB'}))"/>`
+      : `<div class="public-profile__article-thumb-placeholder">AB</div>`;
+    const themeLabel = typeof getThemeLabel === 'function' ? getThemeLabel(a.theme_slug) : a.theme_slug;
+    const statusBadge = a.status !== 'published' ? `<span class="public-profile__article-status">${typeof statusArticleLabel === 'function' ? statusArticleLabel(a.status) : a.status}</span>` : '';
+    return `
+      <article class="public-profile__article" data-article-slug="${escapeHtml(slug)}">
+        <div class="public-profile__article-thumb">${statusBadge}${thumb}</div>
+        <div class="public-profile__article-body">
+          ${themeLabel ? `<div class="public-profile__article-theme">${escapeHtml(themeLabel)}</div>` : ''}
+          <h3 class="public-profile__article-title">${escapeHtml(a.title || 'Sans titre')}</h3>
+          <div class="public-profile__article-meta">
+            <span>📖 ${a.reading_time_minutes || 1} min</span>
+            ${a.reads > 0 ? `<span>👁 ${a.reads}</span>` : ''}
+            ${a.likes_count > 0 ? `<span>❤ ${a.likes_count}</span>` : ''}
+          </div>
+        </div>
+      </article>`;
+  }).join('');
+
+  // Wire up clicks
+  grid.querySelectorAll('[data-article-slug]').forEach(card => {
+    card.addEventListener('click', () => {
+      closePublicProfile();
+      if (typeof openArticlePage === 'function') openArticlePage(card.dataset.articleSlug);
+    });
+  });
+}
+
+// Expose globalement
+window.openProfileModal = openPublicProfile;
+window.openPublicProfile = openPublicProfile;
 async function saveProfile() {
   if (!currentUser || !currentProfile) { showToast('Session expirée', true); return; }
   const bio = document.getElementById('profileEditBio').value.trim();
@@ -9778,6 +10389,11 @@ function bindV09Handlers() {
   document.getElementById('profileEditSave')?.addEventListener('click', saveProfile);
   document.getElementById('profileEditBackdrop')?.addEventListener('click', e => {
     if (e.target.id === 'profileEditBackdrop') closeProfileEditor();
+  });
+  // Public profile modal — wiring
+  document.getElementById('publicProfileClose')?.addEventListener('click', closePublicProfile);
+  document.getElementById('publicProfileBackdrop')?.addEventListener('click', e => {
+    if (e.target.id === 'publicProfileBackdrop') closePublicProfile();
   });
   document.getElementById('navProfileEditBtn')?.addEventListener('click', () => {
     if (typeof closeNavMenu === 'function') closeNavMenu();
@@ -13196,6 +13812,10 @@ const DM = (() => {
         if (a === 'block') toggleBlock();
         else if (a === 'report') openReportModal();
         else if (a === 'archive') toggleArchive();
+        else if (a === 'view-profile' && currentOther && window.openPublicProfile) {
+          closeDrawer();
+          window.openPublicProfile(currentOther.id);
+        }
       });
     });
 
