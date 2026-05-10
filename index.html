@@ -3750,6 +3750,16 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 }
 .dm-conv-item.unread .dm-conv-preview{color:var(--ink);font-weight:500}
 .dm-conv-unread-dot{display:none}
+.dm-conv-item.archived{opacity:0.85}
+.dm-conv-item.archived.unread{opacity:1}
+.dm-conv-archived-tag{
+  display:inline-block;margin-left:6px;
+  padding:1px 7px;border-radius:8px;
+  font-size:0.58rem;font-weight:700;letter-spacing:0.04em;
+  text-transform:uppercase;
+  background:var(--surface-alt);color:var(--ink-muted);
+  vertical-align:middle
+}
 
 /* ─── Thread header ─── */
 .dm-thread-header{
@@ -13426,41 +13436,86 @@ const DM = (() => {
   }
 
   async function loadConversations() {
-    if (!supa || !currentUser) return;
+    if (!supa || !currentUser) { console.warn('[DM list] pas de supa ou pas connecté'); return; }
     try {
+      console.log('[DM list] fetching dm_list_conversations…');
       const { data, error } = await supa.rpc('dm_list_conversations');
-      if (error) throw error;
+      console.log('[DM list] response:', { count: data?.length, error });
+      if (error) {
+        console.error('[DM list] RPC error:', error);
+        // Toast visible pour informer l'utilisateur
+        if (typeof showToast === 'function') {
+          showToast('Erreur chargement DM : ' + error.message, true);
+        }
+        // On garde l'ancienne liste pour ne pas tout perdre
+        return;
+      }
       conversations = data || [];
+      console.log('[DM list] conversations:', conversations);
       renderConversationList();
       updateUnreadBadge();
     } catch (e) {
-      console.warn('DM loadConversations error:', e.message);
+      console.error('[DM list] exception:', e);
+      if (typeof showToast === 'function') showToast('Erreur DM : ' + (e?.message || e), true);
     }
   }
 
   function renderConversationList() {
     const list = $('dmConvList');
-    const empty = $('dmConvEmpty');
-    if (!list) return;
+    if (!list) { console.warn('[DM render] dmConvList introuvable'); return; }
+    let empty = $('dmConvEmpty');
     const search = ($('dmSearchInput')?.value || '').trim().toLowerCase();
-    const filtered = conversations
-      .filter(c => !c.is_archived)
-      .filter(c => !search || (c.other_username || '').toLowerCase().includes(search) || (c.last_message_preview || '').toLowerCase().includes(search));
+
+    // Filtre : on garde les non-archivées + celles archivées QUI ont des non-lus
+    // (sinon un message reçu dans une conv archivée disparaîtrait de la vue)
+    const visible = conversations.filter(c => !c.is_archived || c.unread_count > 0);
+    const filtered = search
+      ? visible.filter(c => (c.other_username || '').toLowerCase().includes(search)
+        || (c.last_message_preview || '').toLowerCase().includes(search))
+      : visible;
+
+    console.log('[DM render]', { total: conversations.length, visible: visible.length, filtered: filtered.length, archived: conversations.filter(c => c.is_archived).length });
 
     if (!filtered.length) {
+      // Recrée l'empty state s'il a été supprimé du DOM
       list.innerHTML = '';
-      list.appendChild(empty || (() => { const d=document.createElement('div'); d.className='dm-conv-empty'; d.textContent='Aucune conversation.'; return d; })());
+      if (!empty || !document.body.contains(empty)) {
+        const newEmpty = document.createElement('div');
+        newEmpty.className = 'dm-conv-empty';
+        newEmpty.id = 'dmConvEmpty';
+        if (search) {
+          newEmpty.innerHTML = `
+            <div class="dm-empty-illu"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="28" cy="28" r="14"/><line x1="38" y1="38" x2="48" y2="48"/></svg></div>
+            <div class="dm-empty-title">Aucun résultat</div>
+            <div class="dm-empty-sub">Aucune conversation ne correspond à <strong>"${escapeHtmlDM(search)}"</strong>.</div>`;
+        } else if (conversations.length > 0) {
+          // Toutes les conv sont archivées sans unread
+          newEmpty.innerHTML = `
+            <div class="dm-empty-illu"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><polyline points="56 16 56 56 8 56 8 16"/><rect x="6" y="6" width="52" height="10"/><line x1="26" y1="32" x2="38" y2="32"/></svg></div>
+            <div class="dm-empty-title">Tout est archivé</div>
+            <div class="dm-empty-sub">Toutes tes conversations sont archivées. Elles réapparaîtront automatiquement quand tu recevras un nouveau message.</div>`;
+        } else {
+          newEmpty.innerHTML = `
+            <div class="dm-empty-illu"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M52 36c0 4.4-3.6 8-8 8H22l-8 8V20c0-4.4 3.6-8 8-8h22c4.4 0 8 3.6 8 8v16z"/><line x1="22" y1="24" x2="40" y2="24" opacity="0.5"/><line x1="22" y1="32" x2="34" y2="32" opacity="0.5"/></svg><span class="dm-empty-dot"></span></div>
+            <div class="dm-empty-title">Ta boîte est vide</div>
+            <div class="dm-empty-sub">Ouvre un article et clique sur <strong>Message</strong> à côté du nom d'un auteur pour démarrer une conversation.</div>`;
+        }
+        list.appendChild(newEmpty);
+      } else {
+        list.appendChild(empty);
+      }
       return;
     }
-    if (empty) empty.remove();
+
     list.innerHTML = filtered.map(c => {
       const unread = c.unread_count > 0;
+      const archived = c.is_archived;
       return `
-        <div class="dm-conv-item${unread ? ' unread' : ''}" data-conv-id="${c.conversation_id}" data-other-id="${c.other_user_id}">
+        <div class="dm-conv-item${unread ? ' unread' : ''}${archived ? ' archived' : ''}" data-conv-id="${c.conversation_id}" data-other-id="${c.other_user_id}" title="${archived ? 'Conversation archivée — réapparue car nouveau message' : ''}">
           <div class="dm-conv-avatar" style="${avatarStyle({ id: c.other_user_id, username: c.other_username })}">${avatarHtml({ username: c.other_username, avatar_url: c.other_avatar_url })}</div>
           <div class="dm-conv-meta">
             <div class="dm-conv-row1">
-              <span class="dm-conv-name">${escapeHtmlDM(c.other_username || 'Utilisateur')}</span>
+              <span class="dm-conv-name">${escapeHtmlDM(c.other_username || 'Utilisateur')}${archived ? ' <span class="dm-conv-archived-tag">archivée</span>' : ''}</span>
               <span class="dm-conv-time">${formatTime(c.last_message_at)}</span>
             </div>
             <div class="dm-conv-preview">${escapeHtmlDM(c.last_message_preview || '— Démarrer la conversation —')}</div>
