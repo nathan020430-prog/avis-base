@@ -3651,15 +3651,17 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 .dm-drawer.in-thread .dm-drawer__back{display:inline-flex}
 
 /* ─── Body 2 vues ─── */
+/* v0.11.3 — toggle display simple (ancien système absolute+transform+visibility
+   trop fragile, cassait l'affichage de la liste après transitions interrompues) */
 .dm-drawer__body{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;position:relative}
 .dm-view{
-  position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);
-  transition:transform 0.32s cubic-bezier(0.32,0.72,0,1),opacity 0.25s ease
+  display:none;flex-direction:column;background:var(--bg);
+  height:100%;width:100%;min-height:0
 }
-.dm-view--list{transform:translateX(0)}
-.dm-view--thread{transform:translateX(100%);visibility:hidden}
-.dm-drawer.in-thread .dm-view--list{transform:translateX(-25%);opacity:0;visibility:hidden}
-.dm-drawer.in-thread .dm-view--thread{transform:translateX(0);visibility:visible}
+.dm-view--list{display:flex}
+.dm-view--thread{display:none}
+.dm-drawer.in-thread .dm-view--list{display:none}
+.dm-drawer.in-thread .dm-view--thread{display:flex}
 
 /* ─── Search ─── */
 .dm-search{padding:14px 20px;border-bottom:1px solid var(--rule);position:relative}
