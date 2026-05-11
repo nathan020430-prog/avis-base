@@ -10555,7 +10555,7 @@ const Follow = {
             let hint = '';
             if (error.code === '42P01') hint = ' (table follows manquante — exécute v0.10.0-migration.sql)';
             else if (error.code === '23505') hint = ' (déjà suivi)';
-            else if (error.code === '23514') hint = ' (auto-follow non autorisé)';
+            else if (error.code === '23514') hint = " (contrainte CHECK — exécute v0.11.3-fix-notif-target-type-profile.sql si tu n'as pas encore appliqué le fix)";
             else if (error.code === '42501') hint = ' (RLS — session expirée ?)';
             showToast('Échec : ' + error.message + hint, true);
           }

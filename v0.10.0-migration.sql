@@ -91,7 +91,7 @@ create trigger trg_on_follow_change
   for each row execute function on_follow_change();
 
 -- ┌─────────────────────────────────────────────────────────────────┐
--- │ 5. Ajouter 'follow' au type de notification autorisé            │
+-- │ 5. Étendre les contraintes CHECK sur notifications              │
 -- └─────────────────────────────────────────────────────────────────┘
 -- La contrainte check sur notifications.type doit inclure 'follow'
 do $$
@@ -99,6 +99,16 @@ begin
   alter table notifications drop constraint if exists notifications_type_check;
   alter table notifications add constraint notifications_type_check
     check (type in ('like','comment','reply','article_validated','follow'));
+exception when others then null;
+end $$;
+
+-- La contrainte check sur notifications.target_type doit inclure 'profile'
+-- (le trigger on_follow_change INSERT avec target_type='profile')
+do $$
+begin
+  alter table notifications drop constraint if exists notifications_target_type_check;
+  alter table notifications add constraint notifications_target_type_check
+    check (target_type in ('article','clip','comment','profile'));
 exception when others then null;
 end $$;
 
