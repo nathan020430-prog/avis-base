@@ -14188,8 +14188,11 @@ const DM = (() => {
         else if (a === 'report') openReportModal();
         else if (a === 'archive') toggleArchive();
         else if (a === 'view-profile' && currentOther && window.openPublicProfile) {
+          // capture l'id AVANT closeDrawer() : il appelle leaveCurrentThread()
+          // qui met currentOther à null, donc on perdrait l'id sinon
+          const otherId = currentOther.id;
           closeDrawer();
-          window.openPublicProfile(currentOther.id);
+          window.openPublicProfile(otherId);
         }
       });
     });
