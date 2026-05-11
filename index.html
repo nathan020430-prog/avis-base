@@ -3656,12 +3656,12 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 .dm-drawer__body{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;position:relative}
 .dm-view{
   display:none;flex-direction:column;background:var(--bg);
-  height:100%;width:100%;min-height:0
+  min-height:0;width:100%
 }
-.dm-view--list{display:flex}
+.dm-view--list{display:flex;flex:1}
 .dm-view--thread{display:none}
 .dm-drawer.in-thread .dm-view--list{display:none}
-.dm-drawer.in-thread .dm-view--thread{display:flex}
+.dm-drawer.in-thread .dm-view--thread{display:flex;flex:1}
 
 /* ─── Search ─── */
 .dm-search{padding:14px 20px;border-bottom:1px solid var(--rule);position:relative}
@@ -3782,10 +3782,11 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 }
 .dm-thread-status:empty{display:none}
 .dm-thread-status.typing{color:var(--accent);font-style:italic}
+.dm-thread-menu-wrap{position:relative;flex-shrink:0}
 .dm-thread-menu{
   width:34px;height:34px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--ink-muted);position:relative;
+  cursor:pointer;color:var(--ink-muted);
   background:transparent;border:1px solid transparent;
   transition:all 0.2s ease
 }
@@ -5802,9 +5803,11 @@ body.is-mobile .notif-bell{width:32px;height:32px}
             <div class="dm-thread-name" id="dmThreadName">—</div>
             <div class="dm-thread-status" id="dmThreadStatus"></div>
           </div>
-          <button class="dm-thread-menu" id="dmThreadMenu" aria-label="Options">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-            <div class="dm-thread-menu-popup" id="dmThreadMenuPopup">
+          <div class="dm-thread-menu-wrap">
+            <button class="dm-thread-menu" id="dmThreadMenu" aria-label="Options" aria-haspopup="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            </button>
+            <div class="dm-thread-menu-popup" id="dmThreadMenuPopup" role="menu">
               <button class="dm-thread-menu-item" data-action="view-profile">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 Voir le profil
@@ -5822,7 +5825,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
                 Signaler
               </button>
             </div>
-          </button>
+          </div>
         </div>
 
         <div class="dm-messages-wrap">
