@@ -36,7 +36,8 @@
 
 <!-- iOS — installation home screen -->
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Avis Basé"/>
 <link rel="apple-touch-icon" href="/icon.svg"/>
 <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png"/>
@@ -3673,7 +3674,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 .dm-search input{
   width:100%;height:40px;padding:0 14px 0 38px;
   background:var(--surface);border:1px solid var(--rule);
-  border-radius:24px;font-size:0.86rem;color:var(--ink);
+  border-radius:24px;font-size:max(16px,0.86rem);color:var(--ink);
   font-family:var(--fs);
   transition:border-color 0.2s ease,box-shadow 0.2s ease,background 0.2s ease
 }
@@ -3923,7 +3924,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   flex:1;resize:none;min-height:40px;max-height:120px;
   padding:10px 14px;
   background:var(--surface);border:1px solid var(--rule);
-  border-radius:22px;font-size:0.93rem;font-family:var(--fs);
+  border-radius:22px;font-size:max(16px,0.93rem);font-family:var(--fs);
   color:var(--ink);line-height:1.45;
   transition:border-color 0.2s ease,box-shadow 0.2s ease,background 0.2s ease
 }
@@ -4194,16 +4195,20 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 @media(max-width:768px){
   .dm-drawer__panel{width:100vw;border-left:none}
   .dm-msg{max-width:84%}
-  .dm-drawer__header{padding:14px 16px 12px}
+  .dm-drawer__header{padding:14px 16px 12px;padding-top:max(14px,env(safe-area-inset-top))}
   .dm-drawer__title{font-size:1.2rem}
   .dm-search{padding:12px 16px}
   .dm-search::before{left:28px}
   .dm-conv-item{padding:13px 16px;gap:12px}
   .dm-thread-header{padding:10px 14px}
   .dm-messages{padding:14px 12px 4px}
-  .dm-compose{padding:10px 12px 12px}
+  /* Compose : safe-area-bottom pour ne pas être coupé par le home indicator iPhone */
+  .dm-compose{padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px))}
   .dm-thread-empty{padding:32px 24px}
   .dm-conv-empty{padding:48px 24px 32px}
+  /* Touch targets 44×44 (Apple HIG / Material Design) sur mobile */
+  .dm-drawer__close,.dm-drawer__back,.dm-thread-menu{width:44px;height:44px}
+  .dm-compose__attach,.dm-compose__send{width:44px;height:44px}
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
