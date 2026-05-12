@@ -4722,8 +4722,6 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   <div class="masthead__top">
     <div class="masthead__top-left">
       <span class="masthead__date" id="mhDate">—</span>
-      <span class="masthead__ornament">·</span>
-      <span id="mhVolume">Vol. 1</span>
     </div>
     <div class="masthead__top-right">
       <span class="sync-ind sync-ind--minimal" id="syncInd" title="État de la connexion"><span class="sync-dot off" id="syncDot"></span><span id="syncLabel" class="sr-only">Hors ligne</span></span>
@@ -4916,7 +4914,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 
   <div class="masthead__meta">
     <span id="mhStatsLeft">— articles publiés</span>
-    <span class="masthead__meta-center">Chaque article cite ses sources.</span>
+    <span class="masthead__meta-center">L'actualité expliquée et vérifiée — à rebours du scroll infini.</span>
     <span>avis-base.com</span>
   </div>
   <div class="notif-backdrop" id="notifBackdrop"></div>
@@ -11389,12 +11387,6 @@ function hydrateMasthead() {
     const dateStr = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     const dEl = document.getElementById('mhDate');
     if (dEl) dEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-    const startDate = new Date('2025-09-01');
-    const weeks = Math.max(1, Math.floor((now - startDate) / (7 * 86400000)));
-    const vol = 1 + Math.floor(weeks / 52);
-    const num = (weeks % 52) || 52;
-    const vEl = document.getElementById('mhVolume');
-    if (vEl) vEl.textContent = `Vol. ${vol} — N° ${num}`;
   } catch(e) {}
 }
 function refreshMastheadStats() {
