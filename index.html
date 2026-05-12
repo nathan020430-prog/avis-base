@@ -234,23 +234,27 @@ img{max-width:100%;display:block}
 .masthead__meta{
   padding:10px 0 12px;
   border-top:1px solid var(--rule);
-  display:flex;align-items:center;justify-content:space-between;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
   font-size:0.66rem;
   color:var(--ink-muted);
   font-weight:600;
   letter-spacing:0.1em;
   text-transform:uppercase;
   gap:14px;
-  flex-wrap:wrap;
   animation:fadeUp 0.6s 0.7s both;
 }
+.masthead__meta>*:first-child{justify-self:start}
+.masthead__meta>*:last-child{justify-self:end}
 .masthead__meta-center{
   font-style:italic;font-family:var(--ff);
   font-size:0.78rem;font-weight:400;
   letter-spacing:0;text-transform:none;
   color:var(--ink-light);
-  flex:1;text-align:center;min-width:200px;
-  opacity:0.85
+  text-align:center;
+  opacity:0.85;
+  white-space:nowrap
 }
 
 /* Top-right utility actions in masthead */
