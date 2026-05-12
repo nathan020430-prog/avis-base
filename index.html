@@ -204,9 +204,9 @@ img{max-width:100%;display:block}
 .masthead__ornament{color:var(--rule);font-size:0.8rem}
 .masthead__date{font-variant-numeric:tabular-nums;text-transform:capitalize}
 .masthead__center{
-  padding:18px 0 14px;
+  padding:14px 0 10px;
   display:flex;flex-direction:column;align-items:center;
-  gap:8px;
+  gap:6px;
   text-align:center;
 }
 .masthead__tagline-top{
@@ -263,9 +263,10 @@ img{max-width:100%;display:block}
 }
 .masthead__meta-center{
   font-style:italic;font-family:var(--ff);
-  font-size:0.74rem;
-  color:var(--ink-muted);
+  font-size:0.72rem;
+  color:var(--ink-light);
   flex:1;text-align:center;min-width:200px;
+  opacity:0.85
 }
 
 /* Top-right utility actions in masthead */
@@ -1220,6 +1221,9 @@ body.admin .card__admin{display:flex}
   display:flex;align-items:center;justify-content:center;padding:0 5px;
   border:2px solid var(--bg);
 }
+
+/* Accessibilité : texte visuellement caché mais lu par les screen readers */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
 /* Sync indicator */
 .sync-ind{
@@ -4223,18 +4227,15 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   display:flex;align-items:center;gap:4px;flex-wrap:wrap
 }
 
-/* Sync indicator — version discrète (juste un point qui pulse + label en petit) */
+/* Sync indicator — minimaliste : juste un petit point qui pulse, sans label visible */
 .masthead__top-right .sync-ind{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 12px;margin-right:6px;
-  background:transparent;border:1px solid var(--rule);
-  border-radius:100px;
-  font-size:0.66rem;font-weight:600;letter-spacing:0.04em;
-  text-transform:uppercase;color:var(--ink-muted);
-  font-family:var(--fs)
+  display:inline-flex;align-items:center;
+  padding:6px;margin-right:2px;
+  background:transparent;border:none;
+  cursor:default
 }
 .masthead__top-right .sync-dot{
-  width:6px;height:6px;border-radius:50%;
+  width:7px;height:7px;border-radius:50%;
   background:var(--success);
   box-shadow:0 0 0 0 rgba(45,122,62,0.35);
   animation:syncPulse 2.4s ease-in-out infinite
@@ -4739,11 +4740,9 @@ body.is-mobile .notif-bell{width:32px;height:32px}
       <span class="masthead__date" id="mhDate">—</span>
       <span class="masthead__ornament">·</span>
       <span id="mhVolume">Vol. 1</span>
-      <span class="masthead__ornament">·</span>
-      <span class="beta-tag">v0.10.0</span>
     </div>
     <div class="masthead__top-right">
-      <span class="sync-ind" id="syncInd"><span class="sync-dot off" id="syncDot"></span><span id="syncLabel">Hors ligne</span></span>
+      <span class="sync-ind sync-ind--minimal" id="syncInd" title="État de la connexion"><span class="sync-dot off" id="syncDot"></span><span id="syncLabel" class="sr-only">Hors ligne</span></span>
 
       <!-- V0.9.7 — Cloche notifications (visible si connecté) -->
       <div class="notif-wrap" id="notifWrap" style="display:none">
@@ -4927,14 +4926,13 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   </div>
 
   <div class="masthead__center">
-    <div class="masthead__tagline-top">Média collaboratif</div>
     <h1 class="masthead__title" id="mhTitle">Avis <em>Basé</em></h1>
     <div class="masthead__sub">Le média qui source tout</div>
   </div>
 
   <div class="masthead__meta">
     <span id="mhStatsLeft">— articles publiés</span>
-    <span class="masthead__meta-center">« Chaque article part d'une vidéo longue, détaille le contexte et cite ses sources. »</span>
+    <span class="masthead__meta-center">Chaque article cite ses sources.</span>
     <span>avis-base.com</span>
   </div>
   <div class="notif-backdrop" id="notifBackdrop"></div>
@@ -5084,7 +5082,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.84-.1z"/></svg>
         @avis_base.nth
       </a>
-      <p class="footer__version">© <span id="yr"></span> · Beta · v0.10.0 — Broadsheet edition · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a></p>
+      <p class="footer__version">© <span id="yr"></span> · Beta · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a></p>
     </div>
   </div>
 </footer>
