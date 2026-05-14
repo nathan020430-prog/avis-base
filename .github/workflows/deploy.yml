@@ -1,0 +1,40 @@
+name: Deploy site (Cloudflare Pages)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - '_headers'
+      - 'manifest.json'
+      - 'public/**'
+      - 'assets/**'
+      - '*.png'
+      - '*.svg'
+      - '*.ico'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Publier sur Cloudflare Pages
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cloudflare Pages Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name=avis-base --branch=main --commit-dirty=true
+
+      - name: Ping de validation
+        run: |
+          sleep 8
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://avis-base.com/)
+          echo "Statut HTTP avis-base.com : $STATUS"
+          [ "$STATUS" = "200" ] || exit 1
