@@ -1,0 +1,33 @@
+name: Sanity check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vérifier qu'aucune clé service_role n'est commit
+        run: |
+          if grep -rn "service_role" --include="*.html" --include="*.js" --include="*.json" .; then
+            echo "::error::Clé service_role détectée dans le code — refusé"
+            exit 1
+          fi
+
+      - name: Vérifier la taille d'index.html (< 2 MB)
+        run: |
+          size=$(stat -c%s index.html)
+          echo "index.html : $size octets"
+          [ "$size" -lt 2097152 ] || (echo "::error::index.html dépasse 2MB" && exit 1)
+
+      - name: Vérifier les migrations SQL idempotentes
+        run: |
+          for f in *.sql; do
+            if [ -f "$f" ]; then
+              head -3 "$f"
+              echo "---"
+            fi
+          done
