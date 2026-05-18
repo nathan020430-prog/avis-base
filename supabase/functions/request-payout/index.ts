@@ -68,6 +68,28 @@ serve(async (req) => {
     return jsonResponse({ error: 'below_threshold', balance_cents: bal.balance_cents }, 400);
   }
 
+  // v0.18.0 Phase 2 — Vérifier la certification "Auteur rémunérable"
+  // Cumul de 4 critères : KYC, ≥3 articles publiés, ≥30j ancienneté, score ≥50.
+  // On utilise la RPC pour avoir une source de vérité unique côté SQL.
+  const { data: certData, error: certErr } = await supa.rpc('check_contributor_certification', { p_user_id: userId });
+  if (certErr) {
+    // Si la RPC n'existe pas (migration Phase 2 pas appliquée), on continue
+    // pour ne pas bloquer le flow legacy. À durcir en prod après stabilisation.
+    console.warn('[request-payout] cert RPC unavailable, allowing payout (migration not applied?)', certErr.message);
+  } else if (certData && certData.certified !== true) {
+    const missing: string[] = [];
+    const m = certData.milestones_met || {};
+    if (!m.articles_published_3) missing.push('articles_published_3');
+    if (!m.account_age_30d) missing.push('account_age_30d');
+    if (!m.credibility_50) missing.push('credibility_50');
+    if (!m.kyc_completed) missing.push('kyc_completed');
+    return jsonResponse({
+      error: 'not_certified',
+      missing_criteria: missing,
+      criteria: certData.criteria || {},
+    }, 403);
+  }
+
   // ---- vérifier qu'il n'y a pas de virement en attente ----
   const { data: pendingPay } = await supa
     .from('contributor_payments')

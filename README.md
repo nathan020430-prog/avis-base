@@ -88,7 +88,8 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 8. `v0.11.2-dm-fix-rls.sql` (V0.11.2 — correctif récursion RLS dm_participants)
 9. `v0.11.3-fix-notif-target-type-profile.sql` (V0.11.3 — contrainte CHECK notif target_type profile)
 10. `v0.16.0-migration.sql` (V0.16.0 — user_blocks + account_deletion_requests pour Apple App Store)
-11. **`v0.17.0-financement-migration.sql`** (V0.17.0 — économie collaborative : 9 tables + 4 vues + 4 RPCs + RLS strict) ← **NOUVEAU**
+11. `v0.17.0-financement-migration.sql` (V0.17.0 — économie collaborative : 9 tables + 4 vues + 4 RPCs + RLS strict)
+12. **`v0.18.0-trust-migration.sql`** (V0.18.0 Phase 2 — certification rémunérable : `contributor_certifications` + 2 RPCs + vue publique) ← **NOUVEAU**
 
 ## Développement local
 
