@@ -182,20 +182,21 @@ serve(async (req) => {
           targetUserId = meta.target_user_id || null;
         }
         if (targetUserId) {
-          // upsert + increment balance
-          const { data: existing } = await supa
-            .from('contributor_balance')
-            .select('balance_cents, total_earned_cents')
-            .eq('user_id', targetUserId)
-            .maybeSingle();
-          const curBal = existing?.balance_cents || 0;
-          const curEarned = existing?.total_earned_cents || 0;
-          await supa.from('contributor_balance').upsert({
-            user_id: targetUserId,
-            balance_cents: curBal + pi.amount,
-            total_earned_cents: curEarned + pi.amount,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'user_id' });
+          // Crédit atomique + idempotent via RPC (cf. v0.18.1-hotfix-money-races.sql).
+          // La RPC verrouille la ligne `tips` (FOR UPDATE), incrémente la balance
+          // en une seule instruction SQL, et pose `tips.credited_at` pour bloquer
+          // les retries de Stripe.
+          const { error: creditErr } = await supa.rpc('credit_tip_to_contributor', {
+            p_payment_intent_id: pi.id,
+            p_target_user_id:    targetUserId,
+            p_amount_cents:      pi.amount,
+          });
+          if (creditErr) {
+            // On laisse Stripe relivrer le webhook : si la RPC n'existe pas encore
+            // (migration v0.18.1 non appliquée), 500 → Stripe réessayera.
+            console.error('[stripe-webhook] credit_tip_to_contributor failed', creditErr);
+            throw new Error(`credit_failed: ${creditErr.message}`);
+          }
         }
         break;
       }
