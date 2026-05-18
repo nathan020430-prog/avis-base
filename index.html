@@ -12223,12 +12223,35 @@ function bindTipJarInline(rootEl) {
     consent.addEventListener('change', () => { state.consent = consent.checked; });
   }
   if (submit) {
-    submit.addEventListener('click', () => {
+    submit.addEventListener('click', async () => {
+      if (!currentUser) {
+        showToast('Connecte-toi pour soutenir cet auteur.', true);
+        openAuthModal('login');
+        return;
+      }
       const amt = state.custom !== null && state.custom > 0 ? state.custom : state.amount;
-      const msg = `Phase 3 — Stripe en cours. Tip de ${amt.toFixed(2).replace('.',',')} € à ${authorName} enregistré côté UI (opt-in pseudo : ${state.consent ? 'OUI' : 'NON'}).`;
-      if (typeof showToast === 'function') showToast(msg);
-      else if (typeof toast === 'function') toast(msg, 4000);
-      else alert(msg);
+      submit.disabled = true;
+      const original = submit.textContent;
+      submit.textContent = 'Redirection vers Stripe…';
+      try {
+        const res = await fetchEdgeFunction('create-checkout-session', {
+          mode: 'tip',
+          amount_cents: Math.round(amt * 100),
+          target_type: 'article',
+          target_article_id: articleId,
+          display_consent: state.consent
+        });
+        if (res?.url) {
+          window.location.href = res.url;
+        } else {
+          showToast(res?.error || 'Erreur création session Stripe.', true);
+        }
+      } catch (e) {
+        showToast(formatEdgeError(e), true);
+      } finally {
+        submit.disabled = false;
+        submit.textContent = original;
+      }
     });
   }
 }
@@ -12309,18 +12332,76 @@ const TipModal = {
         if (m && m.classList.contains('on')) this.close();
       }
     });
-    // Submit (Phase 3 stub)
+    // Submit → appelle l'Edge Function create-checkout-session (mode tip)
     const submit = document.getElementById('tipSubmitBtn');
     if (submit) {
-      submit.addEventListener('click', () => {
+      submit.addEventListener('click', async () => {
         const amt = this._effective();
-        if (typeof toast === 'function') toast(`Phase 3 — Stripe en cours d'intégration. Don de ${amt.toFixed(2).replace('.',',')} € enregistré côté UI (pas encore traité).`, 4000);
-        else alert(`Phase 3 — Stripe en cours. Don de ${amt.toFixed(2).replace('.',',')} € (UI seulement).`);
-        this.close();
+        if (!currentUser) {
+          showToast('Connecte-toi pour faire un don.', true);
+          this.close();
+          openAuthModal('login');
+          return;
+        }
+        const consent = document.getElementById('tipConsent');
+        const target = document.getElementById('tipTarget')?.value || 'pool';
+        submit.disabled = true;
+        submit.textContent = 'Redirection vers Stripe…';
+        try {
+          const res = await fetchEdgeFunction('create-checkout-session', {
+            mode: 'tip',
+            amount_cents: Math.round(amt * 100),
+            target_type: target,
+            display_consent: !!consent?.checked
+          });
+          if (res?.url) {
+            window.location.href = res.url;
+          } else {
+            showToast(res?.error || 'Erreur création session Stripe.', true);
+          }
+        } catch (e) {
+          showToast(formatEdgeError(e), true);
+        } finally {
+          submit.disabled = false;
+          submit.textContent = 'Envoyer le tip';
+        }
       });
     }
   }
 };
+
+// ═══════════════════════════════════════════════════════════
+// v0.17.0 Phase 3 — Helpers Edge Functions
+// ═══════════════════════════════════════════════════════════
+
+async function fetchEdgeFunction(name, body) {
+  if (!supa) throw new Error('supa_not_initialized');
+  // supabase-js fournit functions.invoke() qui injecte automatiquement le JWT user
+  const { data, error } = await supa.functions.invoke(name, { body });
+  if (error) {
+    // En général Supabase renvoie { error: { message: '...' } }
+    throw error;
+  }
+  return data;
+}
+
+function formatEdgeError(e) {
+  if (!e) return 'Erreur inconnue.';
+  const msg = e.message || String(e);
+  if (/Failed to send a request to the Edge Function|Function not found|404/i.test(msg)) {
+    return 'Backend pas encore déployé. Les Edge Functions Stripe seront activées prochainement.';
+  }
+  if (/STRIPE_SECRET_KEY missing|STRIPE_WEBHOOK_SECRET missing|env missing/i.test(msg)) {
+    return 'Backend Stripe pas encore configuré (admin : variables d\'env à set dans Supabase).';
+  }
+  if (/Failed to fetch|Network|NetworkError/i.test(msg)) {
+    return 'Pas de connexion au serveur. Réessaie dans un instant.';
+  }
+  if (/Invalid token|Auth required/i.test(msg)) {
+    return 'Session expirée. Reconnecte-toi.';
+  }
+  return msg.slice(0, 140);
+}
 
 // ═══════════════════════════════════════════════════════════
 // v0.17.0 Phase 3 — Membre (page /devenir-membre — UI only)
@@ -12330,11 +12411,33 @@ const Membre = {
   init() {
     const checkoutBtn = document.getElementById('mbCheckoutBtn');
     if (checkoutBtn) {
-      checkoutBtn.addEventListener('click', () => {
+      checkoutBtn.addEventListener('click', async () => {
+        if (!currentUser) {
+          showToast('Connecte-toi pour devenir membre.', true);
+          openAuthModal('login');
+          return;
+        }
         const consent = document.getElementById('mbConsent');
-        const optIn = consent ? consent.checked : false;
-        if (typeof toast === 'function') toast(`Phase 3 — Stripe Checkout en cours d'intégration. Adhésion 5€/mois prête (opt-in pseudo : ${optIn ? 'OUI' : 'NON'}).`, 4000);
-        else alert(`Phase 3 — Stripe en cours.\nAdhésion 5€/mois enregistrée côté UI.\nAfficher pseudo : ${optIn ? 'OUI' : 'NON'}`);
+        const optIn = !!consent?.checked;
+        checkoutBtn.disabled = true;
+        const originalText = checkoutBtn.textContent;
+        checkoutBtn.textContent = 'Redirection vers Stripe…';
+        try {
+          const res = await fetchEdgeFunction('create-checkout-session', {
+            mode: 'subscription',
+            display_consent: optIn
+          });
+          if (res?.url) {
+            window.location.href = res.url;
+          } else {
+            showToast(res?.error || 'Erreur création session Stripe.', true);
+          }
+        } catch (e) {
+          showToast(formatEdgeError(e), true);
+        } finally {
+          checkoutBtn.disabled = false;
+          checkoutBtn.textContent = originalText;
+        }
       });
     }
     const backBtn = document.getElementById('mbBackBtn');
@@ -12588,16 +12691,56 @@ const MonFin = {
   },
   init() {
     document.getElementById('mfBackBtn')?.addEventListener('click', () => switchView('articles'));
-    document.getElementById('mfPayoutBtn')?.addEventListener('click', () => {
-      const M = MON_FIN_MOCK;
-      const msg = `Phase 7 — Stripe Connect Transfer en cours. Virement de ${this.fmt(M.balance_cents)} demandé côté UI.`;
-      if (typeof showToast === 'function') showToast(msg);
-      else alert(msg);
+    document.getElementById('mfPayoutBtn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('mfPayoutBtn');
+      if (!btn || btn.disabled) return;
+      if (!currentUser) { showToast('Connecte-toi.', true); return; }
+      const ok = confirm('Demander le virement de ta cagnotte maintenant ?\n\nStripe Connect Transfer — délai bancaire 1-2 jours ouvrés.');
+      if (!ok) return;
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = 'Demande en cours…';
+      try {
+        const res = await fetchEdgeFunction('request-payout', {});
+        if (res?.status === 'completed') {
+          showToast(`Virement de ${this.fmt(res.amount_cents)} déclenché — délai 1-2 jours.`);
+          await this.loadFromSupabase();
+        } else if (res?.error) {
+          const friendly = {
+            below_threshold: 'Cagnotte sous le seuil 20 €.',
+            kyc_not_completed: 'Active d\'abord ton compte Stripe Connect (KYC).',
+            payment_already_pending: 'Un virement est déjà en cours.',
+            no_balance: 'Pas encore de cagnotte.',
+          }[res.error] || res.error;
+          showToast(friendly, true);
+        }
+      } catch (e) {
+        showToast(formatEdgeError(e), true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
     });
-    document.getElementById('mfKycBtn')?.addEventListener('click', () => {
-      const msg = 'Phase 7 — Onboarding Stripe Connect Express en cours. Lien KYC à venir.';
-      if (typeof showToast === 'function') showToast(msg);
-      else alert(msg);
+    document.getElementById('mfKycBtn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('mfKycBtn');
+      if (!btn || btn.disabled) return;
+      if (!currentUser) { showToast('Connecte-toi.', true); return; }
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = 'Génération du lien…';
+      try {
+        const res = await fetchEdgeFunction('stripe-connect-onboarding', {});
+        if (res?.url) {
+          window.location.href = res.url;
+        } else {
+          showToast(res?.error || 'Erreur génération lien Stripe Connect.', true);
+        }
+      } catch (e) {
+        showToast(formatEdgeError(e), true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
     });
     document.getElementById('mfHistoryBtn')?.addEventListener('click', () => {
       // Scroll vers la section historique
@@ -13519,6 +13662,33 @@ async function init() {
   if (typeof Membre !== 'undefined') Membre.init();
   if (typeof MonFin !== 'undefined') MonFin.init();
   if (typeof TrackView !== 'undefined') TrackView.init();
+
+  // v0.17.0 — Gestion du retour depuis Stripe Checkout (success URLs)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('member') === 'success') {
+      showToast('Bienvenue chez Avis Basé+ ! Ton adhésion est active.');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('member');
+      url.hash = '#mon-financement';
+      history.replaceState(null, '', url.toString());
+      switchView('mon-financement');
+    } else if (params.get('tip') === 'success') {
+      showToast('Merci pour ton don ! Le contributeur t\'en remercie.');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('tip');
+      url.hash = '#financement';
+      history.replaceState(null, '', url.toString());
+      switchView('financement');
+    } else if (params.get('kyc') === 'done') {
+      showToast('Compte Stripe activé — tu peux maintenant recevoir des virements.');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('kyc');
+      url.hash = '#mon-financement';
+      history.replaceState(null, '', url.toString());
+      if (typeof MonFin !== 'undefined') MonFin.loadFromSupabase();
+    }
+  } catch (e) { console.debug('[stripe-return]', e); }
 
   // Hashchange (bouton back/forward du browser, liens internes)
   window.addEventListener('hashchange', () => {
