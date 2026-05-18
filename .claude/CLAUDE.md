@@ -14,8 +14,20 @@
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
 ## Version actuelle
-- Code en **v0.16.1** (App Store ready + masquage articles test du public)
-- Tag remote : `v0.16.0-prep` sur origin
+- Code en **v0.17.0-phase1** (squelette `/financement`, mock data, 1ère des 7 phases — économie collaborative)
+- v0.16.x livrée : App Store ready + masquage articles test
+- Tag remote : `v0.16.0-prep`, `v0.16.1` sur origin
+
+## Mission en cours : v0.17.0 — Économie collaborative
+- 7 phases successives, validation explicite à chaque palier
+- Phase 1 (squelette page `/financement`) : ✅ livrée
+- Phase 2 : migration SQL (9 tables + 4 vues + RLS) — à faire
+- Phase 3 : Stripe Subscriptions + webhook + `/devenir-membre`
+- Phase 4 : branchement Realtime sur vraies données
+- Phase 5 : tracking vues + dashboard contributeur
+- Phase 6 : algo mensuel + cron compute-monthly-payout
+- Phase 7 : Stripe Connect + virements (⚠️ valider statut juridique ACPR avant)
+- Décisions actées : 5€/mois, 0 salaire admin, 100% surplus aux contributeurs, opt-in affichage anonyme par défaut, seuil virement 20€
 
 ## Versionning
 - Pré-release `0.x.x` jusqu'au lancement public en v1.0.0

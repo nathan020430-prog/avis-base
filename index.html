@@ -60,6 +60,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,500;1,9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Chart.js v4 — utilisé par la page /financement (camembert + ligne historique) -->
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
    AVIS BASÉ — BROADSHEET DESIGN SYSTEM
@@ -4960,6 +4962,105 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   color: var(--ink-muted, #5C5345);
   margin: 0;
   line-height: 1.3;
+}
+
+/* ═══ /FINANCEMENT — Économie collaborative — Avis Basé v0.17.0 ═══════════ */
+
+.fin-view{max-width:1100px;margin:0 auto;padding:32px 24px 80px}
+.fin-section{margin:56px 0;padding-top:24px;border-top:1px solid var(--rule,#D9CFB7)}
+.fin-section:first-of-type{border-top:none;padding-top:0}
+.fin-section__title{font-family:var(--ff);font-weight:600;font-size:32px;line-height:1.15;color:var(--ink);margin:0 0 8px}
+.fin-section__sub{font-family:var(--fb);font-size:14px;color:var(--ink-muted);margin:0 0 24px;max-width:60ch}
+.fin-section__note{font-family:var(--fb);font-size:12px;color:var(--ink-light);margin-top:14px;font-style:italic}
+
+/* §1 HERO */
+.fin-hero{padding:48px 0 32px;border-bottom:3px double var(--rule,#D9CFB7);text-align:center}
+.fin-hero__kicker{font-family:var(--fb);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.fin-hero__title{font-family:var(--fd);font-style:italic;font-weight:500;font-size:clamp(40px,7vw,76px);line-height:1.05;color:var(--ink);margin:0 auto 18px;max-width:14ch}
+.fin-hero__lead{font-family:var(--ff);font-size:clamp(16px,1.8vw,20px);color:var(--ink-muted);max-width:54ch;margin:0 auto 36px;line-height:1.5}
+.fin-hero__stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:780px;margin:0 auto}
+.fin-stat{padding:20px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule,#D9CFB7);text-align:center}
+.fin-stat__label{display:block;font-family:var(--fb);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px}
+.fin-stat__value{display:block;font-family:var(--fd);font-weight:500;font-size:28px;color:var(--ink);line-height:1}
+
+/* §2 LIVE COUNTER */
+.fin-live{display:flex;flex-direction:column;align-items:center;gap:16px;padding:32px 0}
+.fin-live__value{font-family:var(--fd);font-weight:400;font-size:clamp(56px,10vw,104px);line-height:1;color:var(--accent);font-feature-settings:"tnum"}
+.fin-live__ticker{display:inline-flex;align-items:center;gap:8px;font-family:var(--fb);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)}
+.fin-live__dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:finPulse 1.6s ease-in-out infinite}
+@keyframes finPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* §3 BREAKDOWN PIE */
+.fin-breakdown{display:grid;grid-template-columns:320px 1fr;gap:48px;align-items:center}
+.fin-breakdown canvas{max-width:320px;max-height:320px}
+.fin-legend{list-style:none;padding:0;margin:0;font-family:var(--fb);font-size:15px}
+.fin-legend li{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px dotted var(--rule,#D9CFB7);color:var(--ink)}
+.fin-legend li:last-child{border-bottom:none}
+.fin-legend strong{margin-left:auto;font-family:var(--fd);font-size:18px;color:var(--ink)}
+.fin-dot{width:14px;height:14px;border-radius:2px;flex-shrink:0}
+.fin-dot--stripe{background:#6772E5}
+.fin-dot--infra{background:#5C8A6E}
+.fin-dot--contrib{background:var(--accent)}
+
+/* §4 SUPPORTERS WALL */
+.fin-supporters{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.fin-supporter{padding:14px 16px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule,#D9CFB7);font-family:var(--fb);font-size:13px}
+.fin-supporter__name{display:block;font-weight:600;color:var(--ink);margin-bottom:2px}
+.fin-supporter__meta{display:block;font-size:11px;color:var(--ink-muted)}
+
+/* §5 TOP ARTICLES */
+.fin-top{list-style:none;padding:0;margin:0;counter-reset:fintop}
+.fin-top__item{display:grid;grid-template-columns:48px 1fr 100px 90px;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--rule,#D9CFB7);counter-increment:fintop}
+.fin-top__item::before{content:counter(fintop);font-family:var(--fd);font-weight:500;font-size:24px;color:var(--ink-light);font-feature-settings:"tnum"}
+.fin-top__title{font-family:var(--ff);font-weight:500;font-size:16px;color:var(--ink);line-height:1.3}
+.fin-top__author{display:block;font-family:var(--fb);font-size:12px;color:var(--ink-muted);margin-top:2px}
+.fin-top__score{font-family:var(--fb);font-size:13px;color:var(--ink-muted);text-align:right;font-feature-settings:"tnum"}
+.fin-top__share{font-family:var(--fd);font-weight:500;font-size:16px;color:var(--accent);text-align:right;font-feature-settings:"tnum"}
+
+/* §6 INFRA COSTS */
+.fin-costs{width:100%;border-collapse:collapse;font-family:var(--fb);font-size:14px}
+.fin-costs th,.fin-costs td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--rule,#D9CFB7)}
+.fin-costs th{font-family:var(--fb);font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted)}
+.fin-costs td:last-child,.fin-costs th:last-child{text-align:right;font-feature-settings:"tnum"}
+.fin-costs tfoot th{border-top:2px solid var(--ink);border-bottom:none;color:var(--ink);font-size:14px;letter-spacing:0;text-transform:none}
+
+/* §7 HISTORY CHART */
+.fin-history{position:relative;height:300px;margin-top:12px}
+
+/* §8 HOW IT WORKS */
+.fin-how{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:24px}
+.fin-how__col{padding:24px;border-top:3px solid var(--accent);background:var(--paper-2,rgba(0,0,0,.02))}
+.fin-how__num{display:block;font-family:var(--fd);font-weight:400;font-size:48px;color:var(--accent);line-height:1;margin-bottom:12px}
+.fin-how__col h3{font-family:var(--ff);font-weight:600;font-size:18px;color:var(--ink);margin:0 0 8px}
+.fin-how__col p{font-family:var(--fb);font-size:14px;color:var(--ink-muted);line-height:1.5;margin:0}
+.fin-how__example{margin-top:24px;padding:16px 20px;background:var(--accent-soft);border-left:3px solid var(--accent);font-family:var(--ff);font-size:15px;color:var(--ink)}
+.fin-how__example strong{color:var(--accent)}
+
+/* §9 CTA */
+.fin-cta{text-align:center;padding:48px 0;border-top:3px double var(--rule,#D9CFB7);border-bottom:3px double var(--rule,#D9CFB7);margin:64px 0 0}
+.fin-cta__buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.fin-cta__note{font-family:var(--fb);font-size:12px;color:var(--ink-light);font-style:italic}
+
+/* §10 ARCHIVE */
+.fin-archive{list-style:none;padding:0;margin:0}
+.fin-archive__item{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--rule,#D9CFB7);font-family:var(--fb);font-size:14px;color:var(--ink)}
+.fin-archive__item--disabled{color:var(--ink-light);font-style:italic}
+.fin-archive__item--disabled:hover{cursor:not-allowed}
+
+/* Bouton € dans masthead */
+.fin-action{padding:6px 10px;background:transparent;border:1px solid var(--rule,#D9CFB7);color:var(--ink);font-family:var(--fb);font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s ease}
+.fin-action:hover{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
+.fin-action svg{width:14px;height:14px}
+
+/* Responsive */
+@media (max-width:768px){
+  .fin-hero__stats{grid-template-columns:1fr;gap:12px}
+  .fin-breakdown{grid-template-columns:1fr;gap:24px}
+  .fin-breakdown canvas{margin:0 auto}
+  .fin-how{grid-template-columns:1fr;gap:20px}
+  .fin-top__item{grid-template-columns:32px 1fr 80px;gap:10px}
+  .fin-top__share{grid-column:2/-1;text-align:left;color:var(--accent);font-size:14px}
+}
 </style>
 </head>
 <body>
@@ -4991,6 +5092,12 @@ body.is-mobile .notif-bell{width:32px;height:32px}
           </div>
         </div>
       </div>
+
+      <!-- v0.17.0 — Bouton accès page /financement -->
+      <button class="fin-action" id="finNavBtn" aria-label="Économie d'Avis Basé">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Financement</span>
+      </button>
       <button class="mh-action" id="themeToggle" aria-label="Thème">
         <svg id="themeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
       </button>
@@ -5298,6 +5405,138 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   <div class="empty__icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/></svg></div>
   <h2 class="empty__title">Aucune source</h2>
 </div>
+
+<!-- ═══════════════════════════════════════════
+     /FINANCEMENT — Économie collaborative
+     v0.17.0 — Phase 1 (squelette + mock data)
+═══════════════════════════════════════════ -->
+<main id="financementView" class="fin-view" role="main" style="display:none">
+
+  <!-- §1 HERO -->
+  <section class="fin-hero">
+    <div class="fin-hero__kicker">Transparence intégrale</div>
+    <h1 class="fin-hero__title">L'économie d'<em>Avis Basé</em></h1>
+    <p class="fin-hero__lead">On vous doit la vérité. On vous doit aussi les chiffres. Voici, en temps réel, d'où vient l'argent et où il va.</p>
+    <div class="fin-hero__stats">
+      <div class="fin-stat">
+        <span class="fin-stat__label">Pool du mois en cours</span>
+        <span class="fin-stat__value" id="finHeroPool">€0,00</span>
+      </div>
+      <div class="fin-stat">
+        <span class="fin-stat__label">Membres actifs</span>
+        <span class="fin-stat__value" id="finHeroMembers">0</span>
+      </div>
+      <div class="fin-stat">
+        <span class="fin-stat__label">Tips ce mois</span>
+        <span class="fin-stat__value" id="finHeroTips">€0,00</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- §2 LIVE COUNTER -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Pool en cours — <span id="finCurrentMonth">—</span></h2>
+    <p class="fin-section__sub">Montant cumulé pour ce mois, reversé aux contributeurs le 1<sup>er</sup> du mois suivant après déduction des frais réels.</p>
+    <div class="fin-live">
+      <span class="fin-live__value" id="finLivePool">€0,00</span>
+      <span class="fin-live__ticker" aria-live="polite">
+        <span class="fin-live__dot"></span>
+        <span>mise à jour temps réel</span>
+      </span>
+    </div>
+    <p class="fin-section__note">Compteur branché sur Supabase Realtime en Phase 4. Pour l'instant, animation simulée à partir de mock data.</p>
+  </section>
+
+  <!-- §3 BREAKDOWN PIE -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Où va l'argent ?</h2>
+    <p class="fin-section__sub">Sur chaque euro versé, voici exactement comment il se répartit. Aucun salaire admin — 100% du surplus revient aux contributeurs.</p>
+    <div class="fin-breakdown">
+      <canvas id="finBreakdownChart" width="320" height="320" aria-label="Répartition des revenus"></canvas>
+      <ul class="fin-legend">
+        <li><span class="fin-dot fin-dot--stripe"></span> Frais Stripe (réels) <strong id="finBreakdownStripe">5 %</strong></li>
+        <li><span class="fin-dot fin-dot--infra"></span> Infra (Supabase, Cloudflare, domaine) <strong id="finBreakdownInfra">8 %</strong></li>
+        <li><span class="fin-dot fin-dot--contrib"></span> Reversé aux contributeurs <strong id="finBreakdownContrib">87 %</strong></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- §4 SUPPORTERS WALL -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Mur des soutiens</h2>
+    <p class="fin-section__sub">Seuls les membres et donateurs qui ont coché « afficher mon nom » apparaissent ici. Anonyme par défaut.</p>
+    <div class="fin-supporters" id="finSupporters"></div>
+  </section>
+
+  <!-- §5 TOP ARTICLES -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Articles rémunérés ce mois</h2>
+    <p class="fin-section__sub">Classement par score d'engagement (vues × 0,3 + read time × 0,5 + engagement × 0,2). Auteurs affichés en pseudo stable « Auteur #N » par défaut.</p>
+    <ol class="fin-top" id="finTopArticles"></ol>
+  </section>
+
+  <!-- §6 INFRA COSTS -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Frais réels d'infrastructure</h2>
+    <p class="fin-section__sub">Saisis manuellement chaque mois par l'admin. Les factures originales seront téléchargeables en Phase 6.</p>
+    <table class="fin-costs">
+      <thead><tr><th>Poste</th><th>Mensuel</th></tr></thead>
+      <tbody id="finCostsRows"></tbody>
+      <tfoot><tr><th>Total</th><th id="finCostsTotal">€0,00</th></tr></tfoot>
+    </table>
+  </section>
+
+  <!-- §7 HISTORY CHART -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Historique — 12 derniers mois</h2>
+    <p class="fin-section__sub">Revenus totaux, pool contributeurs, et nombre de membres mois par mois.</p>
+    <div class="fin-history">
+      <canvas id="finHistoryChart" aria-label="Historique 12 mois"></canvas>
+    </div>
+  </section>
+
+  <!-- §8 HOW IT WORKS -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Comment ça marche ?</h2>
+    <div class="fin-how">
+      <div class="fin-how__col">
+        <span class="fin-how__num">1</span>
+        <h3>Adhésion 5 €/mois</h3>
+        <p>Vous payez via Stripe. L'argent atterrit sur un compte dédié. Aucun reversement avant la clôture mensuelle.</p>
+      </div>
+      <div class="fin-how__col">
+        <span class="fin-how__num">2</span>
+        <h3>Score par article</h3>
+        <p>Vues uniques × 0,3 + read time × 0,5 + engagement × 0,2. Anti-fraude : 1 vue = 1 user/jour, minimum 10 secondes, auteur exclu de ses propres vues.</p>
+      </div>
+      <div class="fin-how__col">
+        <span class="fin-how__num">3</span>
+        <h3>Reversement le 1<sup>er</sup></h3>
+        <p>Le pool (revenus − frais Stripe − infra réels) est partagé au prorata des scores. Virement Stripe Connect dès 20 €.</p>
+      </div>
+    </div>
+    <p class="fin-how__example">
+      <strong>Exemple chiffré :</strong> un article qui fait 1 000 vues uniques + 200 likes + 30 commentaires ce mois → environ <strong>3,40 €</strong> reversés à l'auteur, pour un pool de 400 € réparti sur 120 articles actifs.
+    </p>
+  </section>
+
+  <!-- §9 CTA -->
+  <section class="fin-cta">
+    <div class="fin-cta__buttons">
+      <button class="btn btn--accent btn--lg" id="finMemberBtn" disabled>Devenir membre — 5 €/mois</button>
+      <button class="btn btn--outline btn--lg" id="finTipBtn" disabled>Faire un don ponctuel</button>
+    </div>
+    <p class="fin-cta__note">Les boutons seront actifs en Phase 3 (intégration Stripe Checkout).</p>
+  </section>
+
+  <!-- §10 ARCHIVE PDF -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Archive — rapports mensuels</h2>
+    <p class="fin-section__sub">Snapshot immuable de chaque clôture mensuelle. PDF générés automatiquement en Phase 6.</p>
+    <ul class="fin-archive" id="finArchive"></ul>
+  </section>
+
+</main>
 
 <section class="app-cta" id="appDownload" aria-labelledby="appCtaTitle">
   <div class="app-cta__inner">
@@ -7650,13 +7889,47 @@ function switchView(view) {
   const gridArc = document.getElementById('grid');
   const emptyArt = document.getElementById('emptyArticles');
   const emptyArc = document.getElementById('empty');
+  const finView = document.getElementById('financementView');
+  // v0.17.0 — wrappers homepage à masquer en vue financement
+  const homeLayout = document.getElementById('homepageLayout');
+  const homeExtras = document.getElementById('homepageExtras');
+  const appDownload = document.getElementById('appDownload');
+  const articlesPager = document.getElementById('articlesPager');
 
-  if (view === 'articles') {
+  // Toujours arrêter le ticker live + masquer la vue financement par défaut
+  if (typeof Financement !== 'undefined') Financement.stopLiveTicker();
+  if (finView) finView.style.display = 'none';
+
+  if (view === 'financement') {
+    if (featured) featured.style.display = 'none';
+    if (searchBar) searchBar.style.display = 'none';
+    if (toolArt) toolArt.style.display = 'none';
+    if (toolArc) toolArc.style.display = 'none';
+    if (gridArt) gridArt.style.display = 'none';
+    if (gridArc) gridArc.style.display = 'none';
+    if (emptyArt) emptyArt.style.display = 'none';
+    if (emptyArc) emptyArc.style.display = 'none';
+    if (homeLayout) homeLayout.style.display = 'none';
+    if (homeExtras) homeExtras.style.display = 'none';
+    if (appDownload) appDownload.style.display = 'none';
+    if (articlesPager) articlesPager.style.display = 'none';
+    if (finView) finView.style.display = 'block';
+    if (typeof Financement !== 'undefined') {
+      Financement.render();
+      Financement.startLiveTicker();
+    }
+    try { history.replaceState(null, '', '#financement'); } catch {}
+    window.scrollTo({top:0, behavior:'instant'});
+  } else if (view === 'articles') {
     if (searchBar) searchBar.style.display = '';
     if (toolArt) toolArt.style.display = 'none';
     if (toolArc) toolArc.style.display = 'none';
     if (gridArc) gridArc.style.display = 'none';
     if (emptyArc) emptyArc.style.display = 'none';
+    // Restaurer les wrappers homepage (cas où on revient depuis #financement)
+    if (homeLayout) homeLayout.style.display = '';
+    if (homeExtras) homeExtras.style.display = '';
+    if (appDownload) appDownload.style.display = '';
     renderArticles();
     try { history.replaceState(null, '', '#articles'); } catch {}
   } else {
@@ -7666,6 +7939,9 @@ function switchView(view) {
     if (toolArc) toolArc.style.display = 'block';
     if (gridArt) gridArt.style.display = 'none';
     if (emptyArt) emptyArt.style.display = 'none';
+    if (homeLayout) homeLayout.style.display = 'none';
+    if (homeExtras) homeExtras.style.display = 'none';
+    if (appDownload) appDownload.style.display = 'none';
     render();
     try { history.replaceState(null, '', '#archive'); } catch {}
   }
@@ -11041,6 +11317,243 @@ function bindV09Handlers() {
 }
 
 
+// ═══════════════════════════════════════════════════════════
+// v0.17.0 — FINANCEMENT (Phase 1 : squelette + mock data)
+// Sera branché sur Supabase + Stripe dans les phases suivantes.
+// ═══════════════════════════════════════════════════════════
+
+const FINANCEMENT_MOCK = {
+  current_month: '2026-05',
+  current_month_label: 'Mai 2026',
+  pool_eur: 412.83,
+  members_count: 87,
+  tips_eur: 142.50,
+  breakdown_pct: { stripe: 5, infra: 8, contributors: 87 },
+  supporters: [
+    {name:'@marie_l', tier:'membre', since_months:6},
+    {name:'@nathanT', tier:'membre', since_months:6},
+    {name:'@kev42', tier:'membre', since_months:3},
+    {name:'@léa.b', tier:'membre', since_months:3},
+    {name:'@toulousain_07', tier:'membre', since_months:2},
+    {name:'@sami_p', tier:'tip', amount_eur:10},
+    {name:'@anouar', tier:'membre', since_months:1},
+    {name:'@karine_pp', tier:'membre', since_months:1},
+    {name:'@valeria', tier:'tip', amount_eur:25},
+    {name:'@mehdi.k', tier:'membre', since_months:5},
+    {name:'@philippe_R', tier:'tip', amount_eur:5},
+    {name:'@yael', tier:'membre', since_months:4}
+  ],
+  top_articles: [
+    {rank:1, title:'Pourquoi les chiffres du chômage cachent une réalité différente', author:'Auteur #3', score:8742, share_cents:3420},
+    {rank:2, title:'La désinformation russe en France : 5 leviers documentés', author:'Auteur #7', score:7211, share_cents:2820},
+    {rank:3, title:'Climat : ce que dit vraiment le dernier rapport GIEC (lecture intégrale)', author:'Auteur #1', score:6845, share_cents:2680},
+    {rank:4, title:'Israël/Palestine : reconstruction chronologique des 18 derniers mois', author:'Auteur #12', score:5933, share_cents:2320},
+    {rank:5, title:'IA et journalisme : 9 expériences ratées, 3 qui ont marché', author:'Auteur #5', score:5104, share_cents:2000},
+    {rank:6, title:'Sondages présidentielle : méthodologie comparée des 6 instituts', author:'Auteur #2', score:4621, share_cents:1810},
+    {rank:7, title:'Logement étudiant : carte interactive des prix réels 2025-2026', author:'Auteur #18', score:4203, share_cents:1650},
+    {rank:8, title:'Cyberattaques sur les hôpitaux : ce qu\'on sait, ce qu\'on cache', author:'Auteur #9', score:3884, share_cents:1520},
+    {rank:9, title:'Énergie nucléaire : la vérité sur le coût réel du parc français', author:'Auteur #4', score:3517, share_cents:1380},
+    {rank:10, title:'Migrations : les chiffres de l\'INSEE vs ceux d\'Eurostat', author:'Auteur #15', score:3204, share_cents:1260}
+  ],
+  infra_costs: [
+    {label:'Supabase Pro', amount:25.00},
+    {label:'Cloudflare Pages', amount:0.00},
+    {label:'Domaine avis-base.com', amount:1.25},
+    {label:'Comptable (mensualisé)', amount:8.33}
+  ],
+  history_12mo: [
+    {month:'2025-06', revenue:0, pool:0, members:0},
+    {month:'2025-07', revenue:0, pool:0, members:0},
+    {month:'2025-08', revenue:0, pool:0, members:0},
+    {month:'2025-09', revenue:55, pool:36, members:11},
+    {month:'2025-10', revenue:115, pool:90, members:23},
+    {month:'2025-11', revenue:185, pool:152, members:37},
+    {month:'2025-12', revenue:275, pool:231, members:55},
+    {month:'2026-01', revenue:355, pool:301, members:71},
+    {month:'2026-02', revenue:380, pool:323, members:76},
+    {month:'2026-03', revenue:395, pool:336, members:79},
+    {month:'2026-04', revenue:425, pool:362, members:85},
+    {month:'2026-05', revenue:435, pool:370, members:87}
+  ],
+  archive: [
+    {month:'2026-04', label:'Avril 2026'},
+    {month:'2026-03', label:'Mars 2026'},
+    {month:'2026-02', label:'Février 2026'}
+  ]
+};
+
+const Financement = {
+  _liveTimer: null,
+  _breakdownChart: null,
+  _historyChart: null,
+  _rendered: false,
+  fmt(n) {
+    return '€' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  },
+  fmtCents(c) {
+    return this.fmt(c / 100);
+  },
+  render() {
+    const M = FINANCEMENT_MOCK;
+    // Hero
+    const heroPool = document.getElementById('finHeroPool');
+    if (heroPool) heroPool.textContent = this.fmt(M.pool_eur);
+    const heroMembers = document.getElementById('finHeroMembers');
+    if (heroMembers) heroMembers.textContent = M.members_count.toString();
+    const heroTips = document.getElementById('finHeroTips');
+    if (heroTips) heroTips.textContent = this.fmt(M.tips_eur);
+
+    // Live counter
+    const monthLabel = document.getElementById('finCurrentMonth');
+    if (monthLabel) monthLabel.textContent = M.current_month_label;
+    const livePool = document.getElementById('finLivePool');
+    if (livePool) livePool.textContent = this.fmt(M.pool_eur);
+
+    // Breakdown legend (already in HTML, just override percentages)
+    const bs = document.getElementById('finBreakdownStripe');
+    if (bs) bs.textContent = M.breakdown_pct.stripe + ' %';
+    const bi = document.getElementById('finBreakdownInfra');
+    if (bi) bi.textContent = M.breakdown_pct.infra + ' %';
+    const bc = document.getElementById('finBreakdownContrib');
+    if (bc) bc.textContent = M.breakdown_pct.contributors + ' %';
+
+    // Supporters
+    const sup = document.getElementById('finSupporters');
+    if (sup) {
+      sup.innerHTML = M.supporters.map(s => {
+        const meta = s.tier === 'membre'
+          ? `Membre — ${s.since_months} mois`
+          : `Don ponctuel — ${this.fmt(s.amount_eur)}`;
+        return `<div class="fin-supporter"><span class="fin-supporter__name">${s.name}</span><span class="fin-supporter__meta">${meta}</span></div>`;
+      }).join('');
+    }
+
+    // Top articles
+    const top = document.getElementById('finTopArticles');
+    if (top) {
+      top.innerHTML = M.top_articles.map(a => `
+        <li class="fin-top__item">
+          <div>
+            <div class="fin-top__title">${a.title}</div>
+            <span class="fin-top__author">${a.author}</span>
+          </div>
+          <span class="fin-top__score">score ${a.score.toLocaleString('fr-FR')}</span>
+          <span class="fin-top__share">${this.fmtCents(a.share_cents)}</span>
+        </li>
+      `).join('').replace(/^<li/, '<li').trim();
+    }
+
+    // Infra costs
+    const rows = document.getElementById('finCostsRows');
+    let total = 0;
+    if (rows) {
+      rows.innerHTML = M.infra_costs.map(c => {
+        total += c.amount;
+        return `<tr><td>${c.label}</td><td>${this.fmt(c.amount)}</td></tr>`;
+      }).join('');
+    }
+    const totalEl = document.getElementById('finCostsTotal');
+    if (totalEl) totalEl.textContent = this.fmt(total);
+
+    // Archive
+    const arc = document.getElementById('finArchive');
+    if (arc) {
+      arc.innerHTML = M.archive.map(a =>
+        `<li class="fin-archive__item fin-archive__item--disabled"><span>${a.label}</span><span>PDF — généré en Phase 6</span></li>`
+      ).join('');
+    }
+
+    // Charts (only render once Chart.js is loaded)
+    this.renderCharts();
+
+    this._rendered = true;
+  },
+  renderCharts() {
+    if (typeof Chart === 'undefined') {
+      // Chart.js pas encore chargé (defer) — retente dans 200ms
+      setTimeout(() => this.renderCharts(), 200);
+      return;
+    }
+    const M = FINANCEMENT_MOCK;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const inkColor = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#1A1108';
+    const inkMuted = getComputedStyle(document.documentElement).getPropertyValue('--ink-muted').trim() || '#6B5C48';
+    const ruleColor = isDark ? 'rgba(237,227,207,.15)' : 'rgba(0,0,0,.1)';
+
+    // Breakdown pie
+    const pieCanvas = document.getElementById('finBreakdownChart');
+    if (pieCanvas) {
+      if (this._breakdownChart) this._breakdownChart.destroy();
+      this._breakdownChart = new Chart(pieCanvas, {
+        type: 'doughnut',
+        data: {
+          labels: ['Frais Stripe', 'Infra', 'Contributeurs'],
+          datasets: [{
+            data: [M.breakdown_pct.stripe, M.breakdown_pct.infra, M.breakdown_pct.contributors],
+            backgroundColor: ['#6772E5', '#5C8A6E', getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8C1C13'],
+            borderColor: isDark ? '#15110B' : '#FDFAF3',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: false,
+          plugins: {legend:{display:false}, tooltip:{enabled:true}},
+          cutout: '62%'
+        }
+      });
+    }
+
+    // History line
+    const lineCanvas = document.getElementById('finHistoryChart');
+    if (lineCanvas) {
+      if (this._historyChart) this._historyChart.destroy();
+      const months = M.history_12mo.map(h => h.month.slice(5) + '/' + h.month.slice(2,4));
+      this._historyChart = new Chart(lineCanvas, {
+        type: 'line',
+        data: {
+          labels: months,
+          datasets: [
+            {label:'Revenus', data: M.history_12mo.map(h => h.revenue), borderColor:'#6772E5', backgroundColor:'rgba(103,114,229,.1)', tension:.3, fill:false},
+            {label:'Pool contributeurs', data: M.history_12mo.map(h => h.pool), borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8C1C13', backgroundColor:'rgba(140,28,19,.1)', tension:.3, fill:true},
+            {label:'Membres', data: M.history_12mo.map(h => h.members), borderColor:'#5C8A6E', backgroundColor:'rgba(92,138,110,.1)', tension:.3, fill:false, yAxisID:'y1'}
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {mode:'index', intersect:false},
+          plugins: {
+            legend: {labels:{color:inkColor, font:{family:'Manrope', size:12}}}
+          },
+          scales: {
+            x: {ticks:{color:inkMuted}, grid:{color:ruleColor}},
+            y: {ticks:{color:inkMuted, callback:v=>'€'+v}, grid:{color:ruleColor}, beginAtZero:true},
+            y1: {position:'right', ticks:{color:inkMuted}, grid:{display:false}, beginAtZero:true}
+          }
+        }
+      });
+    }
+  },
+  startLiveTicker() {
+    if (this._liveTimer) return;
+    let pool = FINANCEMENT_MOCK.pool_eur;
+    this._liveTimer = setInterval(() => {
+      // Fake : ajoute aléatoirement 0,01-0,05€ toutes les ~3-7s
+      if (Math.random() < 0.4) {
+        pool += (Math.random() * 0.04 + 0.01);
+        const el = document.getElementById('finLivePool');
+        if (el) el.textContent = this.fmt(pool);
+        const heroEl = document.getElementById('finHeroPool');
+        if (heroEl) heroEl.textContent = this.fmt(pool);
+      }
+    }, 2500);
+  },
+  stopLiveTicker() {
+    if (this._liveTimer) { clearInterval(this._liveTimer); this._liveTimer = null; }
+  }
+};
+
+
 function refreshUserUI() {
   const authBtn = document.getElementById('authBtn');
   const userMenu = document.getElementById('userMenu');
@@ -11813,9 +12326,23 @@ async function init() {
     setTimeout(() => openArticlePage(slug), 200);
   } else if (hash === '#archive') {
     switchView('archive');
+  } else if (hash === '#financement') {
+    switchView('financement');
   } else {
     switchView('articles');
   }
+
+  // v0.17.0 — bouton € dans le masthead pour aller à /financement
+  const finNavBtn = document.getElementById('finNavBtn');
+  if (finNavBtn) finNavBtn.addEventListener('click', () => switchView('financement'));
+
+  // Hashchange (bouton back/forward du browser, liens internes)
+  window.addEventListener('hashchange', () => {
+    const h = window.location.hash;
+    if (h === '#financement') switchView('financement');
+    else if (h === '#archive') switchView('archive');
+    else if (!h.startsWith('#article/')) switchView('articles');
+  });
 
   if (isAdmin()) {
     await loadSubmissions();
@@ -13601,7 +14128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('%cAvis Basé v0.16.1', 'color:#C8102E;font-size:16px;font-weight:bold');
+  console.log('%cAvis Basé v0.17.0-phase1', 'color:#C8102E;font-size:16px;font-weight:bold');
   console.log('%cMédia collaboratif · @avis_base.nth', 'color:#888;font-size:11px');
   init();
 });
