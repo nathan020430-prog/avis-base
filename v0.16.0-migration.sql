@@ -96,15 +96,9 @@ begin
     scheduled_deletion_at = excluded.scheduled_deletion_at,
     status = 'pending';
 
-  -- Désactiver immédiatement la possibilité de se reconnecter :
-  -- on n'a PAS le droit de toucher à auth.users via SQL côté client.
-  -- On stocke donc un flag dans profiles pour bloquer l'accès aux features.
-  update profiles
-  set bio = coalesce(bio, ''),  -- no-op, mais permet de vérifier que le user existe
-      role = 'user'
-  where id = uid;
-
-  -- Optionnel : log dans coin_transactions ou audit_log si tu as une table
+  -- NB : la ligne dans account_deletion_requests sert elle-même de flag.
+  -- L'app peut requêter cette table pour savoir si un user est en grace period
+  -- et restreindre l'UI en conséquence.
 end $$;
 
 -- ----------------------------------------------------------------------------
@@ -153,11 +147,10 @@ begin
     where status = 'pending'
       and scheduled_deletion_at <= now()
   loop
-    -- Anonymiser les articles (on garde les contenus, on retire l'identité)
-    update articles
-      set author_id = null,
-          body = body || E'\n\n_[Article publié par un compte supprimé.]_'
-      where author_id = victim;
+    -- NB : les articles sont supprimés par CASCADE quand on supprime le profil
+    -- (articles.author_id REFERENCES profiles ON DELETE CASCADE — cf schema_v083.sql).
+    -- Si on voulait préserver les articles avec author "[supprimé]", il faudrait
+    -- d'abord migrer la FK en ON DELETE SET NULL et rendre author_id nullable.
 
     -- Supprimer les commentaires
     delete from comments where author_id = victim;
@@ -178,8 +171,9 @@ begin
     -- Supprimer notifications (envoyées et reçues)
     delete from notifications where user_id = victim or actor_id = victim;
 
-    -- Supprimer blocks
+    -- Supprimer blocks (les deux tables)
     delete from user_blocks where blocker_id = victim or blocked_id = victim;
+    delete from dm_blocks where blocker_id = victim or blocked_id = victim;
 
     -- Supprimer le profil
     delete from profiles where id = victim;
@@ -201,26 +195,39 @@ end $$;
 -- ----------------------------------------------------------------------------
 -- 6. Anti-spam : empêcher les bloqués d'envoyer un DM
 -- ----------------------------------------------------------------------------
--- Mise à jour de la policy dm_insert_participants pour bloquer l'envoi
--- depuis un user qui a été bloqué par le destinataire.
+-- Remplace la policy "users insert own messages" (v0.11.0) pour vérifier
+-- les DEUX tables de blocage : dm_blocks (v0.11.0) ET user_blocks (v0.16.0).
+--
+-- NB : les policies RLS sont permissives par défaut (sémantique OR).
+-- On drop l'ancienne et la "dm_insert_participants" pour ne garder qu'une seule
+-- source de vérité, sinon le check user_blocks serait contournable.
 
 drop policy if exists "dm_insert_participants" on dm_messages;
-create policy "dm_insert_participants" on dm_messages
-  for insert with check (
+drop policy if exists "users insert own messages" on dm_messages;
+create policy "users insert own messages"
+  on dm_messages for insert to authenticated
+  with check (
     sender_id = auth.uid()
     and exists (
       select 1 from dm_participants p
       where p.conversation_id = dm_messages.conversation_id
         and p.user_id = auth.uid()
-        and p.is_blocked = false
     )
-    -- ET le destinataire ne m'a pas bloqué
+    -- Bloque si l'autre participant m'a bloqué via dm_blocks (v0.11.0)
+    and not exists (
+      select 1 from dm_blocks b
+      join dm_participants p2 on p2.user_id = b.blocker_id
+      where p2.conversation_id = dm_messages.conversation_id
+        and p2.user_id <> auth.uid()
+        and b.blocked_id = auth.uid()
+    )
+    -- Bloque aussi si l'autre participant m'a bloqué via user_blocks (v0.16.0)
     and not exists (
       select 1 from user_blocks ub
-      join dm_participants p2 on p2.conversation_id = dm_messages.conversation_id
-      where ub.blocker_id = p2.user_id
+      join dm_participants p3 on p3.user_id = ub.blocker_id
+      where p3.conversation_id = dm_messages.conversation_id
+        and p3.user_id <> auth.uid()
         and ub.blocked_id = auth.uid()
-        and p2.user_id <> auth.uid()
     )
   );
 
