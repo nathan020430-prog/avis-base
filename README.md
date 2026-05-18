@@ -47,6 +47,14 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.17.0-phase1+3+5** — Économie collaborative (UI only) :
+  - `/financement` (10 sections + camembert/ligne 12 mois Chart.js, mock data + live ticker)
+  - `/devenir-membre` (hero + price card 5€/mois + opt-in mur + 3 benefits + FAQ)
+  - Modale "Don ponctuel" (presets 1/3/5/10€ + libre + opt-in + bénéficiaire + summary live)
+  - Tip jar **inline** sur chaque article publié (presets + libre + opt-in pseudo)
+  - `/mon-financement` (dashboard contributeur : cagnotte €/mois, total reversé, articles du mois avec stats détaillées, KYC Stripe Connect stub, toggle pseudo public, historique virements)
+  - Lien "Mon financement" dans le user menu (visible si connecté)
+  - SQL (Phase 2), Stripe Checkout (Phase 3 backend), Realtime (Phase 4), algo mensuel (Phase 6) et Stripe Connect (Phase 7) : à câbler en fin de chantier.
 - **v0.16.1** — Masque les articles "test/demo" du feed public (visibles pour l'auteur et l'admin)
 - **v0.16.0** — Préparation App Store : pages légales (CGU, confidentialité, support, suppression compte), migration Apple-ready (blocage, suppression compte), section download App Store + Play Store
 - **v0.11.3** — Correctifs (notif target_type profile, follow CHECK constraint, DM iOS zoom-in + safe-area + touch targets)
@@ -79,7 +87,8 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 7. `v0.11.0-dm-migration.sql` (V0.11.0 — messagerie directe : threads, participants, messages, RLS)
 8. `v0.11.2-dm-fix-rls.sql` (V0.11.2 — correctif récursion RLS dm_participants)
 9. `v0.11.3-fix-notif-target-type-profile.sql` (V0.11.3 — contrainte CHECK notif target_type profile)
-10. **`v0.16.0-migration.sql`** (V0.16.0 — user_blocks + account_deletion_requests pour Apple App Store) ← **NOUVEAU**
+10. `v0.16.0-migration.sql` (V0.16.0 — user_blocks + account_deletion_requests pour Apple App Store)
+11. **`v0.17.0-financement-migration.sql`** (V0.17.0 — économie collaborative : 9 tables + 4 vues + 4 RPCs + RLS strict) ← **NOUVEAU**
 
 ## Développement local
 

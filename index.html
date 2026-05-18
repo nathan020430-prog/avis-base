@@ -60,6 +60,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,500;1,9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Chart.js v4 — utilisé par la page /financement (camembert + ligne historique) -->
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
    AVIS BASÉ — BROADSHEET DESIGN SYSTEM
@@ -4960,6 +4962,256 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   color: var(--ink-muted, #5C5345);
   margin: 0;
   line-height: 1.3;
+}
+
+/* ═══ /FINANCEMENT — Économie collaborative — Avis Basé v0.17.0 ═══════════ */
+
+.fin-view{max-width:1100px;margin:0 auto;padding:32px 24px 80px}
+.fin-section{margin:56px 0;padding-top:24px;border-top:1px solid var(--rule,#D9CFB7)}
+.fin-section:first-of-type{border-top:none;padding-top:0}
+.fin-section__title{font-family:var(--ff);font-weight:600;font-size:32px;line-height:1.15;color:var(--ink);margin:0 0 8px}
+.fin-section__sub{font-family:var(--fb);font-size:14px;color:var(--ink-muted);margin:0 0 24px;max-width:60ch}
+.fin-section__note{font-family:var(--fb);font-size:12px;color:var(--ink-light);margin-top:14px;font-style:italic}
+
+/* §1 HERO */
+.fin-hero{padding:48px 0 32px;border-bottom:3px double var(--rule,#D9CFB7);text-align:center}
+.fin-hero__kicker{font-family:var(--fb);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.fin-hero__title{font-family:var(--fd);font-style:italic;font-weight:500;font-size:clamp(40px,7vw,76px);line-height:1.05;color:var(--ink);margin:0 auto 18px;max-width:14ch}
+.fin-hero__lead{font-family:var(--ff);font-size:clamp(16px,1.8vw,20px);color:var(--ink-muted);max-width:54ch;margin:0 auto 36px;line-height:1.5}
+.fin-hero__stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:780px;margin:0 auto}
+.fin-stat{padding:20px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule,#D9CFB7);text-align:center}
+.fin-stat__label{display:block;font-family:var(--fb);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px}
+.fin-stat__value{display:block;font-family:var(--fd);font-weight:500;font-size:28px;color:var(--ink);line-height:1}
+
+/* §2 LIVE COUNTER */
+.fin-live{display:flex;flex-direction:column;align-items:center;gap:16px;padding:32px 0}
+.fin-live__value{font-family:var(--fd);font-weight:400;font-size:clamp(56px,10vw,104px);line-height:1;color:var(--accent);font-feature-settings:"tnum"}
+.fin-live__ticker{display:inline-flex;align-items:center;gap:8px;font-family:var(--fb);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)}
+.fin-live__dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:finPulse 1.6s ease-in-out infinite}
+@keyframes finPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* §3 BREAKDOWN PIE */
+.fin-breakdown{display:grid;grid-template-columns:320px 1fr;gap:48px;align-items:center}
+.fin-breakdown canvas{max-width:320px;max-height:320px}
+.fin-legend{list-style:none;padding:0;margin:0;font-family:var(--fb);font-size:15px}
+.fin-legend li{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px dotted var(--rule,#D9CFB7);color:var(--ink)}
+.fin-legend li:last-child{border-bottom:none}
+.fin-legend strong{margin-left:auto;font-family:var(--fd);font-size:18px;color:var(--ink)}
+.fin-dot{width:14px;height:14px;border-radius:2px;flex-shrink:0}
+.fin-dot--stripe{background:#6772E5}
+.fin-dot--infra{background:#5C8A6E}
+.fin-dot--contrib{background:var(--accent)}
+
+/* §4 SUPPORTERS WALL */
+.fin-supporters{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.fin-supporter{padding:14px 16px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule,#D9CFB7);font-family:var(--fb);font-size:13px}
+.fin-supporter__name{display:block;font-weight:600;color:var(--ink);margin-bottom:2px}
+.fin-supporter__meta{display:block;font-size:11px;color:var(--ink-muted)}
+
+/* §5 TOP ARTICLES */
+.fin-top{list-style:none;padding:0;margin:0;counter-reset:fintop}
+.fin-top__item{display:grid;grid-template-columns:48px 1fr 100px 90px;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--rule,#D9CFB7);counter-increment:fintop}
+.fin-top__item::before{content:counter(fintop);font-family:var(--fd);font-weight:500;font-size:24px;color:var(--ink-light);font-feature-settings:"tnum"}
+.fin-top__title{font-family:var(--ff);font-weight:500;font-size:16px;color:var(--ink);line-height:1.3}
+.fin-top__author{display:block;font-family:var(--fb);font-size:12px;color:var(--ink-muted);margin-top:2px}
+.fin-top__score{font-family:var(--fb);font-size:13px;color:var(--ink-muted);text-align:right;font-feature-settings:"tnum"}
+.fin-top__share{font-family:var(--fd);font-weight:500;font-size:16px;color:var(--accent);text-align:right;font-feature-settings:"tnum"}
+
+/* §6 INFRA COSTS */
+.fin-costs{width:100%;border-collapse:collapse;font-family:var(--fb);font-size:14px}
+.fin-costs th,.fin-costs td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--rule,#D9CFB7)}
+.fin-costs th{font-family:var(--fb);font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted)}
+.fin-costs td:last-child,.fin-costs th:last-child{text-align:right;font-feature-settings:"tnum"}
+.fin-costs tfoot th{border-top:2px solid var(--ink);border-bottom:none;color:var(--ink);font-size:14px;letter-spacing:0;text-transform:none}
+
+/* §7 HISTORY CHART */
+.fin-history{position:relative;height:300px;margin-top:12px}
+
+/* §8 HOW IT WORKS */
+.fin-how{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:24px}
+.fin-how__col{padding:24px;border-top:3px solid var(--accent);background:var(--paper-2,rgba(0,0,0,.02))}
+.fin-how__num{display:block;font-family:var(--fd);font-weight:400;font-size:48px;color:var(--accent);line-height:1;margin-bottom:12px}
+.fin-how__col h3{font-family:var(--ff);font-weight:600;font-size:18px;color:var(--ink);margin:0 0 8px}
+.fin-how__col p{font-family:var(--fb);font-size:14px;color:var(--ink-muted);line-height:1.5;margin:0}
+.fin-how__example{margin-top:24px;padding:16px 20px;background:var(--accent-soft);border-left:3px solid var(--accent);font-family:var(--ff);font-size:15px;color:var(--ink)}
+.fin-how__example strong{color:var(--accent)}
+
+/* §9 CTA */
+.fin-cta{text-align:center;padding:48px 0;border-top:3px double var(--rule,#D9CFB7);border-bottom:3px double var(--rule,#D9CFB7);margin:64px 0 0}
+.fin-cta__buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.fin-cta__note{font-family:var(--fb);font-size:12px;color:var(--ink-light);font-style:italic}
+
+/* §10 ARCHIVE */
+.fin-archive{list-style:none;padding:0;margin:0}
+.fin-archive__item{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--rule,#D9CFB7);font-family:var(--fb);font-size:14px;color:var(--ink)}
+.fin-archive__item--disabled{color:var(--ink-light);font-style:italic}
+.fin-archive__item--disabled:hover{cursor:not-allowed}
+
+/* Bouton € dans masthead */
+.fin-action{padding:6px 10px;background:transparent;border:1px solid var(--rule,#D9CFB7);color:var(--ink);font-family:var(--fb);font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s ease}
+.fin-action:hover{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
+.fin-action svg{width:14px;height:14px}
+
+/* ═══ /DEVENIR-MEMBRE — Avis Basé+ — Phase 3 (UI only) ═════════════════════ */
+
+.mb-view{max-width:920px;margin:0 auto;padding:32px 24px 80px}
+.mb-hero{padding:48px 0 32px;text-align:center;border-bottom:3px double var(--rule,#D9CFB7)}
+.mb-hero__kicker{font-family:var(--fb);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;font-weight:600}
+.mb-hero__title{font-family:var(--fd);font-style:italic;font-weight:500;font-size:clamp(40px,7vw,72px);line-height:1.05;color:var(--ink);margin:0 auto 16px}
+.mb-hero__plus{font-style:normal;color:var(--accent);font-weight:400}
+.mb-hero__lead{font-family:var(--ff);font-size:clamp(16px,1.8vw,19px);color:var(--ink-muted);max-width:54ch;margin:0 auto;line-height:1.6}
+
+.mb-price{margin:48px auto 32px;max-width:420px;border:2px solid var(--ink);padding:32px 28px;text-align:center;background:var(--paper-2,rgba(0,0,0,.02))}
+.mb-price__amount{display:flex;align-items:baseline;justify-content:center;gap:6px;margin-bottom:6px}
+.mb-price__num{font-family:var(--fd);font-weight:500;font-size:72px;color:var(--ink);line-height:1;font-feature-settings:"tnum"}
+.mb-price__per{font-family:var(--fb);font-size:14px;color:var(--ink-muted);font-weight:500}
+.mb-price__sub{font-family:var(--fb);font-size:13px;color:var(--ink-muted);margin-bottom:18px}
+.mb-price__cta{display:block;width:100%;margin-top:8px}
+
+.mb-benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin:56px 0}
+.mb-benefit{padding:24px;border-top:3px solid var(--accent)}
+.mb-benefit h3{font-family:var(--ff);font-weight:600;font-size:17px;color:var(--ink);margin:0 0 8px}
+.mb-benefit p{font-family:var(--fb);font-size:14px;color:var(--ink-muted);line-height:1.55;margin:0}
+
+.mb-consent{margin:32px auto;max-width:540px;padding:18px 20px;background:var(--accent-soft);border-left:3px solid var(--accent);display:flex;gap:12px;align-items:flex-start}
+.mb-consent input[type="checkbox"]{margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+.mb-consent label{font-family:var(--fb);font-size:13px;color:var(--ink);line-height:1.5;cursor:pointer}
+.mb-consent label strong{color:var(--accent)}
+.mb-consent__note{display:block;margin-top:4px;font-size:11px;color:var(--ink-muted);font-style:italic}
+
+.mb-faq{margin-top:56px}
+.mb-faq h2{font-family:var(--fd);font-weight:500;font-size:28px;color:var(--ink);margin-bottom:24px}
+.mb-faq__item{padding:16px 0;border-bottom:1px solid var(--rule,#D9CFB7)}
+.mb-faq__item h4{font-family:var(--ff);font-weight:500;font-size:16px;color:var(--ink);margin:0 0 6px}
+.mb-faq__item p{font-family:var(--fb);font-size:14px;color:var(--ink-muted);line-height:1.55;margin:0}
+
+.mb-back{display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;font-family:var(--fb);font-size:13px;color:var(--ink-muted);text-decoration:none;cursor:pointer;background:none;border:none;padding:8px 0}
+.mb-back:hover{color:var(--accent)}
+
+@media (max-width:768px){
+  .mb-benefits{grid-template-columns:1fr;gap:16px}
+  .mb-price{margin:32px auto 24px}
+  .mb-price__num{font-size:56px}
+}
+
+/* ═══ TIP MODAL (don ponctuel — Phase 3 UI only) ═══════════════════════════ */
+
+.tip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+.tip-amount{padding:14px 0;border:1px solid var(--rule,#D9CFB7);background:var(--surface);font-family:var(--fd);font-weight:500;font-size:22px;color:var(--ink);cursor:pointer;transition:all .15s ease}
+.tip-amount:hover{border-color:var(--accent);color:var(--accent)}
+.tip-amount.on{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
+.tip-libre{display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;border:1px dashed var(--rule,#D9CFB7);font-family:var(--fb);font-size:13px;color:var(--ink-muted)}
+.tip-libre input{flex:1;border:none;background:transparent;font-family:var(--fd);font-weight:500;font-size:22px;color:var(--ink);outline:none;width:100%}
+.tip-libre input::placeholder{color:var(--ink-light)}
+.tip-target{margin:14px 0;font-family:var(--fb);font-size:13px;color:var(--ink-muted)}
+.tip-target select{width:100%;padding:10px;border:1px solid var(--rule,#D9CFB7);background:var(--surface);color:var(--ink);font-family:var(--fb);font-size:14px;margin-top:6px}
+.tip-consent{display:flex;gap:10px;align-items:flex-start;padding:14px;background:var(--paper-2,rgba(0,0,0,.02));margin:14px 0}
+.tip-consent input{margin-top:2px;width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
+.tip-consent label{font-family:var(--fb);font-size:12px;color:var(--ink);line-height:1.5;cursor:pointer}
+.tip-summary{font-family:var(--fb);font-size:13px;color:var(--ink-muted);margin-top:10px;padding:10px 12px;background:var(--accent-soft);border-left:2px solid var(--accent)}
+.tip-summary strong{color:var(--accent);font-family:var(--fd);font-size:16px}
+
+@media (max-width:480px){
+  .tip-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ═══ TIP JAR INLINE — sur les articles (Phase 3 UI only) ══════════════════ */
+
+.tip-inline{margin:32px 0;padding:24px;border:1px solid var(--rule,#D9CFB7);background:var(--paper-2,rgba(0,0,0,.02));border-top:3px solid var(--accent)}
+.tip-inline__head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap}
+.tip-inline__title{font-family:var(--ff);font-weight:600;font-size:18px;color:var(--ink);margin:0}
+.tip-inline__sub{font-family:var(--fb);font-size:12px;color:var(--ink-muted);font-style:italic}
+.tip-inline__lead{font-family:var(--fb);font-size:13px;color:var(--ink-muted);margin:0 0 16px;line-height:1.5}
+.tip-inline__lead strong{color:var(--accent)}
+.tip-inline__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.tip-inline__amt{padding:10px 0;border:1px solid var(--rule,#D9CFB7);background:var(--surface);font-family:var(--fd);font-weight:500;font-size:18px;color:var(--ink);cursor:pointer;transition:all .15s ease}
+.tip-inline__amt:hover{border-color:var(--accent);color:var(--accent)}
+.tip-inline__amt.on{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
+.tip-inline__libre{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px dashed var(--rule,#D9CFB7);margin-bottom:10px;font-family:var(--fb);font-size:12px;color:var(--ink-muted)}
+.tip-inline__libre input{flex:1;border:none;background:transparent;font-family:var(--fd);font-weight:500;font-size:18px;color:var(--ink);outline:none;width:100%}
+.tip-inline__consent{display:flex;gap:8px;align-items:flex-start;font-family:var(--fb);font-size:12px;color:var(--ink-muted);margin-bottom:12px}
+.tip-inline__consent input{margin-top:2px;width:14px;height:14px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.tip-inline__submit{width:100%;padding:12px;background:var(--accent);color:#FDFAF3;border:none;font-family:var(--fb);font-weight:600;font-size:14px;cursor:pointer;transition:background .15s ease}
+.tip-inline__submit:hover{background:var(--accent-dark,#6A1209)}
+.tip-inline__note{font-family:var(--fb);font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px;font-style:italic}
+
+@media (max-width:480px){
+  .tip-inline__grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ═══ /MON-FINANCEMENT — Dashboard contributeur — Phase 5 UI ═══════════════ */
+
+.mf-view{max-width:1100px;margin:0 auto;padding:32px 24px 80px}
+.mf-back{display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;font-family:var(--fb);font-size:13px;color:var(--ink-muted);text-decoration:none;cursor:pointer;background:none;border:none;padding:8px 0}
+.mf-back:hover{color:var(--accent)}
+
+.mf-hero{padding:32px 0 24px;border-bottom:3px double var(--rule,#D9CFB7);text-align:left}
+.mf-hero__kicker{font-family:var(--fb);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:600}
+.mf-hero__title{font-family:var(--fd);font-style:italic;font-weight:500;font-size:clamp(36px,5vw,52px);line-height:1.1;color:var(--ink);margin:0}
+.mf-hero__pseudo{color:var(--accent);font-style:normal}
+.mf-hero__sub{font-family:var(--fb);font-size:14px;color:var(--ink-muted);margin-top:6px}
+
+.mf-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:32px 0}
+.mf-card{padding:24px;border:2px solid var(--ink);background:var(--paper-2,rgba(0,0,0,.02))}
+.mf-card__label{font-family:var(--fb);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px;font-weight:600}
+.mf-card__value{font-family:var(--fd);font-weight:500;font-size:48px;line-height:1;color:var(--ink);font-feature-settings:"tnum"}
+.mf-card__sub{font-family:var(--fb);font-size:12px;color:var(--ink-muted);margin-top:8px}
+.mf-card__cta{margin-top:14px;width:100%}
+.mf-card__cta:disabled{opacity:.55;cursor:not-allowed}
+
+.mf-section{margin:48px 0;padding-top:24px;border-top:1px solid var(--rule,#D9CFB7)}
+.mf-section__title{font-family:var(--ff);font-weight:600;font-size:22px;color:var(--ink);margin:0 0 6px}
+.mf-section__sub{font-family:var(--fb);font-size:13px;color:var(--ink-muted);margin:0 0 18px}
+
+.mf-table{width:100%;border-collapse:collapse;font-family:var(--fb);font-size:13px}
+.mf-table th,.mf-table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--rule,#D9CFB7);vertical-align:top}
+.mf-table th{font-family:var(--fb);font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);background:var(--paper-2,rgba(0,0,0,.02))}
+.mf-table td.num{text-align:right;font-feature-settings:"tnum"}
+.mf-table th.num{text-align:right}
+.mf-table td.share{font-family:var(--fd);font-weight:500;color:var(--accent);font-size:15px}
+.mf-table tfoot th{border-top:2px solid var(--ink);text-transform:none;letter-spacing:0;font-size:13px;color:var(--ink)}
+
+.mf-kyc{display:flex;gap:20px;align-items:center;padding:20px;background:var(--paper-2,rgba(0,0,0,.02));border-left:3px solid var(--accent)}
+.mf-kyc__icon{width:44px;height:44px;flex-shrink:0;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.mf-kyc__body{flex:1}
+.mf-kyc__title{font-family:var(--ff);font-weight:600;font-size:15px;color:var(--ink);margin:0 0 4px}
+.mf-kyc__desc{font-family:var(--fb);font-size:13px;color:var(--ink-muted);line-height:1.5;margin:0}
+.mf-kyc__status{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px}
+.mf-kyc__status--pending{background:#F5D58C;color:#8A5A00}
+.mf-kyc__status--done{background:#9DD4A8;color:#2A5A30}
+[data-theme="dark"] .mf-kyc__status--pending{background:#5A3F00;color:#F5D58C}
+[data-theme="dark"] .mf-kyc__status--done{background:#1F4025;color:#9DD4A8}
+
+.mf-privacy{display:flex;gap:12px;align-items:flex-start;padding:18px 20px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule,#D9CFB7)}
+.mf-privacy input{margin-top:3px;width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.mf-privacy label{font-family:var(--fb);font-size:14px;color:var(--ink);line-height:1.5;cursor:pointer}
+.mf-privacy label strong{display:block;font-weight:600;margin-bottom:2px}
+.mf-privacy label span{display:block;font-size:12px;color:var(--ink-muted);font-style:italic}
+
+.mf-status-badge{display:inline-block;font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px}
+.mf-status-badge--completed{background:#9DD4A8;color:#2A5A30}
+.mf-status-badge--pending{background:#F5D58C;color:#8A5A00}
+.mf-status-badge--failed{background:#F5A3A3;color:#8A2020}
+[data-theme="dark"] .mf-status-badge--completed{background:#1F4025;color:#9DD4A8}
+[data-theme="dark"] .mf-status-badge--pending{background:#5A3F00;color:#F5D58C}
+[data-theme="dark"] .mf-status-badge--failed{background:#5A2020;color:#F5A3A3}
+
+@media (max-width:768px){
+  .mf-cards{grid-template-columns:1fr;gap:14px}
+  .mf-card__value{font-size:36px}
+  .mf-kyc{flex-direction:column;align-items:flex-start;gap:12px}
+  .mf-table th:nth-child(n+3),.mf-table td:nth-child(n+3){display:none}
+}
+
+/* Responsive */
+@media (max-width:768px){
+  .fin-hero__stats{grid-template-columns:1fr;gap:12px}
+  .fin-breakdown{grid-template-columns:1fr;gap:24px}
+  .fin-breakdown canvas{margin:0 auto}
+  .fin-how{grid-template-columns:1fr;gap:20px}
+  .fin-top__item{grid-template-columns:32px 1fr 80px;gap:10px}
+  .fin-top__share{grid-column:2/-1;text-align:left;color:var(--accent);font-size:14px}
+}
 </style>
 </head>
 <body>
@@ -4991,6 +5243,12 @@ body.is-mobile .notif-bell{width:32px;height:32px}
           </div>
         </div>
       </div>
+
+      <!-- v0.17.0 — Bouton accès page /financement -->
+      <button class="fin-action" id="finNavBtn" aria-label="Économie d'Avis Basé">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Financement</span>
+      </button>
       <button class="mh-action" id="themeToggle" aria-label="Thème">
         <svg id="themeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
       </button>
@@ -5049,6 +5307,10 @@ body.is-mobile .notif-bell{width:32px;height:32px}
           <button class="nav-menu__item" id="navMyContribBtn" style="display:none">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
             Mes contributions
+          </button>
+          <button class="nav-menu__item" id="navMyFinBtn" style="display:none">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Mon financement
           </button>
 
           <!-- Section Admin -->
@@ -5297,6 +5559,365 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 <div class="empty" id="empty" style="display:none">
   <div class="empty__icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/></svg></div>
   <h2 class="empty__title">Aucune source</h2>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     /FINANCEMENT — Économie collaborative
+     v0.17.0 — Phase 1 (squelette + mock data)
+═══════════════════════════════════════════ -->
+<main id="financementView" class="fin-view" role="main" style="display:none">
+
+  <!-- §1 HERO -->
+  <section class="fin-hero">
+    <div class="fin-hero__kicker">Transparence intégrale</div>
+    <h1 class="fin-hero__title">L'économie d'<em>Avis Basé</em></h1>
+    <p class="fin-hero__lead">On vous doit la vérité. On vous doit aussi les chiffres. Voici, en temps réel, d'où vient l'argent et où il va.</p>
+    <div class="fin-hero__stats">
+      <div class="fin-stat">
+        <span class="fin-stat__label">Pool du mois en cours</span>
+        <span class="fin-stat__value" id="finHeroPool">€0,00</span>
+      </div>
+      <div class="fin-stat">
+        <span class="fin-stat__label">Membres actifs</span>
+        <span class="fin-stat__value" id="finHeroMembers">0</span>
+      </div>
+      <div class="fin-stat">
+        <span class="fin-stat__label">Tips ce mois</span>
+        <span class="fin-stat__value" id="finHeroTips">€0,00</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- §2 LIVE COUNTER -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Pool en cours — <span id="finCurrentMonth">—</span></h2>
+    <p class="fin-section__sub">Montant cumulé pour ce mois, reversé aux contributeurs le 1<sup>er</sup> du mois suivant après déduction des frais réels.</p>
+    <div class="fin-live">
+      <span class="fin-live__value" id="finLivePool">€0,00</span>
+      <span class="fin-live__ticker" aria-live="polite">
+        <span class="fin-live__dot"></span>
+        <span>mise à jour temps réel</span>
+      </span>
+    </div>
+    <p class="fin-section__note">Compteur branché sur Supabase Realtime en Phase 4. Pour l'instant, animation simulée à partir de mock data.</p>
+  </section>
+
+  <!-- §3 BREAKDOWN PIE -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Où va l'argent ?</h2>
+    <p class="fin-section__sub">Sur chaque euro versé, voici exactement comment il se répartit. Aucun salaire admin — 100% du surplus revient aux contributeurs.</p>
+    <div class="fin-breakdown">
+      <canvas id="finBreakdownChart" width="320" height="320" aria-label="Répartition des revenus"></canvas>
+      <ul class="fin-legend">
+        <li><span class="fin-dot fin-dot--stripe"></span> Frais Stripe (réels) <strong id="finBreakdownStripe">5 %</strong></li>
+        <li><span class="fin-dot fin-dot--infra"></span> Infra (Supabase, Cloudflare, domaine) <strong id="finBreakdownInfra">8 %</strong></li>
+        <li><span class="fin-dot fin-dot--contrib"></span> Reversé aux contributeurs <strong id="finBreakdownContrib">87 %</strong></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- §4 SUPPORTERS WALL -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Mur des soutiens</h2>
+    <p class="fin-section__sub">Seuls les membres et donateurs qui ont coché « afficher mon nom » apparaissent ici. Anonyme par défaut.</p>
+    <div class="fin-supporters" id="finSupporters"></div>
+  </section>
+
+  <!-- §5 TOP ARTICLES -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Articles rémunérés ce mois</h2>
+    <p class="fin-section__sub">Classement par score d'engagement (vues × 0,3 + read time × 0,5 + engagement × 0,2). Auteurs affichés en pseudo stable « Auteur #N » par défaut.</p>
+    <ol class="fin-top" id="finTopArticles"></ol>
+  </section>
+
+  <!-- §6 INFRA COSTS -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Frais réels d'infrastructure</h2>
+    <p class="fin-section__sub">Saisis manuellement chaque mois par l'admin. Les factures originales seront téléchargeables en Phase 6.</p>
+    <table class="fin-costs">
+      <thead><tr><th>Poste</th><th>Mensuel</th></tr></thead>
+      <tbody id="finCostsRows"></tbody>
+      <tfoot><tr><th>Total</th><th id="finCostsTotal">€0,00</th></tr></tfoot>
+    </table>
+  </section>
+
+  <!-- §7 HISTORY CHART -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Historique — 12 derniers mois</h2>
+    <p class="fin-section__sub">Revenus totaux, pool contributeurs, et nombre de membres mois par mois.</p>
+    <div class="fin-history">
+      <canvas id="finHistoryChart" aria-label="Historique 12 mois"></canvas>
+    </div>
+  </section>
+
+  <!-- §8 HOW IT WORKS -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Comment ça marche ?</h2>
+    <div class="fin-how">
+      <div class="fin-how__col">
+        <span class="fin-how__num">1</span>
+        <h3>Adhésion 5 €/mois</h3>
+        <p>Vous payez via Stripe. L'argent atterrit sur un compte dédié. Aucun reversement avant la clôture mensuelle.</p>
+      </div>
+      <div class="fin-how__col">
+        <span class="fin-how__num">2</span>
+        <h3>Score par article</h3>
+        <p>Vues uniques × 0,3 + read time × 0,5 + engagement × 0,2. Anti-fraude : 1 vue = 1 user/jour, minimum 10 secondes, auteur exclu de ses propres vues.</p>
+      </div>
+      <div class="fin-how__col">
+        <span class="fin-how__num">3</span>
+        <h3>Reversement le 1<sup>er</sup></h3>
+        <p>Le pool (revenus − frais Stripe − infra réels) est partagé au prorata des scores. Virement Stripe Connect dès 20 €.</p>
+      </div>
+    </div>
+    <p class="fin-how__example">
+      <strong>Exemple chiffré :</strong> un article qui fait 1 000 vues uniques + 200 likes + 30 commentaires ce mois → environ <strong>3,40 €</strong> reversés à l'auteur, pour un pool de 400 € réparti sur 120 articles actifs.
+    </p>
+  </section>
+
+  <!-- §9 CTA -->
+  <section class="fin-cta">
+    <div class="fin-cta__buttons">
+      <button class="btn btn--accent btn--lg" id="finMemberBtn">Devenir membre — 5 €/mois</button>
+      <button class="btn btn--outline btn--lg" id="finTipBtn">Faire un don ponctuel</button>
+    </div>
+    <p class="fin-cta__note">Les boutons ouvrent les pages d'adhésion / don. Paiement Stripe activé en Phase 3 (en cours).</p>
+  </section>
+
+  <!-- §10 ARCHIVE PDF -->
+  <section class="fin-section">
+    <h2 class="fin-section__title">Archive — rapports mensuels</h2>
+    <p class="fin-section__sub">Snapshot immuable de chaque clôture mensuelle. PDF générés automatiquement en Phase 6.</p>
+    <ul class="fin-archive" id="finArchive"></ul>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════
+     /DEVENIR-MEMBRE — Avis Basé+
+     v0.17.0 — Phase 3 (UI only — Stripe à câbler)
+═══════════════════════════════════════════ -->
+<main id="membreView" class="mb-view" role="main" style="display:none">
+  <button class="mb-back" id="mbBackBtn" type="button">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Retour au financement
+  </button>
+
+  <section class="mb-hero">
+    <div class="mb-hero__kicker">Soutenir Avis Basé</div>
+    <h1 class="mb-hero__title">Avis Basé<span class="mb-hero__plus">+</span></h1>
+    <p class="mb-hero__lead">5 € par mois pour financer un média indépendant qui source tout. 100 % du surplus reversé aux contributeurs au prorata de leurs articles. Aucun salaire admin. Zéro pub.</p>
+  </section>
+
+  <div class="mb-price">
+    <div class="mb-price__amount">
+      <span class="mb-price__num">5 €</span>
+      <span class="mb-price__per">/ mois</span>
+    </div>
+    <p class="mb-price__sub">Résiliable à tout moment depuis votre portail Stripe.</p>
+    <button class="btn btn--accent btn--lg mb-price__cta" id="mbCheckoutBtn">Devenir membre maintenant</button>
+  </div>
+
+  <div class="mb-consent">
+    <input type="checkbox" id="mbConsent">
+    <label for="mbConsent">
+      <strong>Afficher mon nom sur le Mur des Soutiens</strong>
+      <span class="mb-consent__note">Anonyme par défaut. Vous pouvez changer d'avis à tout moment dans votre portail membre. À la fin de votre adhésion, votre nom est retiré automatiquement.</span>
+    </label>
+  </div>
+
+  <div class="mb-benefits">
+    <div class="mb-benefit">
+      <h3>Soutenir la rédaction</h3>
+      <p>5 € qui financent l'infra (Supabase, Cloudflare, domaine) et reversent le surplus aux auteurs. Pas de salaire admin, pas de fonds bloqués.</p>
+    </div>
+    <div class="mb-benefit">
+      <h3>Mur des Soutiens</h3>
+      <p>Si vous le souhaitez (opt-in), votre pseudo apparaît sur la page <a href="#financement">/financement</a>. Anonyme par défaut.</p>
+    </div>
+    <div class="mb-benefit">
+      <h3>Transparence totale</h3>
+      <p>Pool, frais, virements : tout est public sur <a href="#financement">/financement</a>. Archive mensuelle immuable.</p>
+    </div>
+  </div>
+
+  <section class="mb-faq">
+    <h2>Questions fréquentes</h2>
+    <div class="mb-faq__item">
+      <h4>Que se passe-t-il avec mes 5 € ?</h4>
+      <p>Le 1er du mois suivant, on déduit les frais Stripe réels (~5%) et les frais infra (~8%). Le reste va dans le pool contributeurs, partagé au prorata des scores d'articles publiés ce mois.</p>
+    </div>
+    <div class="mb-faq__item">
+      <h4>Comment résilier ?</h4>
+      <p>Depuis votre portail Stripe (lien dans votre profil après adhésion). Effectif à la fin de la période en cours, aucun prélèvement supplémentaire.</p>
+    </div>
+    <div class="mb-faq__item">
+      <h4>Avis Basé, c'est qui ?</h4>
+      <p>Un média collaboratif sourcé, créé par <a href="https://www.tiktok.com/@avis_base.nth" target="_blank" rel="noopener">@avis_base.nth</a> sur TikTok. Tous les articles sont écrits par la communauté avec sources citées.</p>
+    </div>
+    <div class="mb-faq__item">
+      <h4>Pourquoi 5 € et pas 3 € ou 10 € ?</h4>
+      <p>Suffisant pour couvrir l'infra dès une trentaine de membres, assez peu pour que ce soit accessible. Si vous voulez donner plus, vous pouvez faire un <em>don ponctuel</em> en plus (100% au contributeur, 0 commission).</p>
+    </div>
+    <div class="mb-faq__item">
+      <h4>Et si je veux juste donner une fois ?</h4>
+      <p>Utilisez le bouton « <a href="#financement">Faire un don ponctuel</a> » sur la page financement, ou le <em>tip jar</em> sur l'article de votre choix (Phase 3 — bientôt).</p>
+    </div>
+  </section>
+</main>
+
+<!-- ═══════════════════════════════════════════
+     /MON-FINANCEMENT — Dashboard contributeur
+     v0.17.0 — Phase 5 UI (mock data, KYC stub)
+═══════════════════════════════════════════ -->
+<main id="monFinView" class="mf-view" role="main" style="display:none">
+  <button class="mf-back" id="mfBackBtn" type="button">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Retour
+  </button>
+
+  <section class="mf-hero">
+    <div class="mf-hero__kicker">Mon financement</div>
+    <h1 class="mf-hero__title">Bonjour <span class="mf-hero__pseudo" id="mfPseudo">@vous</span></h1>
+    <p class="mf-hero__sub">Mois en cours : <span id="mfCurrentMonth">—</span></p>
+  </section>
+
+  <div class="mf-cards">
+    <div class="mf-card">
+      <div class="mf-card__label">Cagnotte ce mois</div>
+      <div class="mf-card__value" id="mfBalance">€0,00</div>
+      <div class="mf-card__sub" id="mfBalanceSub">Seuil de virement : 20 €. Le surplus est cumulé.</div>
+      <button class="btn btn--accent mf-card__cta" id="mfPayoutBtn">Demander un virement</button>
+    </div>
+    <div class="mf-card">
+      <div class="mf-card__label">Total reversé depuis le début</div>
+      <div class="mf-card__value" id="mfTotalEarned">€0,00</div>
+      <div class="mf-card__sub" id="mfArticlesCount">— articles rémunérés</div>
+      <button class="btn btn--ghost mf-card__cta" id="mfHistoryBtn">Voir l'historique →</button>
+    </div>
+  </div>
+
+  <section class="mf-section">
+    <h2 class="mf-section__title">Mes articles ce mois</h2>
+    <p class="mf-section__sub">Score calculé d'après vues uniques × 0,3 + read time × 0,5 + engagement × 0,2. Part estimée si la clôture mensuelle avait lieu maintenant.</p>
+    <table class="mf-table" id="mfArticlesTable">
+      <thead>
+        <tr>
+          <th>Article</th>
+          <th class="num">Vues</th>
+          <th class="num">Read time avg</th>
+          <th class="num">Engagement</th>
+          <th class="num">Score</th>
+          <th class="num">Part estimée</th>
+        </tr>
+      </thead>
+      <tbody id="mfArticlesRows"></tbody>
+      <tfoot>
+        <tr>
+          <th colspan="4">Total estimé du mois</th>
+          <th class="num" id="mfArticlesTotalScore">0</th>
+          <th class="num" id="mfArticlesTotalShare">€0,00</th>
+        </tr>
+      </tfoot>
+    </table>
+  </section>
+
+  <section class="mf-section">
+    <h2 class="mf-section__title">KYC Stripe Connect</h2>
+    <p class="mf-section__sub">Stripe te demande de vérifier ton identité avant le premier virement (obligation légale : KYC/AML). Une fois fait, c'est valable à vie.</p>
+    <div class="mf-kyc">
+      <div class="mf-kyc__icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="mf-kyc__body">
+        <h3 class="mf-kyc__title">Compte Stripe Connect Express</h3>
+        <p class="mf-kyc__desc">L'onboarding prend ~5 minutes. Aucun frais de création. Stripe te demandera : nom, date de naissance, IBAN.</p>
+      </div>
+      <span class="mf-kyc__status mf-kyc__status--pending" id="mfKycStatus">Non activé</span>
+      <button class="btn btn--accent" id="mfKycBtn">Activer mon compte</button>
+    </div>
+  </section>
+
+  <section class="mf-section">
+    <h2 class="mf-section__title">Confidentialité</h2>
+    <p class="mf-section__sub">Tu peux changer d'avis à tout moment. À la fin de ton activité contributeur, ton pseudo est retiré automatiquement.</p>
+    <label class="mf-privacy">
+      <input type="checkbox" id="mfPublicConsent">
+      <span>
+        <strong>Afficher mon pseudo sur le Mur des Soutiens et le classement des articles rémunérés</strong>
+        <span>Anonyme par défaut. Si désactivé, tu apparais en « Auteur #N » sur les pages publiques.</span>
+      </span>
+    </label>
+  </section>
+
+  <section class="mf-section">
+    <h2 class="mf-section__title">Historique des virements</h2>
+    <p class="mf-section__sub">Tous les virements reçus depuis ton activation Stripe Connect.</p>
+    <table class="mf-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th class="num">Montant</th>
+          <th>Statut</th>
+          <th>Transfer ID</th>
+        </tr>
+      </thead>
+      <tbody id="mfPayoutsRows"></tbody>
+    </table>
+    <p class="fin-section__note" id="mfPayoutsEmpty" style="display:none">Aucun virement pour l'instant — le premier sera déclenché dès que ta cagnotte atteindra 20 €.</p>
+  </section>
+</main>
+
+<!-- ═══════════════════════════════════════════
+     TIP MODAL — don ponctuel
+     v0.17.0 — Phase 3 (UI only)
+═══════════════════════════════════════════ -->
+<div class="modal" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="tipModalTitle">
+  <div class="modal__backdrop" data-tip-close></div>
+  <div class="modal__box modal__box--sm">
+    <div class="modal__head">
+      <div>
+        <div class="modal__title" id="tipModalTitle">Faire un don ponctuel</div>
+        <div class="modal__title-sub">100 % au contributeur, 0 commission</div>
+      </div>
+      <button class="modal__close" type="button" data-tip-close aria-label="Fermer">×</button>
+    </div>
+    <div class="modal__body">
+      <p style="font-family:var(--fb);font-size:13px;color:var(--ink-muted);margin:0 0 10px">Choisissez un montant :</p>
+      <div class="tip-grid" id="tipGrid">
+        <button class="tip-amount" data-tip-amount="1">1 €</button>
+        <button class="tip-amount on" data-tip-amount="3">3 €</button>
+        <button class="tip-amount" data-tip-amount="5">5 €</button>
+        <button class="tip-amount" data-tip-amount="10">10 €</button>
+      </div>
+      <div class="tip-libre">
+        <span>ou libre :</span>
+        <input type="number" id="tipLibre" min="1" max="1000" step="0.50" placeholder="autre montant…" inputmode="decimal">
+        <span>€</span>
+      </div>
+
+      <div class="tip-target">
+        <label for="tipTarget">Bénéficiaire</label>
+        <select id="tipTarget">
+          <option value="pool">Pool général (partagé au prorata des scores)</option>
+          <option value="article" disabled>Un article spécifique (à choisir depuis la page article — bientôt)</option>
+        </select>
+      </div>
+
+      <div class="tip-consent">
+        <input type="checkbox" id="tipConsent">
+        <label for="tipConsent">Afficher mon pseudo et mon montant sur le Mur des Soutiens (anonyme par défaut)</label>
+      </div>
+
+      <div class="tip-summary">
+        Total : <strong id="tipSummaryAmount">3,00 €</strong> — <span id="tipSummaryTarget">au pool général</span>
+      </div>
+    </div>
+    <div class="modal__foot">
+      <button class="btn btn--ghost" type="button" data-tip-close>Annuler</button>
+      <button class="btn btn--accent" type="button" id="tipSubmitBtn">Envoyer le tip</button>
+    </div>
+  </div>
 </div>
 
 <section class="app-cta" id="appDownload" aria-labelledby="appCtaTitle">
@@ -7650,13 +8271,84 @@ function switchView(view) {
   const gridArc = document.getElementById('grid');
   const emptyArt = document.getElementById('emptyArticles');
   const emptyArc = document.getElementById('empty');
+  const finView = document.getElementById('financementView');
+  const mbView = document.getElementById('membreView');
+  const mfView = document.getElementById('monFinView');
+  // v0.17.0 — wrappers homepage à masquer en vue financement/membre/monFin
+  const homeLayout = document.getElementById('homepageLayout');
+  const homeExtras = document.getElementById('homepageExtras');
+  const appDownload = document.getElementById('appDownload');
+  const articlesPager = document.getElementById('articlesPager');
 
-  if (view === 'articles') {
+  // Toujours arrêter le ticker live + masquer les vues opt-in par défaut
+  if (typeof Financement !== 'undefined') Financement.stopLiveTicker();
+  if (finView) finView.style.display = 'none';
+  if (mbView) mbView.style.display = 'none';
+  if (mfView) mfView.style.display = 'none';
+
+  if (view === 'financement') {
+    if (featured) featured.style.display = 'none';
+    if (searchBar) searchBar.style.display = 'none';
+    if (toolArt) toolArt.style.display = 'none';
+    if (toolArc) toolArc.style.display = 'none';
+    if (gridArt) gridArt.style.display = 'none';
+    if (gridArc) gridArc.style.display = 'none';
+    if (emptyArt) emptyArt.style.display = 'none';
+    if (emptyArc) emptyArc.style.display = 'none';
+    if (homeLayout) homeLayout.style.display = 'none';
+    if (homeExtras) homeExtras.style.display = 'none';
+    if (appDownload) appDownload.style.display = 'none';
+    if (articlesPager) articlesPager.style.display = 'none';
+    if (finView) finView.style.display = 'block';
+    if (typeof Financement !== 'undefined') {
+      Financement.render();
+      Financement.startLiveTicker();
+    }
+    try { history.replaceState(null, '', '#financement'); } catch {}
+    window.scrollTo({top:0, behavior:'instant'});
+  } else if (view === 'membre') {
+    if (featured) featured.style.display = 'none';
+    if (searchBar) searchBar.style.display = 'none';
+    if (toolArt) toolArt.style.display = 'none';
+    if (toolArc) toolArc.style.display = 'none';
+    if (gridArt) gridArt.style.display = 'none';
+    if (gridArc) gridArc.style.display = 'none';
+    if (emptyArt) emptyArt.style.display = 'none';
+    if (emptyArc) emptyArc.style.display = 'none';
+    if (homeLayout) homeLayout.style.display = 'none';
+    if (homeExtras) homeExtras.style.display = 'none';
+    if (appDownload) appDownload.style.display = 'none';
+    if (articlesPager) articlesPager.style.display = 'none';
+    if (mbView) mbView.style.display = 'block';
+    try { history.replaceState(null, '', '#devenir-membre'); } catch {}
+    window.scrollTo({top:0, behavior:'instant'});
+  } else if (view === 'mon-financement') {
+    if (featured) featured.style.display = 'none';
+    if (searchBar) searchBar.style.display = 'none';
+    if (toolArt) toolArt.style.display = 'none';
+    if (toolArc) toolArc.style.display = 'none';
+    if (gridArt) gridArt.style.display = 'none';
+    if (gridArc) gridArc.style.display = 'none';
+    if (emptyArt) emptyArt.style.display = 'none';
+    if (emptyArc) emptyArc.style.display = 'none';
+    if (homeLayout) homeLayout.style.display = 'none';
+    if (homeExtras) homeExtras.style.display = 'none';
+    if (appDownload) appDownload.style.display = 'none';
+    if (articlesPager) articlesPager.style.display = 'none';
+    if (mfView) mfView.style.display = 'block';
+    if (typeof MonFin !== 'undefined') MonFin.render();
+    try { history.replaceState(null, '', '#mon-financement'); } catch {}
+    window.scrollTo({top:0, behavior:'instant'});
+  } else if (view === 'articles') {
     if (searchBar) searchBar.style.display = '';
     if (toolArt) toolArt.style.display = 'none';
     if (toolArc) toolArc.style.display = 'none';
     if (gridArc) gridArc.style.display = 'none';
     if (emptyArc) emptyArc.style.display = 'none';
+    // Restaurer les wrappers homepage (cas où on revient depuis #financement / #devenir-membre)
+    if (homeLayout) homeLayout.style.display = '';
+    if (homeExtras) homeExtras.style.display = '';
+    if (appDownload) appDownload.style.display = '';
     renderArticles();
     try { history.replaceState(null, '', '#articles'); } catch {}
   } else {
@@ -7666,6 +8358,9 @@ function switchView(view) {
     if (toolArc) toolArc.style.display = 'block';
     if (gridArt) gridArt.style.display = 'none';
     if (emptyArt) emptyArt.style.display = 'none';
+    if (homeLayout) homeLayout.style.display = 'none';
+    if (homeExtras) homeExtras.style.display = 'none';
+    if (appDownload) appDownload.style.display = 'none';
     render();
     try { history.replaceState(null, '', '#archive'); } catch {}
   }
@@ -7999,8 +8694,12 @@ function renderArticlePage(a) {
     <div class="article-page__body">${renderArticleMarkdown(a.bodyMarkdown)}</div>
     ${renderCredibilityCard(a.citedSources)}
     ${citedSection}
+    ${a.status === 'published' && (!currentUser || a.authorId !== currentUser.id) ? renderTipJarInline(a) : ''}
     ${a.status === 'published' ? renderArticleVoteBar(a) : ''}
   `;
+
+  // v0.17.0 Phase 3 — bind tip jar inline (si rendu)
+  body.querySelectorAll('.tip-inline[data-tip-article]').forEach(el => bindTipJarInline(el));
 
   document.getElementById('articleBackBtn')?.addEventListener('click', () => { closeModal('articlePageModal'); });
   document.getElementById('editArticleBtn')?.addEventListener('click', () => { closeModal('articlePageModal'); openArticleEditorForEdit(a.id); });
@@ -11041,6 +11740,594 @@ function bindV09Handlers() {
 }
 
 
+// ═══════════════════════════════════════════════════════════
+// v0.17.0 — FINANCEMENT (Phase 1 : squelette + mock data)
+// Sera branché sur Supabase + Stripe dans les phases suivantes.
+// ═══════════════════════════════════════════════════════════
+
+const FINANCEMENT_MOCK = {
+  current_month: '2026-05',
+  current_month_label: 'Mai 2026',
+  pool_eur: 412.83,
+  members_count: 87,
+  tips_eur: 142.50,
+  breakdown_pct: { stripe: 5, infra: 8, contributors: 87 },
+  supporters: [
+    {name:'@marie_l', tier:'membre', since_months:6},
+    {name:'@nathanT', tier:'membre', since_months:6},
+    {name:'@kev42', tier:'membre', since_months:3},
+    {name:'@léa.b', tier:'membre', since_months:3},
+    {name:'@toulousain_07', tier:'membre', since_months:2},
+    {name:'@sami_p', tier:'tip', amount_eur:10},
+    {name:'@anouar', tier:'membre', since_months:1},
+    {name:'@karine_pp', tier:'membre', since_months:1},
+    {name:'@valeria', tier:'tip', amount_eur:25},
+    {name:'@mehdi.k', tier:'membre', since_months:5},
+    {name:'@philippe_R', tier:'tip', amount_eur:5},
+    {name:'@yael', tier:'membre', since_months:4}
+  ],
+  top_articles: [
+    {rank:1, title:'Pourquoi les chiffres du chômage cachent une réalité différente', author:'Auteur #3', score:8742, share_cents:3420},
+    {rank:2, title:'La désinformation russe en France : 5 leviers documentés', author:'Auteur #7', score:7211, share_cents:2820},
+    {rank:3, title:'Climat : ce que dit vraiment le dernier rapport GIEC (lecture intégrale)', author:'Auteur #1', score:6845, share_cents:2680},
+    {rank:4, title:'Israël/Palestine : reconstruction chronologique des 18 derniers mois', author:'Auteur #12', score:5933, share_cents:2320},
+    {rank:5, title:'IA et journalisme : 9 expériences ratées, 3 qui ont marché', author:'Auteur #5', score:5104, share_cents:2000},
+    {rank:6, title:'Sondages présidentielle : méthodologie comparée des 6 instituts', author:'Auteur #2', score:4621, share_cents:1810},
+    {rank:7, title:'Logement étudiant : carte interactive des prix réels 2025-2026', author:'Auteur #18', score:4203, share_cents:1650},
+    {rank:8, title:'Cyberattaques sur les hôpitaux : ce qu\'on sait, ce qu\'on cache', author:'Auteur #9', score:3884, share_cents:1520},
+    {rank:9, title:'Énergie nucléaire : la vérité sur le coût réel du parc français', author:'Auteur #4', score:3517, share_cents:1380},
+    {rank:10, title:'Migrations : les chiffres de l\'INSEE vs ceux d\'Eurostat', author:'Auteur #15', score:3204, share_cents:1260}
+  ],
+  infra_costs: [
+    {label:'Supabase Pro', amount:25.00},
+    {label:'Cloudflare Pages', amount:0.00},
+    {label:'Domaine avis-base.com', amount:1.25},
+    {label:'Comptable (mensualisé)', amount:8.33}
+  ],
+  history_12mo: [
+    {month:'2025-06', revenue:0, pool:0, members:0},
+    {month:'2025-07', revenue:0, pool:0, members:0},
+    {month:'2025-08', revenue:0, pool:0, members:0},
+    {month:'2025-09', revenue:55, pool:36, members:11},
+    {month:'2025-10', revenue:115, pool:90, members:23},
+    {month:'2025-11', revenue:185, pool:152, members:37},
+    {month:'2025-12', revenue:275, pool:231, members:55},
+    {month:'2026-01', revenue:355, pool:301, members:71},
+    {month:'2026-02', revenue:380, pool:323, members:76},
+    {month:'2026-03', revenue:395, pool:336, members:79},
+    {month:'2026-04', revenue:425, pool:362, members:85},
+    {month:'2026-05', revenue:435, pool:370, members:87}
+  ],
+  archive: [
+    {month:'2026-04', label:'Avril 2026'},
+    {month:'2026-03', label:'Mars 2026'},
+    {month:'2026-02', label:'Février 2026'}
+  ]
+};
+
+const Financement = {
+  _liveTimer: null,
+  _breakdownChart: null,
+  _historyChart: null,
+  _rendered: false,
+  fmt(n) {
+    return '€' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  },
+  fmtCents(c) {
+    return this.fmt(c / 100);
+  },
+  render() {
+    const M = FINANCEMENT_MOCK;
+    // Hero
+    const heroPool = document.getElementById('finHeroPool');
+    if (heroPool) heroPool.textContent = this.fmt(M.pool_eur);
+    const heroMembers = document.getElementById('finHeroMembers');
+    if (heroMembers) heroMembers.textContent = M.members_count.toString();
+    const heroTips = document.getElementById('finHeroTips');
+    if (heroTips) heroTips.textContent = this.fmt(M.tips_eur);
+
+    // Live counter
+    const monthLabel = document.getElementById('finCurrentMonth');
+    if (monthLabel) monthLabel.textContent = M.current_month_label;
+    const livePool = document.getElementById('finLivePool');
+    if (livePool) livePool.textContent = this.fmt(M.pool_eur);
+
+    // Breakdown legend (already in HTML, just override percentages)
+    const bs = document.getElementById('finBreakdownStripe');
+    if (bs) bs.textContent = M.breakdown_pct.stripe + ' %';
+    const bi = document.getElementById('finBreakdownInfra');
+    if (bi) bi.textContent = M.breakdown_pct.infra + ' %';
+    const bc = document.getElementById('finBreakdownContrib');
+    if (bc) bc.textContent = M.breakdown_pct.contributors + ' %';
+
+    // Supporters
+    const sup = document.getElementById('finSupporters');
+    if (sup) {
+      sup.innerHTML = M.supporters.map(s => {
+        const meta = s.tier === 'membre'
+          ? `Membre — ${s.since_months} mois`
+          : `Don ponctuel — ${this.fmt(s.amount_eur)}`;
+        return `<div class="fin-supporter"><span class="fin-supporter__name">${s.name}</span><span class="fin-supporter__meta">${meta}</span></div>`;
+      }).join('');
+    }
+
+    // Top articles
+    const top = document.getElementById('finTopArticles');
+    if (top) {
+      top.innerHTML = M.top_articles.map(a => `
+        <li class="fin-top__item">
+          <div>
+            <div class="fin-top__title">${a.title}</div>
+            <span class="fin-top__author">${a.author}</span>
+          </div>
+          <span class="fin-top__score">score ${a.score.toLocaleString('fr-FR')}</span>
+          <span class="fin-top__share">${this.fmtCents(a.share_cents)}</span>
+        </li>
+      `).join('').replace(/^<li/, '<li').trim();
+    }
+
+    // Infra costs
+    const rows = document.getElementById('finCostsRows');
+    let total = 0;
+    if (rows) {
+      rows.innerHTML = M.infra_costs.map(c => {
+        total += c.amount;
+        return `<tr><td>${c.label}</td><td>${this.fmt(c.amount)}</td></tr>`;
+      }).join('');
+    }
+    const totalEl = document.getElementById('finCostsTotal');
+    if (totalEl) totalEl.textContent = this.fmt(total);
+
+    // Archive
+    const arc = document.getElementById('finArchive');
+    if (arc) {
+      arc.innerHTML = M.archive.map(a =>
+        `<li class="fin-archive__item fin-archive__item--disabled"><span>${a.label}</span><span>PDF — généré en Phase 6</span></li>`
+      ).join('');
+    }
+
+    // Charts (only render once Chart.js is loaded)
+    this.renderCharts();
+
+    this._rendered = true;
+  },
+  renderCharts() {
+    if (typeof Chart === 'undefined') {
+      // Chart.js pas encore chargé (defer) — retente dans 200ms
+      setTimeout(() => this.renderCharts(), 200);
+      return;
+    }
+    const M = FINANCEMENT_MOCK;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const inkColor = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#1A1108';
+    const inkMuted = getComputedStyle(document.documentElement).getPropertyValue('--ink-muted').trim() || '#6B5C48';
+    const ruleColor = isDark ? 'rgba(237,227,207,.15)' : 'rgba(0,0,0,.1)';
+
+    // Breakdown pie
+    const pieCanvas = document.getElementById('finBreakdownChart');
+    if (pieCanvas) {
+      if (this._breakdownChart) this._breakdownChart.destroy();
+      this._breakdownChart = new Chart(pieCanvas, {
+        type: 'doughnut',
+        data: {
+          labels: ['Frais Stripe', 'Infra', 'Contributeurs'],
+          datasets: [{
+            data: [M.breakdown_pct.stripe, M.breakdown_pct.infra, M.breakdown_pct.contributors],
+            backgroundColor: ['#6772E5', '#5C8A6E', getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8C1C13'],
+            borderColor: isDark ? '#15110B' : '#FDFAF3',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: false,
+          plugins: {legend:{display:false}, tooltip:{enabled:true}},
+          cutout: '62%'
+        }
+      });
+    }
+
+    // History line
+    const lineCanvas = document.getElementById('finHistoryChart');
+    if (lineCanvas) {
+      if (this._historyChart) this._historyChart.destroy();
+      const months = M.history_12mo.map(h => h.month.slice(5) + '/' + h.month.slice(2,4));
+      this._historyChart = new Chart(lineCanvas, {
+        type: 'line',
+        data: {
+          labels: months,
+          datasets: [
+            {label:'Revenus', data: M.history_12mo.map(h => h.revenue), borderColor:'#6772E5', backgroundColor:'rgba(103,114,229,.1)', tension:.3, fill:false},
+            {label:'Pool contributeurs', data: M.history_12mo.map(h => h.pool), borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8C1C13', backgroundColor:'rgba(140,28,19,.1)', tension:.3, fill:true},
+            {label:'Membres', data: M.history_12mo.map(h => h.members), borderColor:'#5C8A6E', backgroundColor:'rgba(92,138,110,.1)', tension:.3, fill:false, yAxisID:'y1'}
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {mode:'index', intersect:false},
+          plugins: {
+            legend: {labels:{color:inkColor, font:{family:'Manrope', size:12}}}
+          },
+          scales: {
+            x: {ticks:{color:inkMuted}, grid:{color:ruleColor}},
+            y: {ticks:{color:inkMuted, callback:v=>'€'+v}, grid:{color:ruleColor}, beginAtZero:true},
+            y1: {position:'right', ticks:{color:inkMuted}, grid:{display:false}, beginAtZero:true}
+          }
+        }
+      });
+    }
+  },
+  startLiveTicker() {
+    if (this._liveTimer) return;
+    let pool = FINANCEMENT_MOCK.pool_eur;
+    this._liveTimer = setInterval(() => {
+      // Fake : ajoute aléatoirement 0,01-0,05€ toutes les ~3-7s
+      if (Math.random() < 0.4) {
+        pool += (Math.random() * 0.04 + 0.01);
+        const el = document.getElementById('finLivePool');
+        if (el) el.textContent = this.fmt(pool);
+        const heroEl = document.getElementById('finHeroPool');
+        if (heroEl) heroEl.textContent = this.fmt(pool);
+      }
+    }, 2500);
+  },
+  stopLiveTicker() {
+    if (this._liveTimer) { clearInterval(this._liveTimer); this._liveTimer = null; }
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// v0.17.0 Phase 3 — Tip jar INLINE sur les articles
+// Composant compact "Soutenir cet auteur" rendu après les citations
+// ═══════════════════════════════════════════════════════════
+
+// État par article (clé : article.id)
+const tipInlineState = new Map();
+
+function renderTipJarInline(a) {
+  const aid = a.id;
+  tipInlineState.set(aid, { amount: 3, custom: null, consent: false });
+  const authorName = a.authorUsername || 'l\'auteur';
+  return `
+    <aside class="tip-inline" data-tip-article="${aid}">
+      <div class="tip-inline__head">
+        <h3 class="tip-inline__title">💛 Soutenir ${escapeHtml(authorName)}</h3>
+        <span class="tip-inline__sub">100 % à l'auteur · 0 commission</span>
+      </div>
+      <p class="tip-inline__lead">Un don ponctuel pour cet article — utile s'il vous a appris, intrigué ou fait réfléchir. <strong>100 % part au contributeur</strong>, les frais Stripe sont absorbés par l'adhésion 5 €/mois.</p>
+      <div class="tip-inline__grid" role="radiogroup" aria-label="Montant du tip">
+        <button class="tip-inline__amt" data-amt="1">1 €</button>
+        <button class="tip-inline__amt on" data-amt="3">3 €</button>
+        <button class="tip-inline__amt" data-amt="5">5 €</button>
+        <button class="tip-inline__amt" data-amt="10">10 €</button>
+      </div>
+      <div class="tip-inline__libre">
+        <span>ou libre :</span>
+        <input type="number" class="tip-inline__libre-input" min="1" max="1000" step="0.50" placeholder="autre…" inputmode="decimal">
+        <span>€</span>
+      </div>
+      <label class="tip-inline__consent">
+        <input type="checkbox" class="tip-inline__consent-input">
+        <span>Afficher mon pseudo et mon montant sur le Mur des Soutiens (anonyme par défaut)</span>
+      </label>
+      <button type="button" class="tip-inline__submit" data-tip-submit>Envoyer 3,00 € à ${escapeHtml(authorName)}</button>
+      <p class="tip-inline__note">Phase 3 — Stripe Checkout one-shot en cours d'intégration.</p>
+    </aside>
+  `;
+}
+
+function bindTipJarInline(rootEl) {
+  if (!rootEl) return;
+  const articleId = rootEl.dataset.tipArticle;
+  if (!articleId) return;
+  const state = tipInlineState.get(articleId);
+  if (!state) return;
+  const submit = rootEl.querySelector('[data-tip-submit]');
+  const libreInput = rootEl.querySelector('.tip-inline__libre-input');
+  const consent = rootEl.querySelector('.tip-inline__consent-input');
+  const authorName = rootEl.querySelector('.tip-inline__title')?.textContent?.replace(/^💛 Soutenir /, '').trim() || 'l\'auteur';
+
+  const refresh = () => {
+    const amt = state.custom !== null && state.custom > 0 ? state.custom : state.amount;
+    if (submit) submit.textContent = `Envoyer ${amt.toFixed(2).replace('.',',')} € à ${authorName}`;
+  };
+
+  rootEl.querySelectorAll('.tip-inline__amt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.amount = parseFloat(btn.dataset.amt);
+      state.custom = null;
+      if (libreInput) libreInput.value = '';
+      rootEl.querySelectorAll('.tip-inline__amt').forEach(b => b.classList.toggle('on', b === btn));
+      refresh();
+    });
+  });
+  if (libreInput) {
+    libreInput.addEventListener('input', () => {
+      const v = parseFloat(libreInput.value);
+      if (!isNaN(v) && v > 0) {
+        state.custom = v;
+        rootEl.querySelectorAll('.tip-inline__amt').forEach(b => b.classList.remove('on'));
+      } else {
+        state.custom = null;
+      }
+      refresh();
+    });
+  }
+  if (consent) {
+    consent.addEventListener('change', () => { state.consent = consent.checked; });
+  }
+  if (submit) {
+    submit.addEventListener('click', () => {
+      const amt = state.custom !== null && state.custom > 0 ? state.custom : state.amount;
+      const msg = `Phase 3 — Stripe en cours. Tip de ${amt.toFixed(2).replace('.',',')} € à ${authorName} enregistré côté UI (opt-in pseudo : ${state.consent ? 'OUI' : 'NON'}).`;
+      if (typeof showToast === 'function') showToast(msg);
+      else if (typeof toast === 'function') toast(msg, 4000);
+      else alert(msg);
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// v0.17.0 Phase 3 — TipModal (don ponctuel — UI only, Stripe à câbler)
+// ═══════════════════════════════════════════════════════════
+
+const TipModal = {
+  _amount: 3,
+  _customAmount: null,
+  open() {
+    const m = document.getElementById('tipModal');
+    if (!m) return;
+    m.classList.add('on');
+    this._refresh();
+    document.body.style.overflow = 'hidden';
+  },
+  close() {
+    const m = document.getElementById('tipModal');
+    if (!m) return;
+    m.classList.remove('on');
+    document.body.style.overflow = '';
+  },
+  setAmount(n) {
+    this._amount = n;
+    this._customAmount = null;
+    const libre = document.getElementById('tipLibre');
+    if (libre) libre.value = '';
+    document.querySelectorAll('.tip-amount').forEach(b => {
+      b.classList.toggle('on', parseFloat(b.dataset.tipAmount) === n);
+    });
+    this._refresh();
+  },
+  setCustomAmount(n) {
+    this._customAmount = n;
+    document.querySelectorAll('.tip-amount').forEach(b => b.classList.remove('on'));
+    this._refresh();
+  },
+  _effective() {
+    return this._customAmount !== null && this._customAmount > 0 ? this._customAmount : this._amount;
+  },
+  _refresh() {
+    const amt = this._effective();
+    const amtEl = document.getElementById('tipSummaryAmount');
+    if (amtEl) amtEl.textContent = amt.toFixed(2).replace('.', ',') + ' €';
+    const tgtSel = document.getElementById('tipTarget');
+    const tgtEl = document.getElementById('tipSummaryTarget');
+    if (tgtSel && tgtEl) {
+      tgtEl.textContent = tgtSel.value === 'pool' ? 'au pool général' : 'à un contributeur';
+    }
+  },
+  init() {
+    // Boutons montant
+    document.querySelectorAll('.tip-amount').forEach(b => {
+      b.addEventListener('click', () => this.setAmount(parseFloat(b.dataset.tipAmount)));
+    });
+    // Input libre
+    const libre = document.getElementById('tipLibre');
+    if (libre) {
+      libre.addEventListener('input', () => {
+        const v = parseFloat(libre.value);
+        if (!isNaN(v) && v > 0) this.setCustomAmount(v);
+        else this._refresh();
+      });
+    }
+    // Select target
+    const tgt = document.getElementById('tipTarget');
+    if (tgt) tgt.addEventListener('change', () => this._refresh());
+    // Close handlers
+    document.querySelectorAll('[data-tip-close]').forEach(el => {
+      el.addEventListener('click', () => this.close());
+    });
+    // ESC pour fermer
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        const m = document.getElementById('tipModal');
+        if (m && m.classList.contains('on')) this.close();
+      }
+    });
+    // Submit (Phase 3 stub)
+    const submit = document.getElementById('tipSubmitBtn');
+    if (submit) {
+      submit.addEventListener('click', () => {
+        const amt = this._effective();
+        if (typeof toast === 'function') toast(`Phase 3 — Stripe en cours d'intégration. Don de ${amt.toFixed(2).replace('.',',')} € enregistré côté UI (pas encore traité).`, 4000);
+        else alert(`Phase 3 — Stripe en cours. Don de ${amt.toFixed(2).replace('.',',')} € (UI seulement).`);
+        this.close();
+      });
+    }
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// v0.17.0 Phase 3 — Membre (page /devenir-membre — UI only)
+// ═══════════════════════════════════════════════════════════
+
+const Membre = {
+  init() {
+    const checkoutBtn = document.getElementById('mbCheckoutBtn');
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener('click', () => {
+        const consent = document.getElementById('mbConsent');
+        const optIn = consent ? consent.checked : false;
+        if (typeof toast === 'function') toast(`Phase 3 — Stripe Checkout en cours d'intégration. Adhésion 5€/mois prête (opt-in pseudo : ${optIn ? 'OUI' : 'NON'}).`, 4000);
+        else alert(`Phase 3 — Stripe en cours.\nAdhésion 5€/mois enregistrée côté UI.\nAfficher pseudo : ${optIn ? 'OUI' : 'NON'}`);
+      });
+    }
+    const backBtn = document.getElementById('mbBackBtn');
+    if (backBtn) backBtn.addEventListener('click', () => switchView('financement'));
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// v0.17.0 Phase 5 — MonFin (dashboard contributeur — UI mock)
+// ═══════════════════════════════════════════════════════════
+
+const MON_FIN_MOCK = {
+  current_month_label: 'Mai 2026',
+  balance_cents: 1820,        // €18.20 — sous le seuil 20€
+  total_earned_cents: 8740,   // €87.40 lifetime
+  articles_count_lifetime: 12,
+  kyc_completed: false,
+  public_name_consent: false,
+  my_articles_this_month: [
+    {title:'Pourquoi les chiffres du chômage cachent une réalité différente', views_unique:423, read_time_avg:'4m 12s', engagement:89, score:1456, share_cents:720},
+    {title:'La désinformation russe en France : 5 leviers documentés', views_unique:287, read_time_avg:'5m 41s', engagement:134, score:1212, share_cents:600},
+    {title:'Sondages présidentielle : méthodologie comparée des 6 instituts', views_unique:198, read_time_avg:'3m 58s', engagement:42, score:680, share_cents:340},
+    {title:'Énergie nucléaire : la vérité sur le coût réel du parc français', views_unique:156, read_time_avg:'6m 22s', engagement:38, score:519, share_cents:260}
+  ],
+  payouts_history: [
+    {date:'2026-04-01', amount_cents:2210, status:'completed', stripe_transfer_id:'tr_1NxXyZ2eZvKYlo2C'},
+    {date:'2026-03-01', amount_cents:2080, status:'completed', stripe_transfer_id:'tr_1NwXyZ2eZvKYlo2C'},
+    {date:'2026-02-01', amount_cents:2430, status:'completed', stripe_transfer_id:'tr_1NvXyZ2eZvKYlo2C'}
+  ]
+};
+
+const MonFin = {
+  fmt(cents) {
+    return '€' + (cents / 100).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  },
+  render() {
+    const M = MON_FIN_MOCK;
+
+    // Pseudo (utilise le profil courant ou fallback)
+    const pseudo = (typeof currentProfile !== 'undefined' && currentProfile?.username) ? '@' + currentProfile.username : '@vous';
+    const pseudoEl = document.getElementById('mfPseudo');
+    if (pseudoEl) pseudoEl.textContent = pseudo;
+
+    // Mois courant
+    const monthEl = document.getElementById('mfCurrentMonth');
+    if (monthEl) monthEl.textContent = M.current_month_label;
+
+    // Cagnotte + bouton virement
+    const balanceEl = document.getElementById('mfBalance');
+    if (balanceEl) balanceEl.textContent = this.fmt(M.balance_cents);
+    const balanceSub = document.getElementById('mfBalanceSub');
+    const payoutBtn = document.getElementById('mfPayoutBtn');
+    const canPayout = M.balance_cents >= 2000 && M.kyc_completed;
+    if (payoutBtn) {
+      payoutBtn.disabled = !canPayout;
+      if (M.balance_cents < 2000) {
+        const missing = 2000 - M.balance_cents;
+        if (balanceSub) balanceSub.textContent = `Plus que ${this.fmt(missing)} avant le virement (seuil 20 €).`;
+      } else if (!M.kyc_completed) {
+        if (balanceSub) balanceSub.textContent = 'Active ton compte Stripe Connect ci-dessous pour débloquer le virement.';
+      } else {
+        if (balanceSub) balanceSub.textContent = 'Tu peux demander un virement maintenant.';
+      }
+    }
+
+    // Total + nombre articles
+    const totalEl = document.getElementById('mfTotalEarned');
+    if (totalEl) totalEl.textContent = this.fmt(M.total_earned_cents);
+    const countEl = document.getElementById('mfArticlesCount');
+    if (countEl) countEl.textContent = `${M.articles_count_lifetime} articles rémunérés au total`;
+
+    // Articles du mois
+    const rows = document.getElementById('mfArticlesRows');
+    let totalScore = 0;
+    let totalShare = 0;
+    if (rows) {
+      rows.innerHTML = M.my_articles_this_month.map(a => {
+        totalScore += a.score;
+        totalShare += a.share_cents;
+        const escTitle = (typeof escapeHtml === 'function') ? escapeHtml(a.title) : a.title;
+        return `<tr>
+          <td>${escTitle}</td>
+          <td class="num">${a.views_unique.toLocaleString('fr-FR')}</td>
+          <td class="num">${a.read_time_avg}</td>
+          <td class="num">${a.engagement}</td>
+          <td class="num">${a.score.toLocaleString('fr-FR')}</td>
+          <td class="num share">${this.fmt(a.share_cents)}</td>
+        </tr>`;
+      }).join('');
+    }
+    const totalScoreEl = document.getElementById('mfArticlesTotalScore');
+    if (totalScoreEl) totalScoreEl.textContent = totalScore.toLocaleString('fr-FR');
+    const totalShareEl = document.getElementById('mfArticlesTotalShare');
+    if (totalShareEl) totalShareEl.textContent = this.fmt(totalShare);
+
+    // KYC status
+    const kycStatus = document.getElementById('mfKycStatus');
+    const kycBtn = document.getElementById('mfKycBtn');
+    if (kycStatus) {
+      if (M.kyc_completed) {
+        kycStatus.textContent = 'Activé';
+        kycStatus.classList.remove('mf-kyc__status--pending');
+        kycStatus.classList.add('mf-kyc__status--done');
+      } else {
+        kycStatus.textContent = 'Non activé';
+        kycStatus.classList.add('mf-kyc__status--pending');
+        kycStatus.classList.remove('mf-kyc__status--done');
+      }
+    }
+    if (kycBtn) kycBtn.textContent = M.kyc_completed ? 'Gérer mon compte Stripe' : 'Activer mon compte';
+
+    // Public name consent
+    const consentEl = document.getElementById('mfPublicConsent');
+    if (consentEl) consentEl.checked = M.public_name_consent;
+
+    // Historique virements
+    const payoutsRows = document.getElementById('mfPayoutsRows');
+    const payoutsEmpty = document.getElementById('mfPayoutsEmpty');
+    if (M.payouts_history.length === 0) {
+      if (payoutsRows) payoutsRows.innerHTML = '';
+      if (payoutsEmpty) payoutsEmpty.style.display = 'block';
+    } else {
+      if (payoutsEmpty) payoutsEmpty.style.display = 'none';
+      if (payoutsRows) {
+        payoutsRows.innerHTML = M.payouts_history.map(p => `<tr>
+          <td>${p.date}</td>
+          <td class="num">${this.fmt(p.amount_cents)}</td>
+          <td><span class="mf-status-badge mf-status-badge--${p.status}">${p.status === 'completed' ? 'Effectué' : p.status === 'pending' ? 'En attente' : 'Échec'}</span></td>
+          <td><code style="font-size:11px;color:var(--ink-muted)">${p.stripe_transfer_id}</code></td>
+        </tr>`).join('');
+      }
+    }
+  },
+  init() {
+    document.getElementById('mfBackBtn')?.addEventListener('click', () => switchView('articles'));
+    document.getElementById('mfPayoutBtn')?.addEventListener('click', () => {
+      const M = MON_FIN_MOCK;
+      const msg = `Phase 7 — Stripe Connect Transfer en cours. Virement de ${this.fmt(M.balance_cents)} demandé côté UI.`;
+      if (typeof showToast === 'function') showToast(msg);
+      else alert(msg);
+    });
+    document.getElementById('mfKycBtn')?.addEventListener('click', () => {
+      const msg = 'Phase 7 — Onboarding Stripe Connect Express en cours. Lien KYC à venir.';
+      if (typeof showToast === 'function') showToast(msg);
+      else alert(msg);
+    });
+    document.getElementById('mfHistoryBtn')?.addEventListener('click', () => {
+      // Scroll vers la section historique
+      document.querySelector('#monFinView .mf-section:last-of-type')?.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    document.getElementById('mfPublicConsent')?.addEventListener('change', e => {
+      MON_FIN_MOCK.public_name_consent = e.target.checked;
+      const msg = e.target.checked ? 'Pseudo désormais visible sur les pages publiques.' : 'Pseudo désormais anonyme sur les pages publiques.';
+      if (typeof showToast === 'function') showToast(msg);
+    });
+  }
+};
+
+
 function refreshUserUI() {
   const authBtn = document.getElementById('authBtn');
   const userMenu = document.getElementById('userMenu');
@@ -11103,9 +12390,11 @@ function syncNavMenu() {
   const contribLabel = document.getElementById('navSectionContrib');
   const writeBtn = document.getElementById('navWriteBtn');
   const contribBtn = document.getElementById('navMyContribBtn');
+  const myFinBtn = document.getElementById('navMyFinBtn');
   if (contribLabel) contribLabel.style.display = showContrib ? 'block' : 'none';
   if (writeBtn) writeBtn.style.display = showContrib ? 'flex' : 'none';
   if (contribBtn) contribBtn.style.display = showContrib ? 'flex' : 'none';
+  if (myFinBtn) myFinBtn.style.display = showContrib ? 'flex' : 'none';
 
   // Admin section
   const adminLabel = document.getElementById('navSectionAdmin');
@@ -11813,9 +13102,47 @@ async function init() {
     setTimeout(() => openArticlePage(slug), 200);
   } else if (hash === '#archive') {
     switchView('archive');
+  } else if (hash === '#financement') {
+    switchView('financement');
+  } else if (hash === '#devenir-membre') {
+    switchView('membre');
+  } else if (hash === '#mon-financement') {
+    switchView('mon-financement');
   } else {
     switchView('articles');
   }
+
+  // v0.17.0 — bouton € dans le masthead pour aller à /financement
+  const finNavBtn = document.getElementById('finNavBtn');
+  if (finNavBtn) finNavBtn.addEventListener('click', () => switchView('financement'));
+
+  // v0.17.0 Phase 3 — CTAs sur /financement
+  const finMemberBtn = document.getElementById('finMemberBtn');
+  if (finMemberBtn) finMemberBtn.addEventListener('click', () => switchView('membre'));
+  const finTipBtn = document.getElementById('finTipBtn');
+  if (finTipBtn) finTipBtn.addEventListener('click', () => { if (typeof TipModal !== 'undefined') TipModal.open(); });
+
+  // v0.17.0 Phase 5 — Menu "Mon financement"
+  const navMyFinBtn = document.getElementById('navMyFinBtn');
+  if (navMyFinBtn) navMyFinBtn.addEventListener('click', () => {
+    if (typeof closeNavMenu === 'function') closeNavMenu();
+    switchView('mon-financement');
+  });
+
+  // v0.17.0 Phase 3+5 — init modules
+  if (typeof TipModal !== 'undefined') TipModal.init();
+  if (typeof Membre !== 'undefined') Membre.init();
+  if (typeof MonFin !== 'undefined') MonFin.init();
+
+  // Hashchange (bouton back/forward du browser, liens internes)
+  window.addEventListener('hashchange', () => {
+    const h = window.location.hash;
+    if (h === '#financement') switchView('financement');
+    else if (h === '#devenir-membre') switchView('membre');
+    else if (h === '#mon-financement') switchView('mon-financement');
+    else if (h === '#archive') switchView('archive');
+    else if (!h.startsWith('#article/')) switchView('articles');
+  });
 
   if (isAdmin()) {
     await loadSubmissions();
@@ -13601,7 +14928,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('%cAvis Basé v0.16.1', 'color:#C8102E;font-size:16px;font-weight:bold');
+  console.log('%cAvis Basé v0.17.0-phase1', 'color:#C8102E;font-size:16px;font-weight:bold');
   console.log('%cMédia collaboratif · @avis_base.nth', 'color:#888;font-size:11px');
   init();
 });
