@@ -65,15 +65,14 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.9.0/Broadsheet** | Design | Refonte direction artistique « Broadsheet » | ✅ Livré |
 | **v0.9.1→v0.9.6** | Design | Packs internes Broadsheet (animations, fluidité mobile) | ✅ Livré |
 | **v0.9.7** | Engagement | Notifications in-app (cloche, realtime, triggers) | ✅ Livré |
-| **v0.10.0** | Social | Système de follow + fil personnalisé | ⬜ **PROCHAIN** |
-| **v0.11.0** | Média | Upload vidéo direct (desktop) | 1-2 semaines |
-| **v0.12.0** | Social | Commentaires améliorés (threads) | 1 semaine |
-| **v0.13.0** | Communication | Messages privés (DM) — mobile + desktop | 2 semaines |
-| **v0.14.0** | Engagement | Notifications push + emails | 1 semaine |
-| **v0.15.0** | 🏗️ Refonte | Architecture Next.js (préparer dev pro) | 3-4 semaines |
-| **v0.16.0** | Mobile | App iOS + Android (lecture/interaction, pas d'écriture) | 4-6 semaines |
+| **v0.10.0** | Social | Système de follow + fil personnalisé | ✅ Livré |
+| **v0.11.0** | Communication | PWA installable + Messagerie directe (DM) | ✅ Livré |
+| **v0.11.1→v0.11.3** | UX/Fixes | Refonte esthétique DM, profil public, correctifs RLS/notifs | ✅ Livré |
+| **v0.16.0** | App Store | Pages légales (CGU, privacy, support, delete), migration Apple-ready, section download | ✅ Livré |
+| **v0.16.1** | UX | Masque articles "test/demo" du feed public | ✅ Livré |
 | **v0.17.0** | Sécurité | Modération avancée + anti-fake news | 2 semaines |
 | **v0.18.0** | 💰 Monétisation | Abonnements + tips créateurs | 2-3 semaines |
+| **v0.19.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
 ---
