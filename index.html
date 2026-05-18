@@ -7713,9 +7713,8 @@ body.is-mobile .push-prompt-banner{bottom:calc(70px + env(safe-area-inset-bottom
           </label>
           <span class="fg__err" id="signupCharterErr"></span>
         </div>
-        <!-- v0.18.0 — Captcha Turnstile (sitekey à remplacer en prod par celle de cloudflare.com/turnstile)
-             Sitekey de test "1x00000000000000000000AA" : toujours valide en dev/test. -->
-        <div id="signupCaptcha" class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="auto" style="margin:14px 0"></div>
+        <!-- v0.18.0 — Captcha Turnstile (sitekey publique Cloudflare, ok dans le HTML) -->
+        <div id="signupCaptcha" class="cf-turnstile" data-sitekey="0x4AAAAAADR54SJ4CEFxumcH" data-theme="auto" style="margin:14px 0"></div>
         <p class="fg__hint" style="font-size:11px;color:var(--ink-muted);margin-top:4px">Un email de confirmation te sera envoyé. Tu pourras lire et commenter dès la confirmation, mais l'écriture d'articles est débloquée après 7 jours (anti-spam).</p>
       </div>
       <div id="loginPanel" style="display:none">
