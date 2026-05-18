@@ -9,7 +9,7 @@ Le média collaboratif qui source tout. Chaque article part d'une vidéo longue,
 
 ## Stack
 
-- **Frontend** : un seul fichier `index.html` (~10 800 lignes) — HTML/CSS/JS vanilla
+- **Frontend** : un seul fichier `index.html` (~14 600 lignes) — HTML/CSS/JS vanilla
 - **Backend** : [Supabase](https://supabase.com) (auth, Postgres, RLS, RPC)
 - **Hébergement** : [Cloudflare Pages](https://pages.cloudflare.com) (gratuit, CDN mondial)
 - **Domaine** : `avis-base.com`
@@ -47,6 +47,12 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.16.1** — Masque les articles "test/demo" du feed public (visibles pour l'auteur et l'admin)
+- **v0.16.0** — Préparation App Store : pages légales (CGU, confidentialité, support, suppression compte), migration Apple-ready (blocage, suppression compte), section download App Store + Play Store
+- **v0.11.3** — Correctifs (notif target_type profile, follow CHECK constraint, DM iOS zoom-in + safe-area + touch targets)
+- **v0.11.2** — Soft-launch : refonte esthétique DM, profil public style Instagram, refonte modal d'édition profil
+- **v0.11.1** — DM : refonte esthétique éditoriale
+- **v0.11.0** — PWA installable (App Store / Play Store ready) + Système de messagerie directe (DM)
 - **v0.10.0** — Système de follow + fil personnalisé « Mon Feed » + niveaux de Basitude
 - **v0.9.7** — Notifications in-app (cloche dans le masthead, badge non-lues, panel realtime, triggers Postgres)
 - **v0.9.6** — Mobile fluidity (viewport, inputs, paint)
@@ -69,7 +75,11 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 3. `hotfix_v0832_comments.sql` (V0.8.3.2 — commentaires polymorphes)
 4. `v0.9.0-migration.sql` (V0.9.0 — profils enrichis + favoris)
 5. `v0.9.7-migration.sql` (V0.9.7 — notifications in-app : table, RLS, triggers, RPC)
-6. **`v0.10.0-migration.sql`** (V0.10.0 — follows, compteurs, trigger notif follow) ← **NOUVEAU**
+6. `v0.10.0-migration.sql` (V0.10.0 — follows, compteurs, trigger notif follow)
+7. `v0.11.0-dm-migration.sql` (V0.11.0 — messagerie directe : threads, participants, messages, RLS)
+8. `v0.11.2-dm-fix-rls.sql` (V0.11.2 — correctif récursion RLS dm_participants)
+9. `v0.11.3-fix-notif-target-type-profile.sql` (V0.11.3 — contrainte CHECK notif target_type profile)
+10. **`v0.16.0-migration.sql`** (V0.16.0 — user_blocks + account_deletion_requests pour Apple App Store) ← **NOUVEAU**
 
 ## Développement local
 

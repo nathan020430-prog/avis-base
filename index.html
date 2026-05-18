@@ -7338,10 +7338,27 @@ function articlePassesTimeFilter(a) {
   return true;
 }
 
+// Détecte un article "test/demo" qu'on veut masquer du public
+// (titre court banal + contenu très court). Reste visible pour l'auteur et l'admin.
+function isTestArticle(a) {
+  const t = (a.title || '').trim().toLowerCase();
+  const isTestTitle = /^(test|demo|essai|debug|hello|wip|placeholder|asdf|aaaa|qsdf|azerty)\b/.test(t) || t.length < 4;
+  const tooShort = (a.wordCount || 0) < 30 && (a.bodyMarkdown || '').trim().length < 120;
+  return isTestTitle && tooShort;
+}
+
 function getFilteredArticles() {
   let list = articles.filter(a => {
     // Publiés visibles par tous, brouillons/review visibles par auteur ou admin
     if (a.status === 'published') return true;
+    if (currentUser && a.authorId === currentUser.id) return true;
+    if (isAdmin()) return true;
+    return false;
+  });
+
+  // Masquer les articles "test" du public (mais garder pour l'auteur/admin pour qu'ils puissent les nettoyer)
+  list = list.filter(a => {
+    if (!isTestArticle(a)) return true;
     if (currentUser && a.authorId === currentUser.id) return true;
     if (isAdmin()) return true;
     return false;
@@ -7476,11 +7493,13 @@ function renderArticles() {
 
   // V0.9 Broadsheet : la "Une" est l'article principal sous le masthead
   refreshMastheadStats();
-  const showFeatured = isDefaultView && publishedOnly.length > 0;
+  // Le slot "À LA UNE" ne featured jamais d'article test, même pour l'admin
+  const featuredCandidates = publishedOnly.filter(a => !isTestArticle(a));
+  const showFeatured = isDefaultView && featuredCandidates.length > 0;
   let featuredArticle = null;
   if (showFeatured) {
     // Choisir l'article récent avec le plus haut score (likes + reads)
-    const candidates = publishedOnly.slice().sort((a, b) => {
+    const candidates = featuredCandidates.slice().sort((a, b) => {
       const scoreA = (a.likesCount || 0) * 3 + (a.reads || 0);
       const scoreB = (b.likesCount || 0) * 3 + (b.reads || 0);
       const dateA = new Date(a.publishedAt || a.createdAt).getTime();
@@ -13582,7 +13601,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('%cAvis Basé v0.11.0 (PWA + DM)', 'color:#C8102E;font-size:16px;font-weight:bold');
+  console.log('%cAvis Basé v0.16.1', 'color:#C8102E;font-size:16px;font-weight:bold');
   console.log('%cMédia collaboratif · @avis_base.nth', 'color:#888;font-size:11px');
   init();
 });

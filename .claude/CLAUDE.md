@@ -7,10 +7,15 @@
 **Avis Basé** — média collaboratif qui source tout. Site : https://avis-base.com · TikTok : @avis_base.nth
 
 ## Stack actuelle
-- **Frontend** : un seul fichier `index.html` (~11 000 lignes) — HTML/CSS/JS vanilla
+- **Frontend** : un seul fichier `index.html` (~14 600 lignes) — HTML/CSS/JS vanilla
 - **Backend** : Supabase (auth, Postgres, RLS, RPC)
 - **Hébergement** : Cloudflare Pages
-- **Mobile (à venir v0.16.0)** : app Expo dans un repo séparé `avis-base-app`
+- **PWA** : installable iOS/Android, soumise aux App Store + Play Store
+- **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
+
+## Version actuelle
+- Code en **v0.16.1** (App Store ready + masquage articles test du public)
+- Tag remote : `v0.16.0-prep` sur origin
 
 ## Versionning
 - Pré-release `0.x.x` jusqu'au lancement public en v1.0.0
