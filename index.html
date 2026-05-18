@@ -5052,6 +5052,24 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 .fin-action:hover{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
 .fin-action svg{width:14px;height:14px}
 
+/* Banner CTA Avis Basé+ — v0.17.1 (discret, dismissible) */
+.fin-cta-banner{background:var(--accent);color:#FDFAF3;font-family:var(--fb);font-size:13px;border-bottom:1px solid rgba(0,0,0,.15);position:relative;z-index:50}
+.fin-cta-banner__inner{max-width:1100px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:14px}
+.fin-cta-banner__icon{font-size:18px;flex-shrink:0}
+.fin-cta-banner__copy{flex:1;line-height:1.4}
+.fin-cta-banner__copy strong{font-weight:700;margin-right:4px}
+.fin-cta-banner__copy a{color:#FDFAF3;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+.fin-cta-banner__copy a:hover{color:#fff}
+.fin-cta-banner__btn{display:inline-block;padding:6px 14px;background:#FDFAF3;color:var(--accent);font-weight:600;font-size:12px;letter-spacing:.04em;text-decoration:none;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s ease}
+.fin-cta-banner__btn:hover{opacity:.88}
+.fin-cta-banner__close{background:none;border:none;color:#FDFAF3;font-size:22px;line-height:1;cursor:pointer;padding:0 4px;flex-shrink:0;opacity:.7;transition:opacity .15s ease}
+.fin-cta-banner__close:hover{opacity:1}
+@media (max-width:640px){
+  .fin-cta-banner__inner{flex-wrap:wrap;gap:8px;padding:10px 14px}
+  .fin-cta-banner__copy{flex-basis:100%;font-size:12px}
+  .fin-cta-banner__icon{display:none}
+}
+
 /* ═══ /DEVENIR-MEMBRE — Avis Basé+ — Phase 3 (UI only) ═════════════════════ */
 
 .mb-view{max-width:920px;margin:0 auto;padding:32px 24px 80px}
@@ -5215,6 +5233,21 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════
+     CTA banner — Avis Basé+ (v0.17.1, dismissible)
+═══════════════════════════════════════════ -->
+<aside id="finCtaBanner" class="fin-cta-banner" role="complementary" style="display:none">
+  <div class="fin-cta-banner__inner">
+    <span class="fin-cta-banner__icon" aria-hidden="true">🌱</span>
+    <div class="fin-cta-banner__copy">
+      <strong>Avis Basé+ vient d'arriver.</strong>
+      <span>Soutenir le média qui source tout, à partir de 5 € par mois. Transparence totale sur <a href="#financement" id="finCtaBannerLinkFin">l'utilisation de chaque euro</a>.</span>
+    </div>
+    <a href="#devenir-membre" class="fin-cta-banner__btn" id="finCtaBannerCta">Devenir membre</a>
+    <button class="fin-cta-banner__close" id="finCtaBannerClose" aria-label="Masquer">×</button>
+  </div>
+</aside>
 
 <!-- ═══════════════════════════════════════════
      MASTHEAD (titre du journal)
@@ -8263,6 +8296,10 @@ function renderFeaturedArticle(a) {
 // ─── Onglets Articles / Archive ───
 function switchView(view) {
   currentView = view;
+  // v0.17.1 — refresh banner CTA (masque sur pages financement)
+  if (typeof window._refreshFinCtaBanner === 'function') {
+    setTimeout(() => window._refreshFinCtaBanner(), 0);
+  }
   const featured = document.getElementById('featuredSection');
   const searchBar = document.getElementById('searchBar');
   const toolArt = document.getElementById('toolbarArticles');
@@ -13662,6 +13699,47 @@ async function init() {
   if (typeof Membre !== 'undefined') Membre.init();
   if (typeof MonFin !== 'undefined') MonFin.init();
   if (typeof TrackView !== 'undefined') TrackView.init();
+
+  // v0.17.1 — Banner CTA Avis Basé+ (dismissible, masqué sur pages financement)
+  (function initFinCtaBanner() {
+    const banner = document.getElementById('finCtaBanner');
+    if (!banner) return;
+    const closeBtn = document.getElementById('finCtaBannerClose');
+    const ctaBtn = document.getElementById('finCtaBannerCta');
+    const linkFin = document.getElementById('finCtaBannerLinkFin');
+    const DISMISS_KEY = 'ab_fin_banner_dismissed_v1';
+
+    const shouldShow = () => {
+      try { if (localStorage.getItem(DISMISS_KEY)) return false; } catch {}
+      const h = window.location.hash;
+      if (['#financement', '#devenir-membre', '#mon-financement'].includes(h)) return false;
+      return true;
+    };
+
+    const refresh = () => {
+      banner.style.display = shouldShow() ? '' : 'none';
+    };
+
+    // Expose pour que switchView puisse appeler le refresh après history.replaceState
+    window._refreshFinCtaBanner = refresh;
+
+    refresh();
+    window.addEventListener('hashchange', refresh);
+
+    closeBtn?.addEventListener('click', () => {
+      try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch {}
+      banner.style.display = 'none';
+    });
+
+    ctaBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchView('membre');
+    });
+    linkFin?.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchView('financement');
+    });
+  })();
 
   // v0.17.0 — Gestion du retour depuis Stripe Checkout (success URLs)
   try {
