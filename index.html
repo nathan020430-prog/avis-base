@@ -5215,6 +5215,24 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 [data-theme="dark"] .mf-kyc__status--pending{background:#5A3F00;color:#F5D58C}
 [data-theme="dark"] .mf-kyc__status--done{background:#1F4025;color:#9DD4A8}
 
+/* v0.18.0 Phase 2 — Roadmap de certification (grid 2x2 desktop, stack mobile) */
+.mf-cert{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px}
+.mf-cert__item{display:flex;gap:14px;align-items:center;padding:16px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule,#D9CFB7);transition:all .2s ease}
+.mf-cert__item.met{background:var(--accent-soft);border-color:var(--accent)}
+.mf-cert__check{width:28px;height:28px;border-radius:50%;border:2px solid var(--ink-muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--surface);transition:all .2s ease}
+.mf-cert__item.met .mf-cert__check{border-color:var(--accent);background:var(--accent)}
+.mf-cert__item.met .mf-cert__check::after{content:'✓';color:#FDFAF3;font-weight:700;font-size:16px;line-height:1}
+.mf-cert__body{flex:1;display:flex;flex-direction:column;gap:2px}
+.mf-cert__body strong{font-family:var(--ff);font-weight:600;font-size:14px;color:var(--ink)}
+.mf-cert__progress{font-family:var(--fb);font-size:12px;color:var(--ink-muted);font-feature-settings:"tnum"}
+.mf-cert__item.met .mf-cert__progress{color:var(--accent);font-weight:500}
+.mf-cert__status{font-family:var(--fb);font-size:13px;padding:12px 14px;background:var(--paper-2,rgba(0,0,0,.02));border-left:3px solid var(--ink-light);color:var(--ink);line-height:1.5;margin:0}
+.mf-cert__status.certified{background:var(--accent-soft);border-left-color:var(--accent);color:var(--ink);font-weight:500}
+.mf-cert__status strong{color:var(--accent)}
+@media (max-width:640px){
+  .mf-cert{grid-template-columns:1fr}
+}
+
 .mf-privacy{display:flex;gap:12px;align-items:flex-start;padding:18px 20px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule,#D9CFB7)}
 .mf-privacy input{margin-top:3px;width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
 .mf-privacy label{font-family:var(--fb);font-size:14px;color:var(--ink);line-height:1.5;cursor:pointer}
@@ -5868,6 +5886,43 @@ body.is-mobile .notif-bell{width:32px;height:32px}
         </tr>
       </tfoot>
     </table>
+  </section>
+
+  <!-- v0.18.0 Phase 2 — Roadmap de certification rémunérable -->
+  <section class="mf-section">
+    <h2 class="mf-section__title">Certification rémunérable</h2>
+    <p class="mf-section__sub">Pour débloquer le virement de ta cagnotte, 4 critères cumulatifs. Ils garantissent que les contributeurs payés sont des comptes engagés et identifiés.</p>
+    <div class="mf-cert" id="mfCertGrid">
+      <div class="mf-cert__item" data-cert="articles">
+        <span class="mf-cert__check"></span>
+        <div class="mf-cert__body">
+          <strong>3 articles publiés validés</strong>
+          <span class="mf-cert__progress" id="mfCertArticles">— / 3</span>
+        </div>
+      </div>
+      <div class="mf-cert__item" data-cert="age">
+        <span class="mf-cert__check"></span>
+        <div class="mf-cert__body">
+          <strong>30 jours d'ancienneté</strong>
+          <span class="mf-cert__progress" id="mfCertAge">— / 30 jours</span>
+        </div>
+      </div>
+      <div class="mf-cert__item" data-cert="cred">
+        <span class="mf-cert__check"></span>
+        <div class="mf-cert__body">
+          <strong>Score crédibilité ≥ 50</strong>
+          <span class="mf-cert__progress" id="mfCertCred">— / 50 %</span>
+        </div>
+      </div>
+      <div class="mf-cert__item" data-cert="kyc">
+        <span class="mf-cert__check"></span>
+        <div class="mf-cert__body">
+          <strong>KYC Stripe Connect</strong>
+          <span class="mf-cert__progress" id="mfCertKyc">Non activé</span>
+        </div>
+      </div>
+    </div>
+    <p class="mf-cert__status" id="mfCertStatusBox">Vérification en cours…</p>
   </section>
 
   <section class="mf-section">
@@ -12847,8 +12902,103 @@ const MonFin = {
       };
       this._dataIsReal = true;
       this._renderFromData(this._data);
+
+      // v0.18.0 Phase 2 — Charge la certification rémunérable
+      await this.loadCertification();
     } catch (e) {
       console.debug('[MonFin] loadFromSupabase failed', e?.message || e);
+    }
+  },
+  async loadCertification() {
+    if (!supa || !currentUser) return;
+    try {
+      const { data, error } = await supa.rpc('check_contributor_certification');
+      if (error) {
+        // RPC pas encore créée (migration Phase 2 non appliquée) → silencieux
+        console.debug('[MonFin] cert RPC unavailable', error.message);
+        this._renderCertificationFallback();
+        return;
+      }
+      this._cert = data;
+      this._renderCertification(data);
+    } catch (e) {
+      console.debug('[MonFin] cert error', e);
+    }
+  },
+  _renderCertificationFallback() {
+    // Si la migration Phase 2 n'est pas appliquée, on masque la roadmap
+    const grid = document.getElementById('mfCertGrid');
+    const statusBox = document.getElementById('mfCertStatusBox');
+    if (statusBox) {
+      statusBox.textContent = 'Migration de certification non appliquée (admin : SQL v0.18.0-trust-migration.sql à exécuter).';
+      statusBox.className = 'mf-cert__status';
+    }
+  },
+  _renderCertification(cert) {
+    if (!cert || cert.error) return;
+    const criteria = cert.criteria || {};
+    const milestones = cert.milestones_met || {};
+
+    // 1. Articles
+    const artsItem = document.querySelector('.mf-cert__item[data-cert="articles"]');
+    const artsCount = criteria.articles_published || 0;
+    if (artsItem) {
+      artsItem.classList.toggle('met', !!milestones.articles_published_3);
+      const lbl = document.getElementById('mfCertArticles');
+      if (lbl) lbl.textContent = `${artsCount} / 3 publiés`;
+    }
+    // 2. Age
+    const ageItem = document.querySelector('.mf-cert__item[data-cert="age"]');
+    const ageDays = criteria.account_age_days || 0;
+    if (ageItem) {
+      ageItem.classList.toggle('met', !!milestones.account_age_30d);
+      const lbl = document.getElementById('mfCertAge');
+      if (lbl) lbl.textContent = `${ageDays} / 30 jours`;
+    }
+    // 3. Cred
+    const credItem = document.querySelector('.mf-cert__item[data-cert="cred"]');
+    const credPct = criteria.credibility_score || 0;
+    if (credItem) {
+      credItem.classList.toggle('met', !!milestones.credibility_50);
+      const lbl = document.getElementById('mfCertCred');
+      if (lbl) lbl.textContent = `${credPct} / 50 %`;
+    }
+    // 4. KYC
+    const kycItem = document.querySelector('.mf-cert__item[data-cert="kyc"]');
+    const kycDone = !!milestones.kyc_completed;
+    if (kycItem) {
+      kycItem.classList.toggle('met', kycDone);
+      const lbl = document.getElementById('mfCertKyc');
+      if (lbl) lbl.textContent = kycDone ? 'Activé' : 'Non activé';
+    }
+
+    // Status box + lock bouton virement
+    const statusBox = document.getElementById('mfCertStatusBox');
+    const payoutBtn = document.getElementById('mfPayoutBtn');
+    if (cert.certified) {
+      if (statusBox) {
+        statusBox.innerHTML = '<strong>✓ Auteur rémunérable.</strong> Tu peux demander un virement dès que ta cagnotte atteint 20 €.';
+        statusBox.classList.add('certified');
+      }
+    } else {
+      // Liste des critères manquants
+      const missing = [];
+      if (!milestones.articles_published_3) missing.push(`encore ${Math.max(0, 3 - (criteria.articles_published||0))} article${(3-(criteria.articles_published||0))>1?'s':''} à publier`);
+      if (!milestones.account_age_30d) missing.push(`encore ${Math.max(0, 30 - (criteria.account_age_days||0))} jours d'ancienneté`);
+      if (!milestones.credibility_50) missing.push(`score à monter à 50 % (actuellement ${criteria.credibility_score||0} %)`);
+      if (!milestones.kyc_completed) missing.push('KYC Stripe Connect à activer');
+      if (statusBox) {
+        statusBox.innerHTML = `Encore <strong>${missing.length}</strong> critère${missing.length>1?'s':''} avant éligibilité : ${missing.join(' · ')}.`;
+        statusBox.classList.remove('certified');
+      }
+      // Lock bouton virement même si balance >= 20€
+      if (payoutBtn) {
+        payoutBtn.disabled = true;
+        const balanceSub = document.getElementById('mfBalanceSub');
+        if (balanceSub && (this._data?.balance_cents || 0) >= 2000) {
+          balanceSub.textContent = 'Cagnotte prête, mais certification rémunérable requise (voir ci-dessous).';
+        }
+      }
     }
   },
   _monthLabel(yyyyMm) {
@@ -12879,6 +13029,7 @@ const MonFin = {
             kyc_not_completed: 'Active d\'abord ton compte Stripe Connect (KYC).',
             payment_already_pending: 'Un virement est déjà en cours.',
             no_balance: 'Pas encore de cagnotte.',
+            not_certified: 'Certification rémunérable incomplète — voir les 4 critères ci-dessous.',
           }[res.error] || res.error;
           showToast(friendly, true);
         }
