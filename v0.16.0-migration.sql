@@ -1,19 +1,19 @@
--- ╔═══════════════════════════════════════════════════════════════════════╗
--- ║ Avis Basé — v0.16.0 — Features Apple App Store obligatoires           ║
--- ║                                                                       ║
--- ║ 1. user_blocks : blocage entre utilisateurs (Apple Guideline 1.2)     ║
--- ║ 2. account_deletion_requests + request_account_deletion :             ║
--- ║    suppression de compte avec délai de grâce 30 jours                 ║
--- ║    (Apple Guideline 5.1.1(v))                                         ║
--- ║                                                                       ║
--- ║ Idempotent. À exécuter dans le SQL Editor Supabase.                   ║
--- ╚═══════════════════════════════════════════════════════════════════════╝
+-- ============================================================================
+-- Avis Basé — v0.16.0 — Features Apple App Store obligatoires
+--
+-- 1. user_blocks : blocage entre utilisateurs (Apple Guideline 1.2)
+-- 2. account_deletion_requests + request_account_deletion :
+--    suppression de compte avec délai de grâce 30 jours
+--    (Apple Guideline 5.1.1(v))
+--
+-- Idempotent. À exécuter dans le SQL Editor Supabase.
+-- ============================================================================
 
 set search_path = public;
 
--- ┌─────────────────────────────────────────────────────────────────┐
--- │ 1. Table user_blocks                                            │
--- └─────────────────────────────────────────────────────────────────┘
+-- ----------------------------------------------------------------------------
+-- 1. Table user_blocks
+-- ----------------------------------------------------------------------------
 
 create table if not exists user_blocks (
   blocker_id uuid not null references profiles(id) on delete cascade,
@@ -45,9 +45,9 @@ create policy "blocks_insert_own" on user_blocks
 create policy "blocks_delete_own" on user_blocks
   for delete using (blocker_id = auth.uid());
 
--- ┌─────────────────────────────────────────────────────────────────┐
--- │ 2. Table account_deletion_requests                              │
--- └─────────────────────────────────────────────────────────────────┘
+-- ----------------------------------------------------------------------------
+-- 2. Table account_deletion_requests
+-- ----------------------------------------------------------------------------
 
 create table if not exists account_deletion_requests (
   user_id uuid primary key references profiles(id) on delete cascade,
@@ -72,9 +72,9 @@ create policy "deletion_select_own" on account_deletion_requests
 
 -- Pas d'insert/update direct : tout passe par la RPC ci-dessous
 
--- ┌─────────────────────────────────────────────────────────────────┐
--- │ 3. RPC : request_account_deletion                               │
--- └─────────────────────────────────────────────────────────────────┘
+-- ----------------------------------------------------------------------------
+-- 3. RPC : request_account_deletion
+-- ----------------------------------------------------------------------------
 
 create or replace function request_account_deletion()
 returns void
@@ -107,9 +107,9 @@ begin
   -- Optionnel : log dans coin_transactions ou audit_log si tu as une table
 end $$;
 
--- ┌─────────────────────────────────────────────────────────────────┐
--- │ 4. RPC : cancel_account_deletion                                │
--- └─────────────────────────────────────────────────────────────────┘
+-- ----------------------------------------------------------------------------
+-- 4. RPC : cancel_account_deletion
+-- ----------------------------------------------------------------------------
 
 create or replace function cancel_account_deletion()
 returns void
@@ -129,9 +129,9 @@ begin
   where user_id = uid and status = 'pending';
 end $$;
 
--- ┌─────────────────────────────────────────────────────────────────┐
--- │ 5. Function : execute_pending_deletions (à appeler en CRON)     │
--- └─────────────────────────────────────────────────────────────────┘
+-- ----------------------------------------------------------------------------
+-- 5. Function : execute_pending_deletions (à appeler en CRON)
+-- ----------------------------------------------------------------------------
 -- Pour vraiment supprimer les comptes après les 30 jours, il faut soit :
 --   a) une Edge Function Supabase appelée par un CRON (pg_cron ou externe)
 --   b) une exécution manuelle régulière par un admin
@@ -198,9 +198,9 @@ begin
   return query select count_done;
 end $$;
 
--- ┌─────────────────────────────────────────────────────────────────┐
--- │ 6. Anti-spam : empêcher les bloqués d'envoyer un DM             │
--- └─────────────────────────────────────────────────────────────────┘
+-- ----------------------------------------------------------------------------
+-- 6. Anti-spam : empêcher les bloqués d'envoyer un DM
+-- ----------------------------------------------------------------------------
 -- Mise à jour de la policy dm_insert_participants pour bloquer l'envoi
 -- depuis un user qui a été bloqué par le destinataire.
 
@@ -224,9 +224,9 @@ create policy "dm_insert_participants" on dm_messages
     )
   );
 
--- ┌─────────────────────────────────────────────────────────────────┐
--- │ 7. Vue : articles_visible (masque les contenus bloqués)         │
--- └─────────────────────────────────────────────────────────────────┘
+-- ----------------------------------------------------------------------------
+-- 7. Vue : articles_visible (masque les contenus bloqués)
+-- ----------------------------------------------------------------------------
 -- Crée une vue qui filtre automatiquement les articles des users bloqués.
 -- L'app peut requêter cette vue au lieu de `articles` pour appliquer le filtre.
 
@@ -244,9 +244,9 @@ where a.status = 'published'
 comment on view articles_visible is
   'Articles publiés visibles pour l''utilisateur courant (masque les blocked users)';
 
--- ┌─────────────────────────────────────────────────────────────────┐
--- │ 8. Smoke tests                                                  │
--- └─────────────────────────────────────────────────────────────────┘
+-- ----------------------------------------------------------------------------
+-- 8. Smoke tests
+-- ----------------------------------------------------------------------------
 -- À exécuter manuellement après la migration :
 --
 --   select tablename from pg_tables
@@ -268,15 +268,14 @@ comment on view articles_visible is
 --   --   console.log(error);  // null si OK
 --   --   const { error } = await supa.rpc('cancel_account_deletion');
 
--- ╔═══════════════════════════════════════════════════════════════════════╗
--- ║ Migration v0.16.0 — terminée.                                         ║
--- ║                                                                       ║
--- ║ Étape suivante : créer une Edge Function `delete-pending-accounts`    ║
--- ║ qui :                                                                 ║
--- ║   1. Appelle execute_pending_deletions() pour purger les données      ║
--- ║   2. Pour chaque user retourné, appelle auth.admin.deleteUser(id)     ║
--- ║      avec la SERVICE_ROLE_KEY (côté serveur, jamais dans l'app)       ║
--- ║   3. Est déclenchée par pg_cron tous les jours à 3h du matin          ║
--- ║                                                                       ║
--- ║ Code prêt dans : avis-base-app/app-store/scripts/delete-edge-fn.ts    ║
--- ╚═══════════════════════════════════════════════════════════════════════╝
+-- ============================================================================
+-- Migration v0.16.0 — terminée.
+--
+-- Étape suivante : créer une Edge Function `delete-pending-accounts` qui :
+--   1. Appelle execute_pending_deletions() pour purger les données
+--   2. Pour chaque user retourné, appelle auth.admin.deleteUser(id)
+--      avec la SERVICE_ROLE_KEY (côté serveur, jamais dans l'app)
+--   3. Est déclenchée par pg_cron tous les jours à 3h du matin
+--
+-- Code prêt dans : avis-base-app/app-store/scripts/delete-edge-fn.ts
+-- ============================================================================
