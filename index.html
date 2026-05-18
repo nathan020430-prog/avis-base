@@ -62,6 +62,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Chart.js v4 — utilisé par la page /financement (camembert + ligne historique) -->
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<!-- Cloudflare Turnstile — captcha anti-bot pour signup (v0.18.0 Phase 1) -->
+<script defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
    AVIS BASÉ — BROADSHEET DESIGN SYSTEM
@@ -1384,6 +1386,19 @@ body.admin .card__admin{display:flex}
 .fg__row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fg__err{font-size:0.74rem;color:var(--accent);min-height:14px;margin-top:2px}
 .fg__hint{font-size:0.74rem;color:var(--ink-muted);margin-top:2px;font-style:italic}
+
+/* v0.18.0 — Checkbox (charte signup) + password strength meter */
+.fg--check{display:flex;flex-direction:column;gap:6px;margin:14px 0 6px}
+.fg__check{display:flex;gap:10px;align-items:flex-start;font-size:0.82rem;line-height:1.45;color:var(--ink);cursor:pointer}
+.fg__check input[type="checkbox"]{margin-top:2px;width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.fg__check a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+.fg__pwd-strength{display:flex;align-items:center;gap:10px;margin-top:6px}
+.fg__pwd-strength-bar{flex:1;height:4px;background:var(--rule,#D9CFB7);border-radius:2px;overflow:hidden}
+.fg__pwd-strength-bar span{display:block;height:100%;background:var(--accent);width:0;transition:width .25s ease,background .25s ease}
+.fg__pwd-strength-bar span.weak{width:33%;background:#D44A3D}
+.fg__pwd-strength-bar span.medium{width:66%;background:#E8A23A}
+.fg__pwd-strength-bar span.strong{width:100%;background:#5C8A6E}
+.fg__pwd-strength-label{font-size:0.7rem;color:var(--ink-muted);min-width:64px}
 
 /* Auth tabs */
 .auth-tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:2px solid var(--rule)}
@@ -6167,8 +6182,27 @@ body.is-mobile .notif-bell{width:32px;height:32px}
       </div>
       <div id="signupPanel">
         <div class="fg"><label class="fg__label" for="signupUsername">Pseudo <span>(visible publiquement)</span></label><input type="text" id="signupUsername" class="fg__input" placeholder="TonPseudo" maxlength="24" autocomplete="username"/><span class="fg__err" id="signupUsernameErr"></span></div>
-        <div class="fg"><label class="fg__label" for="signupEmail">Email</label><input type="email" id="signupEmail" class="fg__input" placeholder="ton@email.com" autocomplete="email"/><span class="fg__err" id="signupEmailErr"></span></div>
-        <div class="fg"><label class="fg__label" for="signupPassword">Mot de passe <span>(min. 6 caractères)</span></label><input type="password" id="signupPassword" class="fg__input" placeholder="••••••••" autocomplete="new-password"/><span class="fg__err" id="signupPasswordErr"></span></div>
+        <div class="fg"><label class="fg__label" for="signupEmail">Email <span>(vérification obligatoire)</span></label><input type="email" id="signupEmail" class="fg__input" placeholder="ton@email.com" autocomplete="email"/><span class="fg__err" id="signupEmailErr"></span></div>
+        <div class="fg">
+          <label class="fg__label" for="signupPassword">Mot de passe <span>(min. 8 caractères)</span></label>
+          <input type="password" id="signupPassword" class="fg__input" placeholder="••••••••" autocomplete="new-password" minlength="8"/>
+          <div class="fg__pwd-strength" id="signupPwdStrength" aria-live="polite" style="display:none">
+            <div class="fg__pwd-strength-bar"><span id="signupPwdStrengthFill"></span></div>
+            <span class="fg__pwd-strength-label" id="signupPwdStrengthLabel">—</span>
+          </div>
+          <span class="fg__err" id="signupPasswordErr"></span>
+        </div>
+        <div class="fg fg--check">
+          <label class="fg__check">
+            <input type="checkbox" id="signupCharter">
+            <span>J'ai lu et j'accepte <a href="#" id="signupCharterLink">la charte éditoriale</a> d'Avis Basé (anti-haine, anti-désinformation, sourcer ses affirmations).</span>
+          </label>
+          <span class="fg__err" id="signupCharterErr"></span>
+        </div>
+        <!-- v0.18.0 — Captcha Turnstile (sitekey à remplacer en prod par celle de cloudflare.com/turnstile)
+             Sitekey de test "1x00000000000000000000AA" : toujours valide en dev/test. -->
+        <div id="signupCaptcha" class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="auto" style="margin:14px 0"></div>
+        <p class="fg__hint" style="font-size:11px;color:var(--ink-muted);margin-top:4px">Un email de confirmation te sera envoyé. Tu pourras lire et commenter dès la confirmation, mais l'écriture d'articles est débloquée après 7 jours (anti-spam).</p>
       </div>
       <div id="loginPanel" style="display:none">
         <div class="fg"><label class="fg__label" for="loginEmail">Email</label><input type="email" id="loginEmail" class="fg__input" placeholder="ton@email.com" autocomplete="username"/></div>
@@ -9448,9 +9482,47 @@ function resetArticleEditorState() {
   if (articleEditorState.saveTimer) { clearTimeout(articleEditorState.saveTimer); articleEditorState.saveTimer = null; }
 }
 
+// v0.18.0 Phase 1 — combien de jours depuis la création du compte
+function accountAgeDays() {
+  if (!currentProfile?.created_at) return Infinity;
+  const created = new Date(currentProfile.created_at);
+  if (isNaN(created.getTime())) return Infinity;
+  return Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function canWriteArticle() {
+  if (!currentUser) return { ok: false, reason: 'not_authenticated' };
+  if (isAdmin && isAdmin()) return { ok: true };  // Admins toujours autorisés
+  // Vérifier confirmation email
+  if (currentUser.email_confirmed_at == null && currentUser.confirmed_at == null) {
+    return { ok: false, reason: 'email_not_confirmed' };
+  }
+  // Restriction anti-spam : 7 jours minimum
+  const age = accountAgeDays();
+  if (age < 7) {
+    return { ok: false, reason: 'too_new', days_remaining: 7 - age };
+  }
+  return { ok: true };
+}
+
 function openArticleEditorForSubmit() {
   if (blockIfMobile()) return; // V0.8.3 — création désactivée sur mobile
   if (!currentUser) { openAuthModal('signup'); return; }
+
+  // v0.18.0 — Restrictions anti-spam compte
+  const check = canWriteArticle();
+  if (!check.ok) {
+    if (check.reason === 'email_not_confirmed') {
+      showToast('Confirme d\'abord ton email avant d\'écrire un article.', true);
+      return;
+    }
+    if (check.reason === 'too_new') {
+      const days = check.days_remaining;
+      showToast(`Écriture débloquée dans ${days} jour${days > 1 ? 's' : ''} (anti-spam compte récent). Tu peux déjà lire, liker et commenter en attendant.`, true);
+      return;
+    }
+  }
+
   resetArticleEditorState();
   articleEditorState.mode = 'new';
 
@@ -10123,26 +10195,79 @@ function openAuthModal(mode = 'signup') {
   document.getElementById('authSubtitle').textContent = mode === 'signup' ? 'Crée un compte pour participer' : 'Connecte-toi à ton compte';
   document.getElementById('authSubmitBtn').textContent = mode === 'signup' ? 'Créer mon compte' : 'Se connecter';
   openModal('authModal');
+  // v0.18.0 — render Turnstile widget (idempotent — Cloudflare le fait tout seul si script déjà chargé)
+  if (mode === 'signup') {
+    try {
+      if (typeof turnstile !== 'undefined') {
+        const widget = document.getElementById('signupCaptcha');
+        if (widget && !widget.dataset.rendered) {
+          turnstile.render('#signupCaptcha');
+          widget.dataset.rendered = '1';
+        }
+      }
+    } catch {}
+  }
+}
+
+// v0.18.0 — calcule la force d'un mot de passe (0-3 : faible/moyen/fort)
+function passwordStrength(pwd) {
+  if (!pwd) return 0;
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (pwd.length >= 12) score++;
+  if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd) && /[^a-zA-Z0-9]/.test(pwd)) score++;
+  return Math.min(3, score);
 }
 
 async function signup() {
   const username = document.getElementById('signupUsername').value.trim();
   const email = document.getElementById('signupEmail').value.trim();
   const password = document.getElementById('signupPassword').value;
+  const charterEl = document.getElementById('signupCharter');
   document.getElementById('signupUsernameErr').textContent = '';
   document.getElementById('signupEmailErr').textContent = '';
   document.getElementById('signupPasswordErr').textContent = '';
+  const charterErr = document.getElementById('signupCharterErr');
+  if (charterErr) charterErr.textContent = '';
 
   if (username.length < 3) { document.getElementById('signupUsernameErr').textContent = 'Pseudo trop court (3 min)'; return; }
   if (username.length > 24) { document.getElementById('signupUsernameErr').textContent = 'Pseudo trop long (24 max)'; return; }
   if (!/^[a-zA-Z0-9_-]+$/.test(username)) { document.getElementById('signupUsernameErr').textContent = 'Seulement lettres/chiffres/tirets'; return; }
   if (!email.includes('@')) { document.getElementById('signupEmailErr').textContent = 'Email invalide'; return; }
-  if (password.length < 6) { document.getElementById('signupPasswordErr').textContent = '6 caractères minimum'; return; }
+  if (password.length < 8) { document.getElementById('signupPasswordErr').textContent = '8 caractères minimum'; return; }
+  if (charterEl && !charterEl.checked) {
+    if (charterErr) charterErr.textContent = 'Tu dois accepter la charte pour rejoindre la communauté.';
+    return;
+  }
+
+  // v0.18.0 — Captcha Turnstile
+  let captchaToken = null;
+  try {
+    if (typeof turnstile !== 'undefined') {
+      const tokenInput = document.querySelector('#signupCaptcha input[name="cf-turnstile-response"]');
+      captchaToken = tokenInput?.value || null;
+    }
+  } catch {}
+  // Si Turnstile pas chargé OU sitekey de test → on continue sans bloquer (dev/staging)
+  // En prod, Supabase Auth doit être configuré pour exiger le captcha côté serveur.
 
   const btn = document.getElementById('authSubmitBtn');
   btn.disabled = true; btn.textContent = 'Création...';
-  const { data, error } = await supa.auth.signUp({ email, password });
-  if (error) { btn.disabled = false; btn.textContent = 'Créer mon compte'; document.getElementById('signupEmailErr').textContent = error.message; return; }
+  const signUpOpts = { email, password };
+  if (captchaToken) signUpOpts.options = { captchaToken };
+  const { data, error } = await supa.auth.signUp(signUpOpts);
+  if (error) {
+    btn.disabled = false; btn.textContent = 'Créer mon compte';
+    if (/captcha/i.test(error.message)) {
+      if (charterErr) charterErr.textContent = 'Captcha invalide ou expiré. Recommence.';
+      // Reset Turnstile widget si dispo
+      try { if (typeof turnstile !== 'undefined') turnstile.reset('#signupCaptcha'); } catch {}
+    } else {
+      document.getElementById('signupEmailErr').textContent = error.message;
+    }
+    return;
+  }
   if (!data.user) { btn.disabled = false; btn.textContent = 'Créer mon compte'; document.getElementById('signupEmailErr').textContent = 'Erreur inattendue'; return; }
   const { error: pErr } = await supa.from('profiles').insert({ id: data.user.id, username, role: 'contributor' });
   btn.disabled = false; btn.textContent = 'Créer mon compte';
@@ -10151,8 +10276,14 @@ async function signup() {
     document.getElementById('signupUsernameErr').textContent = pErr.message;
     return;
   }
-  showToast('🎉 Bienvenue dans la communauté !');
-  closeModal('authModal');
+  // Détecte si l'email confirmation est requise côté Supabase (data.session === null)
+  if (!data.session) {
+    closeModal('authModal');
+    showToast('📧 Vérifie ton email pour activer ton compte. Le lien expire dans 24h.');
+  } else {
+    showToast('🎉 Bienvenue dans la communauté !');
+    closeModal('authModal');
+  }
 }
 
 async function login() {
@@ -15376,6 +15507,29 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('tabSignup').addEventListener('click', () => openAuthModal('signup'));
   document.getElementById('tabLogin').addEventListener('click', () => openAuthModal('login'));
   document.getElementById('authSubmitBtn').addEventListener('click', () => { if (authMode === 'signup') signup(); else login(); });
+
+  // v0.18.0 Phase 1 — Password strength live + charter link
+  const pwdInput = document.getElementById('signupPassword');
+  if (pwdInput) {
+    pwdInput.addEventListener('input', () => {
+      const meter = document.getElementById('signupPwdStrength');
+      const fill = document.getElementById('signupPwdStrengthFill');
+      const label = document.getElementById('signupPwdStrengthLabel');
+      if (!meter || !fill || !label) return;
+      const v = pwdInput.value;
+      if (!v) { meter.style.display = 'none'; return; }
+      meter.style.display = 'flex';
+      const s = passwordStrength(v);
+      fill.classList.remove('weak', 'medium', 'strong');
+      if (s <= 1) { fill.classList.add('weak'); label.textContent = 'Faible'; }
+      else if (s === 2) { fill.classList.add('medium'); label.textContent = 'Moyen'; }
+      else { fill.classList.add('strong'); label.textContent = 'Fort'; }
+    });
+  }
+  document.getElementById('signupCharterLink')?.addEventListener('click', e => {
+    e.preventDefault();
+    if (typeof openCharterView === 'function') openCharterView();
+  });
 
   // ─ User menu ─
   document.getElementById('userMenuBtn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('userDropdown').classList.toggle('on'); });
