@@ -47,7 +47,9 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
-- **v0.17.0-phase1+3+5** — Économie collaborative (UI only) :
+- **v0.18.0** — Trust & Identity : compte renforcé (captcha + charte + email confirm + min 8 chars + restriction écriture 7 jours), certification "Auteur rémunérable" (4 critères cumulatifs avec roadmap personnelle), crédibilité enrichie (badges multiples ⭐📝✓💛 + breakdown public + historique)
+- **v0.17.1** — Banner CTA Avis Basé+ discret au-dessus du masthead (dismissible)
+- **v0.17.0** — Économie collaborative complète :
   - `/financement` (10 sections + camembert/ligne 12 mois Chart.js, mock data + live ticker)
   - `/devenir-membre` (hero + price card 5€/mois + opt-in mur + 3 benefits + FAQ)
   - Modale "Don ponctuel" (presets 1/3/5/10€ + libre + opt-in + bénéficiaire + summary live)
@@ -89,7 +91,8 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 9. `v0.11.3-fix-notif-target-type-profile.sql` (V0.11.3 — contrainte CHECK notif target_type profile)
 10. `v0.16.0-migration.sql` (V0.16.0 — user_blocks + account_deletion_requests pour Apple App Store)
 11. `v0.17.0-financement-migration.sql` (V0.17.0 — économie collaborative : 9 tables + 4 vues + 4 RPCs + RLS strict)
-12. **`v0.18.0-trust-migration.sql`** (V0.18.0 Phase 2 — certification rémunérable : `contributor_certifications` + 2 RPCs + vue publique) ← **NOUVEAU**
+12. `v0.18.0-trust-migration.sql` (V0.18.0 Phase 2 — certification rémunérable : `contributor_certifications` + 2 RPCs + vue publique)
+13. **`v0.18.0-credibility-migration.sql`** (V0.18.0 Phase 3 — `cred_score_history` + 3 RPCs `recompute_user_cred_score`, `get_user_cred_breakdown`, `recompute_all_cred_scores`) ← **NOUVEAU**
 
 ## Développement local
 

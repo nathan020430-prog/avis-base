@@ -70,9 +70,11 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.11.1→v0.11.3** | UX/Fixes | Refonte esthétique DM, profil public, correctifs RLS/notifs | ✅ Livré |
 | **v0.16.0** | App Store | Pages légales (CGU, privacy, support, delete), migration Apple-ready, section download | ✅ Livré |
 | **v0.16.1** | UX | Masque articles "test/demo" du feed public | ✅ Livré |
-| **v0.17.0** | 💰 Économie collaborative | Page `/financement` + adhésion 5€/mois + algo score + payouts Stripe Connect (7 phases) | 🚀 7/7 phases livrées (frontend + SQL + Edge Functions drafts) — reste config Stripe + déploiement |
-| **v0.18.0** | Sécurité | Modération avancée + anti-fake news (repoussée depuis v0.17) | 2 semaines |
-| **v0.19.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) | 4-6 semaines |
+| **v0.17.0** | 💰 Économie collaborative | Page `/financement` + adhésion 5€/mois + algo score + payouts Stripe Connect (7 phases) | ✅ Livré |
+| **v0.17.1** | UX | Banner CTA Avis Basé+ dismissible sur la home | ✅ Livré |
+| **v0.18.0** | 🛡️ Trust & Identity | Phase 1 : compte renforcé (captcha + charte + email confirm + 8 chars + restriction écriture 7j). Phase 2 : certification rémunérable (4 critères + roadmap + lock virement). Phase 3 : crédibilité enrichie (badges multiples + breakdown public + historique) | ✅ Livré (3/3 phases) |
+| **v0.19.0** | Sécurité | Modération avancée + anti-fake news (peer-review, masquage auto, dashboard mod) | 2 semaines |
+| **v0.20.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
 ---

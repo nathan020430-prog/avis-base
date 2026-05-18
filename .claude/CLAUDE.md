@@ -13,32 +13,40 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle
-- Code en **v0.17.0-phase1** (squelette `/financement`, mock data, 1ère des 7 phases — économie collaborative)
-- v0.16.x livrée : App Store ready + masquage articles test
-- Tag remote : `v0.16.0-prep`, `v0.16.1` sur origin
+## Version actuelle — v0.18.0 (Trust & Identity) — taguée 2026-05-18
+- v0.16.x → App Store ready + masquage articles test
+- v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
+- v0.17.1 → Banner CTA Avis Basé+ sur la home
+- **v0.18.0 → Trust & Identity (Phase 1+2+3)** :
+  - Compte renforcé (captcha Turnstile + charte + email confirm + min 8 chars + restriction écriture 7j)
+  - Certification "Auteur rémunérable" (4 critères : 3 articles + 30j + score ≥50 + KYC)
+  - Crédibilité enrichie (badges multiples + breakdown public + historique)
 
-## Mission en cours : v0.17.0 — Économie collaborative
-- 7 phases successives, validation explicite à chaque palier
-- Phase 1 (squelette `/financement`) : ✅ livrée
-- Phase 3 UI (`/devenir-membre` + modale tip + tip jar inline articles) : ✅ livrée
-- Phase 5 UI (`/mon-financement` dashboard contributeur) : ✅ livrée — mock data, KYC stub, bouton virement disabled si <20€
-- Phase 2 (migration SQL — `v0.17.0-financement-migration.sql` : 9 tables + 4 vues + 4 RPCs + RLS strict) : ✅ livrée — à exécuter dans Supabase SQL Editor
-- Phase 3 backend : Edge Functions `create-checkout-session` + `stripe-webhook` : ✅ drafts livrés dans `supabase/functions/`, à déployer après config Stripe secrets (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, PRICE_ID_MEMBERSHIP, SITE_URL)
-- Phase 4 : branchement Supabase sur /financement (polling 30s) : ✅ livrée
-- Phase 5 backend : track_view wire + dashboard sur vraies données : ✅ livrée
-- Phase 6 : Edge Function `compute-monthly-payout` (snapshot mensuel + crédit balance) : ✅ draft livré, déployable + cron pg_cron à configurer
-- Phase 7 : Edge Functions `stripe-connect-onboarding` + `request-payout` : ✅ drafts livrés (⚠️ avant 1er virement réel : valider statut juridique ACPR avec un avocat)
+Tags sur origin : `v0.16.0-prep`, `v0.16.1`, `v0.17.0`, `v0.17.0-ui-and-sql`, `v0.18.0`
 
-Reste à faire (côté admin/owner, pas code) :
-1. Créer compte Stripe (mode test), produit 5€/mois, copier price_id
-2. Set Supabase secrets (STRIPE_*, PRICE_ID, SITE_URL)
-3. Déployer les 5 Edge Functions via `supabase functions deploy ...`
-4. Configurer le webhook Stripe sur l'URL Supabase, copier whsec_ → secret
-5. (Phase 7) Activer Stripe Connect Express + consulter avocat ACPR
-6. (Phase 6) Configurer pg_cron : 1er du mois 3h → compute-monthly-payout
-Voir `supabase/functions/README.md` pour les détails étape par étape.
-- Décisions actées : 5€/mois, 0 salaire admin, 100% surplus aux contributeurs, opt-in affichage anonyme par défaut, seuil virement 20€
+## ⚠️ SQL à appliquer côté Supabase (dans cet ordre)
+Le code est mergé mais les migrations doivent être exécutées manuellement dans le SQL Editor :
+1. `v0.17.0-financement-migration.sql` — 9 tables économie + 4 vues + 4 RPCs (✅ déjà appliquée)
+2. `v0.18.0-trust-migration.sql` — `contributor_certifications` + 2 RPCs + vue publique
+3. `v0.18.0-credibility-migration.sql` — `cred_score_history` + 3 RPCs
+
+Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
+
+## ⚠️ Reste à faire (admin/owner, pas du code)
+**Stripe — pour activer l'économie collab en prod** (voir `supabase/functions/README.md`) :
+1. Créer compte Stripe (mode test), produit 5€/mois, copier `price_id`
+2. Set Supabase secrets : `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PRICE_ID_MEMBERSHIP`, `SITE_URL`
+3. Déployer les 5 Edge Functions : `supabase functions deploy create-checkout-session stripe-webhook compute-monthly-payout request-payout stripe-connect-onboarding`
+4. Configurer webhook Stripe → URL Supabase → copier `whsec_` → secret
+5. (Phase 6) Activer extension pg_cron + `select cron.schedule(...)` pour compute-monthly-payout mensuel
+6. (Phase 7) Activer Stripe Connect Express + ⚠️ **consulter avocat ACPR avant 1er virement réel** (statut intermédiaire de paiement)
+
+**Auth — Phase 1** :
+1. Supabase Dashboard → Auth → Settings → activer "Confirm email"
+2. (Optionnel) Cloudflare Turnstile → créer site → remplacer la sitekey dans `index.html` (actuellement `1x00000000000000000000AA` de test)
+
+**Décisions économie collab actées (ne pas y revenir sans demander)** :
+5€/mois, 0 salaire admin, 100% surplus aux contributeurs, opt-in affichage anonyme par défaut, seuil virement 20€, certification rémunérable obligatoire
 
 ## Versionning
 - Pré-release `0.x.x` jusqu'au lancement public en v1.0.0
