@@ -20,9 +20,10 @@
 
 ## Mission en cours : v0.17.0 — Économie collaborative
 - 7 phases successives, validation explicite à chaque palier
-- Phase 1 (squelette page `/financement`) : ✅ livrée
-- Phase 2 : migration SQL (9 tables + 4 vues + RLS) — à faire
-- Phase 3 : Stripe Subscriptions + webhook + `/devenir-membre`
+- Phase 1 (squelette `/financement`) : ✅ livrée
+- Phase 3 UI (`/devenir-membre` + modale tip) : ✅ livrée — CTAs câblés sur UI, Stripe Checkout backend encore à faire
+- Phase 2 (migration SQL — 9 tables + 4 vues + RLS) : différée à la fin du chantier (décision user)
+- Phase 3 backend : Edge Functions `create-checkout-session` + `stripe-webhook` — à faire quand SQL en place
 - Phase 4 : branchement Realtime sur vraies données
 - Phase 5 : tracking vues + dashboard contributeur
 - Phase 6 : algo mensuel + cron compute-monthly-payout

@@ -5052,6 +5052,69 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 .fin-action:hover{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
 .fin-action svg{width:14px;height:14px}
 
+/* ═══ /DEVENIR-MEMBRE — Avis Basé+ — Phase 3 (UI only) ═════════════════════ */
+
+.mb-view{max-width:920px;margin:0 auto;padding:32px 24px 80px}
+.mb-hero{padding:48px 0 32px;text-align:center;border-bottom:3px double var(--rule,#D9CFB7)}
+.mb-hero__kicker{font-family:var(--fb);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;font-weight:600}
+.mb-hero__title{font-family:var(--fd);font-style:italic;font-weight:500;font-size:clamp(40px,7vw,72px);line-height:1.05;color:var(--ink);margin:0 auto 16px}
+.mb-hero__plus{font-style:normal;color:var(--accent);font-weight:400}
+.mb-hero__lead{font-family:var(--ff);font-size:clamp(16px,1.8vw,19px);color:var(--ink-muted);max-width:54ch;margin:0 auto;line-height:1.6}
+
+.mb-price{margin:48px auto 32px;max-width:420px;border:2px solid var(--ink);padding:32px 28px;text-align:center;background:var(--paper-2,rgba(0,0,0,.02))}
+.mb-price__amount{display:flex;align-items:baseline;justify-content:center;gap:6px;margin-bottom:6px}
+.mb-price__num{font-family:var(--fd);font-weight:500;font-size:72px;color:var(--ink);line-height:1;font-feature-settings:"tnum"}
+.mb-price__per{font-family:var(--fb);font-size:14px;color:var(--ink-muted);font-weight:500}
+.mb-price__sub{font-family:var(--fb);font-size:13px;color:var(--ink-muted);margin-bottom:18px}
+.mb-price__cta{display:block;width:100%;margin-top:8px}
+
+.mb-benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin:56px 0}
+.mb-benefit{padding:24px;border-top:3px solid var(--accent)}
+.mb-benefit h3{font-family:var(--ff);font-weight:600;font-size:17px;color:var(--ink);margin:0 0 8px}
+.mb-benefit p{font-family:var(--fb);font-size:14px;color:var(--ink-muted);line-height:1.55;margin:0}
+
+.mb-consent{margin:32px auto;max-width:540px;padding:18px 20px;background:var(--accent-soft);border-left:3px solid var(--accent);display:flex;gap:12px;align-items:flex-start}
+.mb-consent input[type="checkbox"]{margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+.mb-consent label{font-family:var(--fb);font-size:13px;color:var(--ink);line-height:1.5;cursor:pointer}
+.mb-consent label strong{color:var(--accent)}
+.mb-consent__note{display:block;margin-top:4px;font-size:11px;color:var(--ink-muted);font-style:italic}
+
+.mb-faq{margin-top:56px}
+.mb-faq h2{font-family:var(--fd);font-weight:500;font-size:28px;color:var(--ink);margin-bottom:24px}
+.mb-faq__item{padding:16px 0;border-bottom:1px solid var(--rule,#D9CFB7)}
+.mb-faq__item h4{font-family:var(--ff);font-weight:500;font-size:16px;color:var(--ink);margin:0 0 6px}
+.mb-faq__item p{font-family:var(--fb);font-size:14px;color:var(--ink-muted);line-height:1.55;margin:0}
+
+.mb-back{display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;font-family:var(--fb);font-size:13px;color:var(--ink-muted);text-decoration:none;cursor:pointer;background:none;border:none;padding:8px 0}
+.mb-back:hover{color:var(--accent)}
+
+@media (max-width:768px){
+  .mb-benefits{grid-template-columns:1fr;gap:16px}
+  .mb-price{margin:32px auto 24px}
+  .mb-price__num{font-size:56px}
+}
+
+/* ═══ TIP MODAL (don ponctuel — Phase 3 UI only) ═══════════════════════════ */
+
+.tip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+.tip-amount{padding:14px 0;border:1px solid var(--rule,#D9CFB7);background:var(--surface);font-family:var(--fd);font-weight:500;font-size:22px;color:var(--ink);cursor:pointer;transition:all .15s ease}
+.tip-amount:hover{border-color:var(--accent);color:var(--accent)}
+.tip-amount.on{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
+.tip-libre{display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;border:1px dashed var(--rule,#D9CFB7);font-family:var(--fb);font-size:13px;color:var(--ink-muted)}
+.tip-libre input{flex:1;border:none;background:transparent;font-family:var(--fd);font-weight:500;font-size:22px;color:var(--ink);outline:none;width:100%}
+.tip-libre input::placeholder{color:var(--ink-light)}
+.tip-target{margin:14px 0;font-family:var(--fb);font-size:13px;color:var(--ink-muted)}
+.tip-target select{width:100%;padding:10px;border:1px solid var(--rule,#D9CFB7);background:var(--surface);color:var(--ink);font-family:var(--fb);font-size:14px;margin-top:6px}
+.tip-consent{display:flex;gap:10px;align-items:flex-start;padding:14px;background:var(--paper-2,rgba(0,0,0,.02));margin:14px 0}
+.tip-consent input{margin-top:2px;width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
+.tip-consent label{font-family:var(--fb);font-size:12px;color:var(--ink);line-height:1.5;cursor:pointer}
+.tip-summary{font-family:var(--fb);font-size:13px;color:var(--ink-muted);margin-top:10px;padding:10px 12px;background:var(--accent-soft);border-left:2px solid var(--accent)}
+.tip-summary strong{color:var(--accent);font-family:var(--fd);font-size:16px}
+
+@media (max-width:480px){
+  .tip-grid{grid-template-columns:repeat(2,1fr)}
+}
+
 /* Responsive */
 @media (max-width:768px){
   .fin-hero__stats{grid-template-columns:1fr;gap:12px}
@@ -5523,10 +5586,10 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   <!-- §9 CTA -->
   <section class="fin-cta">
     <div class="fin-cta__buttons">
-      <button class="btn btn--accent btn--lg" id="finMemberBtn" disabled>Devenir membre — 5 €/mois</button>
-      <button class="btn btn--outline btn--lg" id="finTipBtn" disabled>Faire un don ponctuel</button>
+      <button class="btn btn--accent btn--lg" id="finMemberBtn">Devenir membre — 5 €/mois</button>
+      <button class="btn btn--outline btn--lg" id="finTipBtn">Faire un don ponctuel</button>
     </div>
-    <p class="fin-cta__note">Les boutons seront actifs en Phase 3 (intégration Stripe Checkout).</p>
+    <p class="fin-cta__note">Les boutons ouvrent les pages d'adhésion / don. Paiement Stripe activé en Phase 3 (en cours).</p>
   </section>
 
   <!-- §10 ARCHIVE PDF -->
@@ -5537,6 +5600,131 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   </section>
 
 </main>
+
+<!-- ═══════════════════════════════════════════
+     /DEVENIR-MEMBRE — Avis Basé+
+     v0.17.0 — Phase 3 (UI only — Stripe à câbler)
+═══════════════════════════════════════════ -->
+<main id="membreView" class="mb-view" role="main" style="display:none">
+  <button class="mb-back" id="mbBackBtn" type="button">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Retour au financement
+  </button>
+
+  <section class="mb-hero">
+    <div class="mb-hero__kicker">Soutenir Avis Basé</div>
+    <h1 class="mb-hero__title">Avis Basé<span class="mb-hero__plus">+</span></h1>
+    <p class="mb-hero__lead">5 € par mois pour financer un média indépendant qui source tout. 100 % du surplus reversé aux contributeurs au prorata de leurs articles. Aucun salaire admin. Zéro pub.</p>
+  </section>
+
+  <div class="mb-price">
+    <div class="mb-price__amount">
+      <span class="mb-price__num">5 €</span>
+      <span class="mb-price__per">/ mois</span>
+    </div>
+    <p class="mb-price__sub">Résiliable à tout moment depuis votre portail Stripe.</p>
+    <button class="btn btn--accent btn--lg mb-price__cta" id="mbCheckoutBtn">Devenir membre maintenant</button>
+  </div>
+
+  <div class="mb-consent">
+    <input type="checkbox" id="mbConsent">
+    <label for="mbConsent">
+      <strong>Afficher mon nom sur le Mur des Soutiens</strong>
+      <span class="mb-consent__note">Anonyme par défaut. Vous pouvez changer d'avis à tout moment dans votre portail membre. À la fin de votre adhésion, votre nom est retiré automatiquement.</span>
+    </label>
+  </div>
+
+  <div class="mb-benefits">
+    <div class="mb-benefit">
+      <h3>Soutenir la rédaction</h3>
+      <p>5 € qui financent l'infra (Supabase, Cloudflare, domaine) et reversent le surplus aux auteurs. Pas de salaire admin, pas de fonds bloqués.</p>
+    </div>
+    <div class="mb-benefit">
+      <h3>Mur des Soutiens</h3>
+      <p>Si vous le souhaitez (opt-in), votre pseudo apparaît sur la page <a href="#financement">/financement</a>. Anonyme par défaut.</p>
+    </div>
+    <div class="mb-benefit">
+      <h3>Transparence totale</h3>
+      <p>Pool, frais, virements : tout est public sur <a href="#financement">/financement</a>. Archive mensuelle immuable.</p>
+    </div>
+  </div>
+
+  <section class="mb-faq">
+    <h2>Questions fréquentes</h2>
+    <div class="mb-faq__item">
+      <h4>Que se passe-t-il avec mes 5 € ?</h4>
+      <p>Le 1er du mois suivant, on déduit les frais Stripe réels (~5%) et les frais infra (~8%). Le reste va dans le pool contributeurs, partagé au prorata des scores d'articles publiés ce mois.</p>
+    </div>
+    <div class="mb-faq__item">
+      <h4>Comment résilier ?</h4>
+      <p>Depuis votre portail Stripe (lien dans votre profil après adhésion). Effectif à la fin de la période en cours, aucun prélèvement supplémentaire.</p>
+    </div>
+    <div class="mb-faq__item">
+      <h4>Avis Basé, c'est qui ?</h4>
+      <p>Un média collaboratif sourcé, créé par <a href="https://www.tiktok.com/@avis_base.nth" target="_blank" rel="noopener">@avis_base.nth</a> sur TikTok. Tous les articles sont écrits par la communauté avec sources citées.</p>
+    </div>
+    <div class="mb-faq__item">
+      <h4>Pourquoi 5 € et pas 3 € ou 10 € ?</h4>
+      <p>Suffisant pour couvrir l'infra dès une trentaine de membres, assez peu pour que ce soit accessible. Si vous voulez donner plus, vous pouvez faire un <em>don ponctuel</em> en plus (100% au contributeur, 0 commission).</p>
+    </div>
+    <div class="mb-faq__item">
+      <h4>Et si je veux juste donner une fois ?</h4>
+      <p>Utilisez le bouton « <a href="#financement">Faire un don ponctuel</a> » sur la page financement, ou le <em>tip jar</em> sur l'article de votre choix (Phase 3 — bientôt).</p>
+    </div>
+  </section>
+</main>
+
+<!-- ═══════════════════════════════════════════
+     TIP MODAL — don ponctuel
+     v0.17.0 — Phase 3 (UI only)
+═══════════════════════════════════════════ -->
+<div class="modal" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="tipModalTitle">
+  <div class="modal__backdrop" data-tip-close></div>
+  <div class="modal__box modal__box--sm">
+    <div class="modal__head">
+      <div>
+        <div class="modal__title" id="tipModalTitle">Faire un don ponctuel</div>
+        <div class="modal__title-sub">100 % au contributeur, 0 commission</div>
+      </div>
+      <button class="modal__close" type="button" data-tip-close aria-label="Fermer">×</button>
+    </div>
+    <div class="modal__body">
+      <p style="font-family:var(--fb);font-size:13px;color:var(--ink-muted);margin:0 0 10px">Choisissez un montant :</p>
+      <div class="tip-grid" id="tipGrid">
+        <button class="tip-amount" data-tip-amount="1">1 €</button>
+        <button class="tip-amount on" data-tip-amount="3">3 €</button>
+        <button class="tip-amount" data-tip-amount="5">5 €</button>
+        <button class="tip-amount" data-tip-amount="10">10 €</button>
+      </div>
+      <div class="tip-libre">
+        <span>ou libre :</span>
+        <input type="number" id="tipLibre" min="1" max="1000" step="0.50" placeholder="autre montant…" inputmode="decimal">
+        <span>€</span>
+      </div>
+
+      <div class="tip-target">
+        <label for="tipTarget">Bénéficiaire</label>
+        <select id="tipTarget">
+          <option value="pool">Pool général (partagé au prorata des scores)</option>
+          <option value="article" disabled>Un article spécifique (à choisir depuis la page article — bientôt)</option>
+        </select>
+      </div>
+
+      <div class="tip-consent">
+        <input type="checkbox" id="tipConsent">
+        <label for="tipConsent">Afficher mon pseudo et mon montant sur le Mur des Soutiens (anonyme par défaut)</label>
+      </div>
+
+      <div class="tip-summary">
+        Total : <strong id="tipSummaryAmount">3,00 €</strong> — <span id="tipSummaryTarget">au pool général</span>
+      </div>
+    </div>
+    <div class="modal__foot">
+      <button class="btn btn--ghost" type="button" data-tip-close>Annuler</button>
+      <button class="btn btn--accent" type="button" id="tipSubmitBtn">Envoyer le tip</button>
+    </div>
+  </div>
+</div>
 
 <section class="app-cta" id="appDownload" aria-labelledby="appCtaTitle">
   <div class="app-cta__inner">
@@ -7890,15 +8078,17 @@ function switchView(view) {
   const emptyArt = document.getElementById('emptyArticles');
   const emptyArc = document.getElementById('empty');
   const finView = document.getElementById('financementView');
-  // v0.17.0 — wrappers homepage à masquer en vue financement
+  const mbView = document.getElementById('membreView');
+  // v0.17.0 — wrappers homepage à masquer en vue financement/membre
   const homeLayout = document.getElementById('homepageLayout');
   const homeExtras = document.getElementById('homepageExtras');
   const appDownload = document.getElementById('appDownload');
   const articlesPager = document.getElementById('articlesPager');
 
-  // Toujours arrêter le ticker live + masquer la vue financement par défaut
+  // Toujours arrêter le ticker live + masquer les vues opt-in par défaut
   if (typeof Financement !== 'undefined') Financement.stopLiveTicker();
   if (finView) finView.style.display = 'none';
+  if (mbView) mbView.style.display = 'none';
 
   if (view === 'financement') {
     if (featured) featured.style.display = 'none';
@@ -7920,13 +8110,29 @@ function switchView(view) {
     }
     try { history.replaceState(null, '', '#financement'); } catch {}
     window.scrollTo({top:0, behavior:'instant'});
+  } else if (view === 'membre') {
+    if (featured) featured.style.display = 'none';
+    if (searchBar) searchBar.style.display = 'none';
+    if (toolArt) toolArt.style.display = 'none';
+    if (toolArc) toolArc.style.display = 'none';
+    if (gridArt) gridArt.style.display = 'none';
+    if (gridArc) gridArc.style.display = 'none';
+    if (emptyArt) emptyArt.style.display = 'none';
+    if (emptyArc) emptyArc.style.display = 'none';
+    if (homeLayout) homeLayout.style.display = 'none';
+    if (homeExtras) homeExtras.style.display = 'none';
+    if (appDownload) appDownload.style.display = 'none';
+    if (articlesPager) articlesPager.style.display = 'none';
+    if (mbView) mbView.style.display = 'block';
+    try { history.replaceState(null, '', '#devenir-membre'); } catch {}
+    window.scrollTo({top:0, behavior:'instant'});
   } else if (view === 'articles') {
     if (searchBar) searchBar.style.display = '';
     if (toolArt) toolArt.style.display = 'none';
     if (toolArc) toolArc.style.display = 'none';
     if (gridArc) gridArc.style.display = 'none';
     if (emptyArc) emptyArc.style.display = 'none';
-    // Restaurer les wrappers homepage (cas où on revient depuis #financement)
+    // Restaurer les wrappers homepage (cas où on revient depuis #financement / #devenir-membre)
     if (homeLayout) homeLayout.style.display = '';
     if (homeExtras) homeExtras.style.display = '';
     if (appDownload) appDownload.style.display = '';
@@ -11553,6 +11759,115 @@ const Financement = {
   }
 };
 
+// ═══════════════════════════════════════════════════════════
+// v0.17.0 Phase 3 — TipModal (don ponctuel — UI only, Stripe à câbler)
+// ═══════════════════════════════════════════════════════════
+
+const TipModal = {
+  _amount: 3,
+  _customAmount: null,
+  open() {
+    const m = document.getElementById('tipModal');
+    if (!m) return;
+    m.classList.add('on');
+    this._refresh();
+    document.body.style.overflow = 'hidden';
+  },
+  close() {
+    const m = document.getElementById('tipModal');
+    if (!m) return;
+    m.classList.remove('on');
+    document.body.style.overflow = '';
+  },
+  setAmount(n) {
+    this._amount = n;
+    this._customAmount = null;
+    const libre = document.getElementById('tipLibre');
+    if (libre) libre.value = '';
+    document.querySelectorAll('.tip-amount').forEach(b => {
+      b.classList.toggle('on', parseFloat(b.dataset.tipAmount) === n);
+    });
+    this._refresh();
+  },
+  setCustomAmount(n) {
+    this._customAmount = n;
+    document.querySelectorAll('.tip-amount').forEach(b => b.classList.remove('on'));
+    this._refresh();
+  },
+  _effective() {
+    return this._customAmount !== null && this._customAmount > 0 ? this._customAmount : this._amount;
+  },
+  _refresh() {
+    const amt = this._effective();
+    const amtEl = document.getElementById('tipSummaryAmount');
+    if (amtEl) amtEl.textContent = amt.toFixed(2).replace('.', ',') + ' €';
+    const tgtSel = document.getElementById('tipTarget');
+    const tgtEl = document.getElementById('tipSummaryTarget');
+    if (tgtSel && tgtEl) {
+      tgtEl.textContent = tgtSel.value === 'pool' ? 'au pool général' : 'à un contributeur';
+    }
+  },
+  init() {
+    // Boutons montant
+    document.querySelectorAll('.tip-amount').forEach(b => {
+      b.addEventListener('click', () => this.setAmount(parseFloat(b.dataset.tipAmount)));
+    });
+    // Input libre
+    const libre = document.getElementById('tipLibre');
+    if (libre) {
+      libre.addEventListener('input', () => {
+        const v = parseFloat(libre.value);
+        if (!isNaN(v) && v > 0) this.setCustomAmount(v);
+        else this._refresh();
+      });
+    }
+    // Select target
+    const tgt = document.getElementById('tipTarget');
+    if (tgt) tgt.addEventListener('change', () => this._refresh());
+    // Close handlers
+    document.querySelectorAll('[data-tip-close]').forEach(el => {
+      el.addEventListener('click', () => this.close());
+    });
+    // ESC pour fermer
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        const m = document.getElementById('tipModal');
+        if (m && m.classList.contains('on')) this.close();
+      }
+    });
+    // Submit (Phase 3 stub)
+    const submit = document.getElementById('tipSubmitBtn');
+    if (submit) {
+      submit.addEventListener('click', () => {
+        const amt = this._effective();
+        if (typeof toast === 'function') toast(`Phase 3 — Stripe en cours d'intégration. Don de ${amt.toFixed(2).replace('.',',')} € enregistré côté UI (pas encore traité).`, 4000);
+        else alert(`Phase 3 — Stripe en cours. Don de ${amt.toFixed(2).replace('.',',')} € (UI seulement).`);
+        this.close();
+      });
+    }
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// v0.17.0 Phase 3 — Membre (page /devenir-membre — UI only)
+// ═══════════════════════════════════════════════════════════
+
+const Membre = {
+  init() {
+    const checkoutBtn = document.getElementById('mbCheckoutBtn');
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener('click', () => {
+        const consent = document.getElementById('mbConsent');
+        const optIn = consent ? consent.checked : false;
+        if (typeof toast === 'function') toast(`Phase 3 — Stripe Checkout en cours d'intégration. Adhésion 5€/mois prête (opt-in pseudo : ${optIn ? 'OUI' : 'NON'}).`, 4000);
+        else alert(`Phase 3 — Stripe en cours.\nAdhésion 5€/mois enregistrée côté UI.\nAfficher pseudo : ${optIn ? 'OUI' : 'NON'}`);
+      });
+    }
+    const backBtn = document.getElementById('mbBackBtn');
+    if (backBtn) backBtn.addEventListener('click', () => switchView('financement'));
+  }
+};
+
 
 function refreshUserUI() {
   const authBtn = document.getElementById('authBtn');
@@ -12328,6 +12643,8 @@ async function init() {
     switchView('archive');
   } else if (hash === '#financement') {
     switchView('financement');
+  } else if (hash === '#devenir-membre') {
+    switchView('membre');
   } else {
     switchView('articles');
   }
@@ -12336,10 +12653,21 @@ async function init() {
   const finNavBtn = document.getElementById('finNavBtn');
   if (finNavBtn) finNavBtn.addEventListener('click', () => switchView('financement'));
 
+  // v0.17.0 Phase 3 — CTAs sur /financement
+  const finMemberBtn = document.getElementById('finMemberBtn');
+  if (finMemberBtn) finMemberBtn.addEventListener('click', () => switchView('membre'));
+  const finTipBtn = document.getElementById('finTipBtn');
+  if (finTipBtn) finTipBtn.addEventListener('click', () => { if (typeof TipModal !== 'undefined') TipModal.open(); });
+
+  // v0.17.0 Phase 3 — init modules
+  if (typeof TipModal !== 'undefined') TipModal.init();
+  if (typeof Membre !== 'undefined') Membre.init();
+
   // Hashchange (bouton back/forward du browser, liens internes)
   window.addEventListener('hashchange', () => {
     const h = window.location.hash;
     if (h === '#financement') switchView('financement');
+    else if (h === '#devenir-membre') switchView('membre');
     else if (h === '#archive') switchView('archive');
     else if (!h.startsWith('#article/')) switchView('articles');
   });
