@@ -5215,6 +5215,31 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 [data-theme="dark"] .mf-kyc__status--pending{background:#5A3F00;color:#F5D58C}
 [data-theme="dark"] .mf-kyc__status--done{background:#1F4025;color:#9DD4A8}
 
+/* v0.18.0 Phase 3 — Badges utilisateur réutilisables */
+.user-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border:1px solid var(--rule,#D9CFB7);background:var(--surface);font-family:var(--fb);font-size:11px;font-weight:600;color:var(--ink);border-radius:999px;letter-spacing:.02em;line-height:1.2}
+.badge__icon{font-size:13px;line-height:1}
+.badge__label{}
+.badge--level{}
+.badge--veteran{background:#FFF0CB;border-color:#E0B65A;color:#7A5800}
+.badge--prolific{background:#E0F0E5;border-color:#5C8A6E;color:#1F4025}
+.badge--certified{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+.badge--member{background:linear-gradient(135deg,#FFE5A8 0%,#F5D58C 100%);border-color:#D4A841;color:#7A5800}
+[data-theme="dark"] .badge--veteran{background:#3D2E12;border-color:#7A5A24;color:#F5D58C}
+[data-theme="dark"] .badge--prolific{background:#1F4025;border-color:#5C8A6E;color:#9DD4A8}
+[data-theme="dark"] .badge--member{background:linear-gradient(135deg,#5A4014 0%,#7A5800 100%);border-color:#A88234;color:#F5D58C}
+
+/* v0.18.0 Phase 3 — Breakdown du score (D'où vient ce score ?) */
+.cred-breakdown{margin-top:18px;padding:18px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule,#D9CFB7)}
+.cred-breakdown__title{font-family:var(--ff);font-weight:600;font-size:14px;color:var(--ink);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.cred-breakdown__total{font-family:var(--fd);font-weight:500;font-size:18px;color:var(--accent);margin-left:auto;font-feature-settings:"tnum"}
+.cred-breakdown__list{display:grid;grid-template-columns:1fr 60px 90px;gap:8px 12px;font-family:var(--fb);font-size:12px;align-items:center}
+.cred-breakdown__list .lbl{color:var(--ink)}
+.cred-breakdown__list .cnt{color:var(--ink-muted);text-align:right;font-feature-settings:"tnum"}
+.cred-breakdown__list .pts{color:var(--ink);font-weight:600;text-align:right;font-feature-settings:"tnum"}
+.cred-breakdown__list .pts.neg{color:#B83A2D}
+.cred-breakdown__formula{margin-top:12px;font-family:var(--fb);font-size:11px;color:var(--ink-muted);font-style:italic;line-height:1.5}
+
 /* v0.18.0 Phase 2 — Roadmap de certification (grid 2x2 desktop, stack mobile) */
 .mf-cert{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px}
 .mf-cert__item{display:flex;gap:14px;align-items:center;padding:16px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule,#D9CFB7);transition:all .2s ease}
@@ -5845,6 +5870,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   <section class="mf-hero">
     <div class="mf-hero__kicker">Mon financement</div>
     <h1 class="mf-hero__title">Bonjour <span class="mf-hero__pseudo" id="mfPseudo">@vous</span></h1>
+    <div id="mfBadges"></div>
     <p class="mf-hero__sub">Mois en cours : <span id="mfCurrentMonth">—</span></p>
   </section>
 
@@ -6982,6 +7008,8 @@ body.is-mobile .notif-bell{width:32px;height:32px}
             <div class="public-profile__actions" id="publicProfileActions"></div>
           </div>
           <div class="public-profile__bio" id="publicProfileBio"></div>
+          <!-- v0.18.0 Phase 3 — Breakdown du score crédibilité -->
+          <div id="publicProfileCredBreakdown" style="display:none"></div>
         </div>
         <div class="public-profile__stats" id="publicProfileStats"></div>
         <div class="public-profile__tabs" id="publicProfileTabs">
@@ -10389,6 +10417,111 @@ function getUserLevel(pct) {
   return USER_LEVELS.slice().reverse().find(l => pct >= l.min) || USER_LEVELS[0];
 }
 
+// v0.18.0 Phase 3 — renderCredBreakdown : panneau "D'où vient ce score ?"
+// Appelle la RPC get_user_cred_breakdown et injecte le HTML dans le profile public.
+async function renderCredBreakdown(userId) {
+  const container = document.getElementById('publicProfileCredBreakdown');
+  if (!container || !userId || !supa) return;
+  try {
+    const { data, error } = await supa.rpc('get_user_cred_breakdown', { p_user_id: userId });
+    if (error || !data || data.error) {
+      // RPC pas dispo (migration Phase 3 pas appliquée) → on masque le panel
+      container.style.display = 'none';
+      return;
+    }
+    const breakdown = data.breakdown || [];
+    const score = data.score || 0;
+    const formula = `score = clamp(somme des points, 0, 200) × 0,5 — soit 100 % max à 200 points bruts.`;
+    container.innerHTML = `
+      <div class="cred-breakdown">
+        <h4 class="cred-breakdown__title">
+          D'où vient ce score ?
+          <span class="cred-breakdown__total">${score} %</span>
+        </h4>
+        <div class="cred-breakdown__list">
+          ${breakdown.map(b => {
+            const points = Number(b.points || 0);
+            const cls = points < 0 ? 'pts neg' : 'pts';
+            const sign = points > 0 ? '+' : '';
+            const num = Number(b.count || 0);
+            const numFmt = Number.isInteger(num) ? num : num.toFixed(1);
+            return `
+              <span class="lbl">${escapeHtml(b.label)}</span>
+              <span class="cnt">${numFmt} × ${b.weight}</span>
+              <span class="${cls}">${sign}${points.toFixed(1)} pts</span>
+            `;
+          }).join('')}
+        </div>
+        <p class="cred-breakdown__formula">${formula}</p>
+      </div>
+    `;
+    container.style.display = 'block';
+  } catch (e) {
+    console.debug('[renderCredBreakdown] failed', e);
+    container.style.display = 'none';
+  }
+}
+
+// v0.18.0 Phase 3 — renderUserBadges : composant réutilisable
+// profile: row profiles (id, username, credibility_score, articles_published, created_at)
+// extras: { is_member, is_certified } (optionnels, à fournir si chargés)
+function renderUserBadges(profile, extras = {}) {
+  if (!profile) return '';
+  const badges = [];
+
+  // 1. Niveau Basitude (toujours présent, basé sur credibility_score)
+  const score = profile.credibility_score || 0;
+  const level = getUserLevel(score);
+  badges.push({
+    cls: 'badge--level badge--lvl-' + level.key,
+    title: `${level.label} — score ${score} %`,
+    html: `<span class="badge__icon">${level.icon}</span><span class="badge__label">${escapeHtml(level.label)}</span>`
+  });
+
+  // 2. Vétéran : compte > 180 jours
+  if (profile.created_at) {
+    const ageDays = Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000);
+    if (ageDays >= 180) {
+      badges.push({
+        cls: 'badge--veteran',
+        title: 'Vétéran — membre de la communauté depuis plus de 6 mois',
+        html: '<span class="badge__icon">⭐</span><span class="badge__label">Vétéran</span>'
+      });
+    }
+  }
+
+  // 3. Prolifique : > 10 articles publiés
+  if ((profile.articles_published || 0) >= 10) {
+    badges.push({
+      cls: 'badge--prolific',
+      title: 'Prolifique — plus de 10 articles publiés',
+      html: '<span class="badge__icon">📝</span><span class="badge__label">Prolifique</span>'
+    });
+  }
+
+  // 4. Auteur rémunérable (certified)
+  if (extras.is_certified) {
+    badges.push({
+      cls: 'badge--certified',
+      title: 'Auteur rémunérable — 4 critères de confiance validés',
+      html: '<span class="badge__icon">✓</span><span class="badge__label">Rémunérable</span>'
+    });
+  }
+
+  // 5. Membre Avis Basé+
+  if (extras.is_member) {
+    badges.push({
+      cls: 'badge--member',
+      title: 'Membre Avis Basé+ — soutient le média',
+      html: '<span class="badge__icon">💛</span><span class="badge__label">Membre+</span>'
+    });
+  }
+
+  return `<div class="user-badges">${badges.map(b =>
+    `<span class="badge ${b.cls}" title="${escapeHtml(b.title)}">${b.html}</span>`
+  ).join('')}</div>`;
+}
+
 // Calcule le score de crédibilité brut d'un profil
 // Les points sont pondérés par la crédibilité de l'utilisateur qui interagit
 // (poids = credibilite_interactant / 100)
@@ -11138,9 +11271,39 @@ function renderPublicProfile(profile, userArticles, stats) {
     lvlBadge.style.display = 'none';
   }
 
+  // v0.18.0 Phase 3 — Badges multiples sous le pseudo
+  if (typeof renderUserBadges === 'function') {
+    let badgesContainer = document.getElementById('publicProfileBadges');
+    if (!badgesContainer) {
+      // Crée le container après le level badge
+      badgesContainer = document.createElement('div');
+      badgesContainer.id = 'publicProfileBadges';
+      lvlBadge?.parentNode?.insertBefore(badgesContainer, lvlBadge.nextSibling);
+    }
+    // Fetch async certified + member status, then render
+    (async () => {
+      let isCertified = false;
+      let isMember = false;
+      try {
+        if (supa) {
+          const { data: cert } = await supa.from('contributor_certifications').select('status').eq('user_id', profile.id).maybeSingle();
+          isCertified = cert?.status === 'certified';
+          const { data: mem } = await supa.from('members').select('status').eq('user_id', profile.id).maybeSingle();
+          isMember = mem?.status === 'active';
+        }
+      } catch {}
+      badgesContainer.innerHTML = renderUserBadges(profile, { is_certified: isCertified, is_member: isMember });
+    })();
+  }
+
   // Bio
   const bioEl = document.getElementById('publicProfileBio');
   bioEl.textContent = profile.bio || '';
+
+  // v0.18.0 Phase 3 — Breakdown du score "D'où vient ce score ?"
+  if (typeof renderCredBreakdown === 'function') {
+    renderCredBreakdown(profile.id);
+  }
 
   // Meta : lien social, date d'inscription
   const meta = document.getElementById('publicProfileMeta');
@@ -12882,6 +13045,13 @@ const MonFin = {
         .eq('user_id', uid)
         .order('requested_at', { ascending: false });
 
+      // v0.18.0 Phase 3 — Statut membre Avis Basé+ pour badge
+      let isMember = false;
+      try {
+        const { data: mem } = await supa.from('members').select('status').eq('user_id', uid).maybeSingle();
+        isMember = mem?.status === 'active';
+      } catch {}
+
       const payouts_history = (payments || []).map(p => ({
         date: (p.completed_at || p.requested_at || '').slice(0, 10),
         amount_cents: p.amount_cents,
@@ -12897,6 +13067,7 @@ const MonFin = {
         articles_count_lifetime: (myArticles || []).length,
         kyc_completed: !!bal?.kyc_completed,
         public_name_consent: !!bal?.public_name_consent,
+        is_member: isMember,
         my_articles_this_month,
         payouts_history
       };
@@ -12938,6 +13109,17 @@ const MonFin = {
     if (!cert || cert.error) return;
     const criteria = cert.criteria || {};
     const milestones = cert.milestones_met || {};
+
+    // v0.18.0 Phase 3 — Render badges dans le hero MonFin
+    if (typeof renderUserBadges === 'function' && typeof currentProfile !== 'undefined' && currentProfile) {
+      const container = document.getElementById('mfBadges');
+      if (container) {
+        container.innerHTML = renderUserBadges(currentProfile, {
+          is_certified: cert.certified === true,
+          is_member: !!this._data?.is_member
+        });
+      }
+    }
 
     // 1. Articles
     const artsItem = document.querySelector('.mf-cert__item[data-cert="articles"]');
