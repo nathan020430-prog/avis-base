@@ -5115,6 +5115,30 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   .tip-grid{grid-template-columns:repeat(2,1fr)}
 }
 
+/* ═══ TIP JAR INLINE — sur les articles (Phase 3 UI only) ══════════════════ */
+
+.tip-inline{margin:32px 0;padding:24px;border:1px solid var(--rule,#D9CFB7);background:var(--paper-2,rgba(0,0,0,.02));border-top:3px solid var(--accent)}
+.tip-inline__head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap}
+.tip-inline__title{font-family:var(--ff);font-weight:600;font-size:18px;color:var(--ink);margin:0}
+.tip-inline__sub{font-family:var(--fb);font-size:12px;color:var(--ink-muted);font-style:italic}
+.tip-inline__lead{font-family:var(--fb);font-size:13px;color:var(--ink-muted);margin:0 0 16px;line-height:1.5}
+.tip-inline__lead strong{color:var(--accent)}
+.tip-inline__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.tip-inline__amt{padding:10px 0;border:1px solid var(--rule,#D9CFB7);background:var(--surface);font-family:var(--fd);font-weight:500;font-size:18px;color:var(--ink);cursor:pointer;transition:all .15s ease}
+.tip-inline__amt:hover{border-color:var(--accent);color:var(--accent)}
+.tip-inline__amt.on{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
+.tip-inline__libre{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px dashed var(--rule,#D9CFB7);margin-bottom:10px;font-family:var(--fb);font-size:12px;color:var(--ink-muted)}
+.tip-inline__libre input{flex:1;border:none;background:transparent;font-family:var(--fd);font-weight:500;font-size:18px;color:var(--ink);outline:none;width:100%}
+.tip-inline__consent{display:flex;gap:8px;align-items:flex-start;font-family:var(--fb);font-size:12px;color:var(--ink-muted);margin-bottom:12px}
+.tip-inline__consent input{margin-top:2px;width:14px;height:14px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.tip-inline__submit{width:100%;padding:12px;background:var(--accent);color:#FDFAF3;border:none;font-family:var(--fb);font-weight:600;font-size:14px;cursor:pointer;transition:background .15s ease}
+.tip-inline__submit:hover{background:var(--accent-dark,#6A1209)}
+.tip-inline__note{font-family:var(--fb);font-size:11px;color:var(--ink-light);text-align:center;margin-top:8px;font-style:italic}
+
+@media (max-width:480px){
+  .tip-inline__grid{grid-template-columns:repeat(2,1fr)}
+}
+
 /* Responsive */
 @media (max-width:768px){
   .fin-hero__stats{grid-template-columns:1fr;gap:12px}
@@ -8481,8 +8505,12 @@ function renderArticlePage(a) {
     <div class="article-page__body">${renderArticleMarkdown(a.bodyMarkdown)}</div>
     ${renderCredibilityCard(a.citedSources)}
     ${citedSection}
+    ${a.status === 'published' && (!currentUser || a.authorId !== currentUser.id) ? renderTipJarInline(a) : ''}
     ${a.status === 'published' ? renderArticleVoteBar(a) : ''}
   `;
+
+  // v0.17.0 Phase 3 — bind tip jar inline (si rendu)
+  body.querySelectorAll('.tip-inline[data-tip-article]').forEach(el => bindTipJarInline(el));
 
   document.getElementById('articleBackBtn')?.addEventListener('click', () => { closeModal('articlePageModal'); });
   document.getElementById('editArticleBtn')?.addEventListener('click', () => { closeModal('articlePageModal'); openArticleEditorForEdit(a.id); });
@@ -11758,6 +11786,97 @@ const Financement = {
     if (this._liveTimer) { clearInterval(this._liveTimer); this._liveTimer = null; }
   }
 };
+
+// ═══════════════════════════════════════════════════════════
+// v0.17.0 Phase 3 — Tip jar INLINE sur les articles
+// Composant compact "Soutenir cet auteur" rendu après les citations
+// ═══════════════════════════════════════════════════════════
+
+// État par article (clé : article.id)
+const tipInlineState = new Map();
+
+function renderTipJarInline(a) {
+  const aid = a.id;
+  tipInlineState.set(aid, { amount: 3, custom: null, consent: false });
+  const authorName = a.authorUsername || 'l\'auteur';
+  return `
+    <aside class="tip-inline" data-tip-article="${aid}">
+      <div class="tip-inline__head">
+        <h3 class="tip-inline__title">💛 Soutenir ${escapeHtml(authorName)}</h3>
+        <span class="tip-inline__sub">100 % à l'auteur · 0 commission</span>
+      </div>
+      <p class="tip-inline__lead">Un don ponctuel pour cet article — utile s'il vous a appris, intrigué ou fait réfléchir. <strong>100 % part au contributeur</strong>, les frais Stripe sont absorbés par l'adhésion 5 €/mois.</p>
+      <div class="tip-inline__grid" role="radiogroup" aria-label="Montant du tip">
+        <button class="tip-inline__amt" data-amt="1">1 €</button>
+        <button class="tip-inline__amt on" data-amt="3">3 €</button>
+        <button class="tip-inline__amt" data-amt="5">5 €</button>
+        <button class="tip-inline__amt" data-amt="10">10 €</button>
+      </div>
+      <div class="tip-inline__libre">
+        <span>ou libre :</span>
+        <input type="number" class="tip-inline__libre-input" min="1" max="1000" step="0.50" placeholder="autre…" inputmode="decimal">
+        <span>€</span>
+      </div>
+      <label class="tip-inline__consent">
+        <input type="checkbox" class="tip-inline__consent-input">
+        <span>Afficher mon pseudo et mon montant sur le Mur des Soutiens (anonyme par défaut)</span>
+      </label>
+      <button type="button" class="tip-inline__submit" data-tip-submit>Envoyer 3,00 € à ${escapeHtml(authorName)}</button>
+      <p class="tip-inline__note">Phase 3 — Stripe Checkout one-shot en cours d'intégration.</p>
+    </aside>
+  `;
+}
+
+function bindTipJarInline(rootEl) {
+  if (!rootEl) return;
+  const articleId = rootEl.dataset.tipArticle;
+  if (!articleId) return;
+  const state = tipInlineState.get(articleId);
+  if (!state) return;
+  const submit = rootEl.querySelector('[data-tip-submit]');
+  const libreInput = rootEl.querySelector('.tip-inline__libre-input');
+  const consent = rootEl.querySelector('.tip-inline__consent-input');
+  const authorName = rootEl.querySelector('.tip-inline__title')?.textContent?.replace(/^💛 Soutenir /, '').trim() || 'l\'auteur';
+
+  const refresh = () => {
+    const amt = state.custom !== null && state.custom > 0 ? state.custom : state.amount;
+    if (submit) submit.textContent = `Envoyer ${amt.toFixed(2).replace('.',',')} € à ${authorName}`;
+  };
+
+  rootEl.querySelectorAll('.tip-inline__amt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.amount = parseFloat(btn.dataset.amt);
+      state.custom = null;
+      if (libreInput) libreInput.value = '';
+      rootEl.querySelectorAll('.tip-inline__amt').forEach(b => b.classList.toggle('on', b === btn));
+      refresh();
+    });
+  });
+  if (libreInput) {
+    libreInput.addEventListener('input', () => {
+      const v = parseFloat(libreInput.value);
+      if (!isNaN(v) && v > 0) {
+        state.custom = v;
+        rootEl.querySelectorAll('.tip-inline__amt').forEach(b => b.classList.remove('on'));
+      } else {
+        state.custom = null;
+      }
+      refresh();
+    });
+  }
+  if (consent) {
+    consent.addEventListener('change', () => { state.consent = consent.checked; });
+  }
+  if (submit) {
+    submit.addEventListener('click', () => {
+      const amt = state.custom !== null && state.custom > 0 ? state.custom : state.amount;
+      const msg = `Phase 3 — Stripe en cours. Tip de ${amt.toFixed(2).replace('.',',')} € à ${authorName} enregistré côté UI (opt-in pseudo : ${state.consent ? 'OUI' : 'NON'}).`;
+      if (typeof showToast === 'function') showToast(msg);
+      else if (typeof toast === 'function') toast(msg, 4000);
+      else alert(msg);
+    });
+  }
+}
 
 // ═══════════════════════════════════════════════════════════
 // v0.17.0 Phase 3 — TipModal (don ponctuel — UI only, Stripe à câbler)
