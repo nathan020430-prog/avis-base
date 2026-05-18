@@ -95,11 +95,40 @@ serve(async (req) => {
 
     const revenueCents = membersFeesTotal + tipsTotal;
 
-    // ---- 2. Frais ----
-    // Stripe fees : 1,5% + 0,25€ par transaction CB EU.
-    // Approximation pragmatique : 5% du revenue (cible brief).
-    // Pour précision, requête à Stripe balance_transactions du mois.
-    const stripeFeesCents = Math.round(revenueCents * 0.05);
+    // ---- 2. Frais Stripe (réels via balance_transactions) ----
+    // On somme `bt.fee` (en cents) pour toutes les BalanceTransaction du mois.
+    // - `bt.fee` est positif sur charge/payment (frais prélevés)
+    // - `bt.fee` est négatif sur refund (remboursement partiel des frais)
+    // → la somme donne le net réel des frais Stripe sur le mois.
+    //
+    // Fallback : si l'API Stripe échoue, on retombe sur l'estimation 5% pour
+    // ne pas bloquer le calcul, mais on positionne `stripe_fees_estimated=true`
+    // dans la réponse pour que l'admin sache qu'il faut réviser à la main.
+    let stripeFeesCents = 0;
+    let stripeFeesEstimated = false;
+    try {
+      const gte = Math.floor(monthStart.getTime() / 1000);
+      const lt  = Math.floor(nextMonth.getTime() / 1000);
+      let startingAfter: string | undefined;
+      // garde-fou : 100 pages * 100 tx = 10 000 transactions max
+      for (let i = 0; i < 100; i++) {
+        const page = await stripe.balanceTransactions.list({
+          created: { gte, lt },
+          limit: 100,
+          ...(startingAfter ? { starting_after: startingAfter } : {}),
+        });
+        for (const bt of page.data) {
+          stripeFeesCents += bt.fee || 0;
+        }
+        if (!page.has_more) break;
+        startingAfter = page.data[page.data.length - 1]?.id;
+        if (!startingAfter) break;
+      }
+    } catch (e) {
+      console.error('[compute-monthly-payout] balance_transactions fetch failed, fallback to 5%:', e);
+      stripeFeesCents = Math.round(revenueCents * 0.05);
+      stripeFeesEstimated = true;
+    }
 
     // Infra costs saisis manuellement par le superadmin
     const { data: infraRows } = await supa
@@ -231,6 +260,7 @@ serve(async (req) => {
       payout_month: payoutMonth,
       revenue_cents: revenueCents,
       stripe_fees_cents: stripeFeesCents,
+      stripe_fees_estimated: stripeFeesEstimated,
       infra_cost_cents: infraCostCents,
       pool_cents: poolCents,
       members_count: activeMembersCount || 0,

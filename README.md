@@ -69,6 +69,8 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 - **v0.20.0** — Transparence & Identité : page **/a-propos** (manifeste, différenciateurs, équipe, liens) + page **/stats** publiques (compteurs articles/contributeurs/sources/commentaires/basitude moyenne + stats modération + top 10 contributeurs). RPCs `get_public_stats()` / `get_public_top_contributors()` ouvertes à `anon`.
 - **v0.19.1** — Modération (suite) : notifications auteur quand son contenu est masqué/restauré (trigger DB) + charte de modération publique (modale `#charte-moderation` accessible depuis footer / signalement / charte éditoriale)
 - **v0.19.0** — Modération avancée : signalement enrichi (8 raisons + 3 niveaux de sévérité), masquage auto (≥3 signalements distincts ou 1 priorité haute), peer review communautaire (score ≥50, quorum 3 votes), dashboard mod (admin ou score ≥75), journal d'actions, RPC `submit_report`/`submit_peer_review`/`mod_apply_action`
+- **v0.18.2** — Hotfix audit (RLS server-side + politique certif) : restriction écriture 7j et email-confirmé déplacée côté Postgres (`account_can_publish()` + policy `articles_insert_auth_and_aged`), frais Stripe calculés via `balance_transactions.list()` au lieu de l'estimation 5% hardcodée, trigger d'auto-révocation de la certification quand un auteur retombe sous 3 articles publiés
+- **v0.18.1** — Hotfix race conditions money : crédit tips atomique + idempotent, request-payout verrouillé, durcissement RLS sur `contributor_balance`
 - **v0.18.0** — Trust & Identity : compte renforcé (captcha + charte + email confirm + min 8 chars + restriction écriture 7 jours), certification "Auteur rémunérable" (4 critères cumulatifs avec roadmap personnelle), crédibilité enrichie (badges multiples ⭐📝✓💛 + breakdown public + historique)
 - **v0.17.1** — Banner CTA Avis Basé+ discret au-dessus du masthead (dismissible)
 - **v0.17.0** — Économie collaborative complète :
@@ -116,13 +118,14 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 12. `v0.18.0-trust-migration.sql` (V0.18.0 Phase 2 — certification rémunérable : `contributor_certifications` + 2 RPCs + vue publique)
 13. `v0.18.0-credibility-migration.sql` (V0.18.0 Phase 3 — `cred_score_history` + 3 RPCs `recompute_user_cred_score`, `get_user_cred_breakdown`, `recompute_all_cred_scores`)
 14. `v0.18.1-hotfix-money-races.sql` (V0.18.1 — corrige 3 race conditions sur les flux d'argent + ferme une faille RLS sur `contributor_balance`)
-15. `v0.19.0-moderation-migration.sql` (V0.19.0 — modération avancée : extension `reports` + `moderation_state` sur articles/clips + tables `moderation_actions` & `peer_reviews` + RPCs `submit_report`/`submit_peer_review`/`mod_apply_action`/`get_moderation_queue`/`get_peer_review_queue`)
-16. `v0.19.1-moderation-notifs.sql` (V0.19.1 — étend `notifications.type` (+`content_hidden`, `content_restored`) + trigger `notify_on_moderation_change` sur articles/clips)
-17. `v0.20.0-stats-migration.sql` (V0.20.0 — RPCs publiques `get_public_stats()` + `get_public_top_contributors()`)
-18. `v0.22.1-top-tippers-migration.sql` (V0.22.1 — RPC publique `get_public_top_tippers(limit, days)` filtrée sur display_consent=true)
-19. `v0.24.0-waitlist-migration.sql` (V0.24.0 — table `waitlist` + RPC `submit_waitlist()` + vue admin `waitlist_summary`)
-20. `v0.25.1-clip-publications-migration.sql` (V0.25.1 — table `clip_publications` + trigger sync `clips.status` + vue `clip_publications_by_clip` + backfill TikTok pour compat v0.6.3)
-21. **`v0.26.1-public-finance-stats-migration.sql`** (V0.26.1 — RPCs publiques `get_public_finance_summary()` + `get_public_finance_history(n)` pour la section transparence financière sur `/stats`) ← **NOUVEAU**
+15. `v0.18.2-hotfix-audit-rls-and-cert.sql` (V0.18.2 — `account_can_publish()` + policy `articles_insert_auth_and_aged` server-side + trigger auto-révocation certif si articles publiés < 3)
+16. `v0.19.0-moderation-migration.sql` (V0.19.0 — modération avancée : extension `reports` + `moderation_state` sur articles/clips + tables `moderation_actions` & `peer_reviews` + RPCs `submit_report`/`submit_peer_review`/`mod_apply_action`/`get_moderation_queue`/`get_peer_review_queue`)
+17. `v0.19.1-moderation-notifs.sql` (V0.19.1 — étend `notifications.type` (+`content_hidden`, `content_restored`) + trigger `notify_on_moderation_change` sur articles/clips)
+18. `v0.20.0-stats-migration.sql` (V0.20.0 — RPCs publiques `get_public_stats()` + `get_public_top_contributors()`)
+19. `v0.22.1-top-tippers-migration.sql` (V0.22.1 — RPC publique `get_public_top_tippers(limit, days)` filtrée sur display_consent=true)
+20. `v0.24.0-waitlist-migration.sql` (V0.24.0 — table `waitlist` + RPC `submit_waitlist()` + vue admin `waitlist_summary`)
+21. `v0.25.1-clip-publications-migration.sql` (V0.25.1 — table `clip_publications` + trigger sync `clips.status` + vue `clip_publications_by_clip` + backfill TikTok pour compat v0.6.3)
+22. `v0.26.1-public-finance-stats-migration.sql` (V0.26.1 — RPCs publiques `get_public_finance_summary()` + `get_public_finance_history(n)` pour la section transparence financière sur `/stats`)
 
 ## Développement local
 

@@ -251,6 +251,11 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - SQL : `v0.19.0-moderation-migration.sql` (idempotente, ASCII pur). Tables `moderation_actions` & `peer_reviews`, RPCs `submit_report`, `submit_peer_review`, `mod_apply_action`, `get_moderation_queue`, `get_peer_review_queue`, `get_user_moderation_summary`
 - Compat : tant que la migration n'est pas appliquée, le frontend retombe sur l'INSERT direct dans `reports` (signalement v0.18 fonctionne toujours)
 
+## [v0.18.2] — Hotfix audit (RLS server-side + certif auto-revoke)
+- Restriction écriture (7 jours + email confirmé) déplacée côté Postgres : helper `account_can_publish()` + policy INSERT `articles_insert_auth_and_aged`
+- Edge Function `compute-monthly-payout` : frais Stripe lus depuis `balance_transactions` au lieu d'une estimation 5% hardcodée (fallback transparent si l'API échoue, flag `stripe_fees_estimated` dans la réponse)
+- Trigger `trg_articles_recheck_certification` : révoque automatiquement la certif d'un auteur si son nombre d'articles publiés tombe sous 3
+
 ## [v0.18.1] — Hotfix race conditions tips / payouts
 - Crédit de tip atomique + idempotent (RPC `credit_tip_to_contributor`)
 - Réservation de payout sérialisée (RPC `reserve_payout` avec SELECT FOR UPDATE)
