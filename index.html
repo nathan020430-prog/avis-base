@@ -11809,9 +11809,12 @@ const FINANCEMENT_MOCK = {
 
 const Financement = {
   _liveTimer: null,
+  _pollTimer: null,
   _breakdownChart: null,
   _historyChart: null,
   _rendered: false,
+  _data: null,  // données effectivement affichées (réel ou mock)
+  _dataIsReal: false,
   fmt(n) {
     return '€' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   },
@@ -11819,7 +11822,15 @@ const Financement = {
     return this.fmt(c / 100);
   },
   render() {
-    const M = FINANCEMENT_MOCK;
+    // Premier render synchrone : on affiche les mock data pour ne pas avoir une page vide.
+    // loadFromSupabase() remplacera ensuite par les vraies données + lancera le polling.
+    if (!this._data) this._data = FINANCEMENT_MOCK;
+    this._renderFromData(this._data);
+    this._rendered = true;
+    // Trigger async load (sauf si déjà chargé en mode réel)
+    if (!this._dataIsReal) this.loadFromSupabase();
+  },
+  _renderFromData(M) {
     // Hero
     const heroPool = document.getElementById('finHeroPool');
     if (heroPool) heroPool.textContent = this.fmt(M.pool_eur);
@@ -11842,40 +11853,52 @@ const Financement = {
     const bc = document.getElementById('finBreakdownContrib');
     if (bc) bc.textContent = M.breakdown_pct.contributors + ' %';
 
-    // Supporters
+    // Supporters (avec empty state pour soft-launch)
     const sup = document.getElementById('finSupporters');
     if (sup) {
-      sup.innerHTML = M.supporters.map(s => {
-        const meta = s.tier === 'membre'
-          ? `Membre — ${s.since_months} mois`
-          : `Don ponctuel — ${this.fmt(s.amount_eur)}`;
-        return `<div class="fin-supporter"><span class="fin-supporter__name">${s.name}</span><span class="fin-supporter__meta">${meta}</span></div>`;
-      }).join('');
+      if (!M.supporters || M.supporters.length === 0) {
+        sup.innerHTML = `<p style="grid-column:1/-1;font-family:var(--fb);font-size:13px;color:var(--ink-muted);font-style:italic;padding:12px 0">Aucun soutien opt-in pour le moment. Ils apparaîtront ici dès qu'un membre ou un donateur aura coché « afficher mon nom ».</p>`;
+      } else {
+        sup.innerHTML = M.supporters.map(s => {
+          const meta = s.tier === 'membre'
+            ? `Membre — ${s.since_months} mois`
+            : `Don ponctuel — ${this.fmt(s.amount_eur)}`;
+          return `<div class="fin-supporter"><span class="fin-supporter__name">${s.name}</span><span class="fin-supporter__meta">${meta}</span></div>`;
+        }).join('');
+      }
     }
 
-    // Top articles
+    // Top articles (avec empty state si pas encore de stats)
     const top = document.getElementById('finTopArticles');
     if (top) {
-      top.innerHTML = M.top_articles.map(a => `
-        <li class="fin-top__item">
-          <div>
-            <div class="fin-top__title">${a.title}</div>
-            <span class="fin-top__author">${a.author}</span>
-          </div>
-          <span class="fin-top__score">score ${a.score.toLocaleString('fr-FR')}</span>
-          <span class="fin-top__share">${this.fmtCents(a.share_cents)}</span>
-        </li>
-      `).join('').replace(/^<li/, '<li').trim();
+      if (!M.top_articles || M.top_articles.length === 0) {
+        top.innerHTML = `<p style="font-family:var(--fb);font-size:13px;color:var(--ink-muted);font-style:italic;padding:12px 0">Pas encore d'articles dans le classement. Les premiers scores apparaîtront dès que des lectures ≥ 10 s seront enregistrées.</p>`;
+      } else {
+        top.innerHTML = M.top_articles.map(a => `
+          <li class="fin-top__item">
+            <div>
+              <div class="fin-top__title">${a.title}</div>
+              <span class="fin-top__author">${a.author}</span>
+            </div>
+            <span class="fin-top__score">score ${Math.round(a.score).toLocaleString('fr-FR')}</span>
+            <span class="fin-top__share">${this.fmtCents(a.share_cents)}</span>
+          </li>
+        `).join('').replace(/^<li/, '<li').trim();
+      }
     }
 
     // Infra costs
     const rows = document.getElementById('finCostsRows');
     let total = 0;
     if (rows) {
-      rows.innerHTML = M.infra_costs.map(c => {
-        total += c.amount;
-        return `<tr><td>${c.label}</td><td>${this.fmt(c.amount)}</td></tr>`;
-      }).join('');
+      if (!M.infra_costs || M.infra_costs.length === 0) {
+        rows.innerHTML = `<tr><td colspan="2" style="font-style:italic;color:var(--ink-muted);text-align:center">Aucun frais saisi pour ce mois.</td></tr>`;
+      } else {
+        rows.innerHTML = M.infra_costs.map(c => {
+          total += c.amount;
+          return `<tr><td>${c.label}</td><td>${this.fmt(c.amount)}</td></tr>`;
+        }).join('');
+      }
     }
     const totalEl = document.getElementById('finCostsTotal');
     if (totalEl) totalEl.textContent = this.fmt(total);
@@ -11883,15 +11906,150 @@ const Financement = {
     // Archive
     const arc = document.getElementById('finArchive');
     if (arc) {
-      arc.innerHTML = M.archive.map(a =>
-        `<li class="fin-archive__item fin-archive__item--disabled"><span>${a.label}</span><span>PDF — généré en Phase 6</span></li>`
-      ).join('');
+      if (!M.archive || M.archive.length === 0) {
+        arc.innerHTML = `<li class="fin-archive__item fin-archive__item--disabled"><span>Aucune clôture mensuelle encore</span><span>Premier rapport : début du mois suivant</span></li>`;
+      } else {
+        arc.innerHTML = M.archive.map(a =>
+          `<li class="fin-archive__item fin-archive__item--disabled"><span>${a.label}</span><span>PDF — généré en Phase 6</span></li>`
+        ).join('');
+      }
     }
+
+    // Banner soft-launch si tout est à zéro
+    this._renderSoftLaunchBanner(M);
 
     // Charts (only render once Chart.js is loaded)
     this.renderCharts();
+  },
+  _renderSoftLaunchBanner(M) {
+    const heroSection = document.querySelector('#financementView .fin-hero');
+    if (!heroSection) return;
+    let banner = document.getElementById('finSoftLaunchBanner');
+    const isEmpty = (M.pool_eur || 0) === 0 && (M.members_count || 0) === 0 && this._dataIsReal;
+    if (isEmpty) {
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'finSoftLaunchBanner';
+        banner.style.cssText = 'margin:24px auto;max-width:780px;padding:14px 18px;background:var(--accent-soft);border-left:3px solid var(--accent);font-family:var(--fb);font-size:13px;color:var(--ink);line-height:1.5';
+        banner.innerHTML = '<strong style="color:var(--accent)">Économie en construction — soft-launch.</strong> Les premiers chiffres apparaîtront dès qu\'un membre rejoindra Avis Basé+. En attendant, on prépare le terrain.';
+        heroSection.appendChild(banner);
+      }
+    } else if (banner) {
+      banner.remove();
+    }
+  },
+  async loadFromSupabase() {
+    if (!supa) return;
+    try {
+      // Fetch en parallèle des 5 vues + table infra_costs (mois courant)
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const [econR, donorsR, leaderR, costsR, archiveR] = await Promise.all([
+        supa.from('public_economy_current').select('*').maybeSingle(),
+        supa.from('public_donor_wall').select('*').limit(60),
+        supa.from('public_article_leaderboard').select('*'),
+        supa.from('monthly_infra_costs').select('label, amount_cents').eq('cost_month', currentMonth),
+        supa.from('public_monthly_archive').select('*').limit(12)
+      ]);
 
-    this._rendered = true;
+      // Si la moindre table n'existe pas (migration pas appliquée), on garde mock
+      const anyMissing = [econR, donorsR, leaderR, costsR, archiveR].some(r => r.error && /relation .* does not exist|does not exist/.test(r.error.message || ''));
+      if (anyMissing) {
+        console.warn('[Financement] migration v0.17.0 non appliquée — fallback mock data');
+        return;
+      }
+
+      const econ = econR.data || {};
+      const donors = donorsR.data || [];
+      const leader = leaderR.data || [];
+      const costs = costsR.data || [];
+      const archive = archiveR.data || [];
+
+      // Calcul breakdown réel (depuis le pool / revenue)
+      const revenueCents = econ.revenue_cents || 0;
+      const stripeFeesCents = econ.stripe_fees_cents || 0;
+      const infraCostCents = econ.infra_cost_cents || 0;
+      const poolCents = econ.pool_cents || 0;
+      let stripePct = 0, infraPct = 0, contribPct = 0;
+      if (revenueCents > 0) {
+        stripePct = Math.round((stripeFeesCents / revenueCents) * 100);
+        infraPct = Math.round((infraCostCents / revenueCents) * 100);
+        contribPct = Math.max(0, 100 - stripePct - infraPct);
+      } else {
+        // Pas de revenu encore : afficher la cible idéale (5 / 8 / 87)
+        stripePct = 5; infraPct = 8; contribPct = 87;
+      }
+
+      // Build l'objet _data au même format que FINANCEMENT_MOCK
+      this._data = {
+        current_month: econ.current_month || currentMonth,
+        current_month_label: this._monthLabel(econ.current_month || currentMonth),
+        pool_eur: poolCents / 100,
+        members_count: econ.members_count || 0,
+        tips_eur: (econ.tips_total_cents_month || 0) / 100,
+        breakdown_pct: { stripe: stripePct, infra: infraPct, contributors: contribPct },
+        supporters: donors.map(d => ({
+          name: '@' + (d.name || 'anon'),
+          tier: d.kind === 'member' ? 'membre' : 'tip',
+          since_months: d.kind === 'member' ? this._monthsSince(d.since) : null,
+          amount_eur: d.kind === 'tip' ? (d.tip_amount_cents || 0) / 100 : null
+        })),
+        top_articles: leader.map((a, i) => ({
+          rank: i + 1,
+          title: a.title || '(sans titre)',
+          author: a.author_display_name || ('Auteur #' + (i + 1)),
+          score: Number(a.score) || 0,
+          share_cents: a.estimated_share_cents || 0
+        })),
+        infra_costs: costs.map(c => ({ label: c.label, amount: (c.amount_cents || 0) / 100 })),
+        history_12mo: this._buildHistory12mo(archive),
+        archive: archive.map(a => ({ month: a.payout_month, label: this._monthLabel(a.payout_month) }))
+      };
+      this._dataIsReal = true;
+      // Re-render à partir des vraies données
+      this._renderFromData(this._data);
+    } catch (e) {
+      console.debug('[Financement] loadFromSupabase failed', e?.message || e);
+    }
+  },
+  _monthLabel(yyyyMm) {
+    if (!yyyyMm) return '—';
+    const [y, m] = yyyyMm.split('-');
+    const names = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    return (names[parseInt(m, 10) - 1] || m) + ' ' + y;
+  },
+  _monthsSince(dateStr) {
+    if (!dateStr) return 0;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 0;
+    const now = new Date();
+    return Math.max(1, (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
+  },
+  _buildHistory12mo(archive) {
+    // Renvoie un tableau de 12 mois (les 12 derniers), complétant avec 0 si absent
+    const now = new Date();
+    const arr = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthStr = d.toISOString().slice(0, 7);
+      const found = archive.find(a => a.payout_month === monthStr);
+      arr.push({
+        month: monthStr,
+        revenue: found ? (found.revenue_cents || 0) / 100 : 0,
+        pool: found ? (found.pool_cents || 0) / 100 : 0,
+        members: found ? (found.members_count || 0) : 0
+      });
+    }
+    return arr;
+  },
+  startPolling() {
+    if (this._pollTimer) return;
+    // Refresh data toutes les 30s (RLS-friendly, pas de Realtime nécessaire)
+    this._pollTimer = setInterval(() => {
+      this.loadFromSupabase();
+    }, 30000);
+  },
+  stopPolling() {
+    if (this._pollTimer) { clearInterval(this._pollTimer); this._pollTimer = null; }
   },
   renderCharts() {
     if (typeof Chart === 'undefined') {
@@ -11899,7 +12057,7 @@ const Financement = {
       setTimeout(() => this.renderCharts(), 200);
       return;
     }
-    const M = FINANCEMENT_MOCK;
+    const M = this._data || FINANCEMENT_MOCK;
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     const inkColor = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#1A1108';
     const inkMuted = getComputedStyle(document.documentElement).getPropertyValue('--ink-muted').trim() || '#6B5C48';
@@ -11960,21 +12118,27 @@ const Financement = {
     }
   },
   startLiveTicker() {
+    // En vrai (données réelles), on lance le polling 30s + on saute l'animation fake si pool=0.
+    // En mock, on garde l'animation fake pour montrer le concept.
+    this.startPolling();
     if (this._liveTimer) return;
-    let pool = FINANCEMENT_MOCK.pool_eur;
     this._liveTimer = setInterval(() => {
+      if (this._dataIsReal) return;  // pas d'animation fake quand on a la vraie data
       // Fake : ajoute aléatoirement 0,01-0,05€ toutes les ~3-7s
       if (Math.random() < 0.4) {
-        pool += (Math.random() * 0.04 + 0.01);
+        const cur = this._data ? this._data.pool_eur : 0;
+        const next = cur + (Math.random() * 0.04 + 0.01);
+        if (this._data) this._data.pool_eur = next;
         const el = document.getElementById('finLivePool');
-        if (el) el.textContent = this.fmt(pool);
+        if (el) el.textContent = this.fmt(next);
         const heroEl = document.getElementById('finHeroPool');
-        if (heroEl) heroEl.textContent = this.fmt(pool);
+        if (heroEl) heroEl.textContent = this.fmt(next);
       }
     }, 2500);
   },
   stopLiveTicker() {
     if (this._liveTimer) { clearInterval(this._liveTimer); this._liveTimer = null; }
+    this.stopPolling();
   }
 };
 
@@ -12203,12 +12367,20 @@ const MON_FIN_MOCK = {
 };
 
 const MonFin = {
+  _data: null,
+  _dataIsReal: false,
   fmt(cents) {
     return '€' + (cents / 100).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   },
   render() {
-    const M = MON_FIN_MOCK;
-
+    if (!this._data) this._data = MON_FIN_MOCK;
+    this._renderFromData(this._data);
+    // Si user connecté → fetch vraies données (sans bloquer le render initial)
+    if (typeof currentUser !== 'undefined' && currentUser && !this._dataIsReal) {
+      this.loadFromSupabase();
+    }
+  },
+  _renderFromData(M) {
     // Pseudo (utilise le profil courant ou fallback)
     const pseudo = (typeof currentProfile !== 'undefined' && currentProfile?.username) ? '@' + currentProfile.username : '@vous';
     const pseudoEl = document.getElementById('mfPseudo');
@@ -12246,23 +12418,28 @@ const MonFin = {
     const rows = document.getElementById('mfArticlesRows');
     let totalScore = 0;
     let totalShare = 0;
+    const arts = Array.isArray(M.my_articles_this_month) ? M.my_articles_this_month : [];
     if (rows) {
-      rows.innerHTML = M.my_articles_this_month.map(a => {
-        totalScore += a.score;
-        totalShare += a.share_cents;
-        const escTitle = (typeof escapeHtml === 'function') ? escapeHtml(a.title) : a.title;
-        return `<tr>
-          <td>${escTitle}</td>
-          <td class="num">${a.views_unique.toLocaleString('fr-FR')}</td>
-          <td class="num">${a.read_time_avg}</td>
-          <td class="num">${a.engagement}</td>
-          <td class="num">${a.score.toLocaleString('fr-FR')}</td>
-          <td class="num share">${this.fmt(a.share_cents)}</td>
-        </tr>`;
-      }).join('');
+      if (arts.length === 0) {
+        rows.innerHTML = `<tr><td colspan="6" style="text-align:center;font-style:italic;color:var(--ink-muted);padding:24px">Aucun article publié actif ce mois — publie un article pour apparaître dans le classement et toucher une part du pool.</td></tr>`;
+      } else {
+        rows.innerHTML = arts.map(a => {
+          totalScore += a.score;
+          totalShare += a.share_cents;
+          const escTitle = (typeof escapeHtml === 'function') ? escapeHtml(a.title) : a.title;
+          return `<tr>
+            <td>${escTitle}</td>
+            <td class="num">${(a.views_unique||0).toLocaleString('fr-FR')}</td>
+            <td class="num">${a.read_time_avg || '—'}</td>
+            <td class="num">${a.engagement || 0}</td>
+            <td class="num">${Math.round(a.score).toLocaleString('fr-FR')}</td>
+            <td class="num share">${this.fmt(a.share_cents)}</td>
+          </tr>`;
+        }).join('');
+      }
     }
     const totalScoreEl = document.getElementById('mfArticlesTotalScore');
-    if (totalScoreEl) totalScoreEl.textContent = totalScore.toLocaleString('fr-FR');
+    if (totalScoreEl) totalScoreEl.textContent = Math.round(totalScore).toLocaleString('fr-FR');
     const totalShareEl = document.getElementById('mfArticlesTotalShare');
     if (totalShareEl) totalShareEl.textContent = this.fmt(totalShare);
 
@@ -12289,20 +12466,125 @@ const MonFin = {
     // Historique virements
     const payoutsRows = document.getElementById('mfPayoutsRows');
     const payoutsEmpty = document.getElementById('mfPayoutsEmpty');
-    if (M.payouts_history.length === 0) {
+    const payouts = Array.isArray(M.payouts_history) ? M.payouts_history : [];
+    if (payouts.length === 0) {
       if (payoutsRows) payoutsRows.innerHTML = '';
       if (payoutsEmpty) payoutsEmpty.style.display = 'block';
     } else {
       if (payoutsEmpty) payoutsEmpty.style.display = 'none';
       if (payoutsRows) {
-        payoutsRows.innerHTML = M.payouts_history.map(p => `<tr>
+        payoutsRows.innerHTML = payouts.map(p => `<tr>
           <td>${p.date}</td>
           <td class="num">${this.fmt(p.amount_cents)}</td>
           <td><span class="mf-status-badge mf-status-badge--${p.status}">${p.status === 'completed' ? 'Effectué' : p.status === 'pending' ? 'En attente' : 'Échec'}</span></td>
-          <td><code style="font-size:11px;color:var(--ink-muted)">${p.stripe_transfer_id}</code></td>
+          <td><code style="font-size:11px;color:var(--ink-muted)">${p.stripe_transfer_id || '—'}</code></td>
         </tr>`).join('');
       }
     }
+  },
+  async loadFromSupabase() {
+    if (!supa || typeof currentUser === 'undefined' || !currentUser) return;
+    try {
+      const uid = currentUser.id;
+      const currentMonth = new Date().toISOString().slice(0, 7);
+
+      // 1. Cagnotte
+      const { data: bal } = await supa.from('contributor_balance').select('*').eq('user_id', uid).maybeSingle();
+
+      // 2. Articles du mois — on récupère mes articles publiés
+      const { data: myArticles } = await supa.from('articles').select('id, title').eq('author_id', uid).eq('status', 'published');
+
+      // 3. Stats par article pour le mois en cours
+      const articleIds = (myArticles || []).map(a => a.id);
+      let stats = [];
+      if (articleIds.length > 0) {
+        const monthStart = currentMonth + '-01';
+        const { data: statsR } = await supa
+          .from('article_stats_daily')
+          .select('article_id, views_unique_count, views_member_count, read_time_total_sec, engagement_count, score')
+          .gte('stat_date', monthStart)
+          .in('article_id', articleIds);
+        stats = statsR || [];
+      }
+
+      // Agrège par article (somme des stats journalières du mois)
+      const byArticle = new Map();
+      stats.forEach(s => {
+        const cur = byArticle.get(s.article_id) || { views_unique: 0, views_member: 0, read_time_total_sec: 0, engagement_sum: 0, score: 0 };
+        cur.views_unique += s.views_unique_count || 0;
+        cur.views_member += s.views_member_count || 0;
+        cur.read_time_total_sec += s.read_time_total_sec || 0;
+        cur.engagement_sum += s.engagement_count || 0;
+        cur.score += Number(s.score) || 0;
+        byArticle.set(s.article_id, cur);
+      });
+
+      // 4. Pool du mois pour estimer la part de chaque article
+      const { data: econ } = await supa.from('public_economy_current').select('pool_cents').maybeSingle();
+      const poolCents = econ?.pool_cents || 0;
+
+      // 5. Total scores tous articles pour calculer la part
+      const { data: leader } = await supa.from('public_article_leaderboard').select('score');
+      const totalAllScores = (leader || []).reduce((sum, r) => sum + (Number(r.score) || 0), 0);
+
+      // Build articles mix avec part estimée
+      const my_articles_this_month = (myArticles || []).map(art => {
+        const s = byArticle.get(art.id) || { views_unique: 0, views_member: 0, read_time_total_sec: 0, engagement_sum: 0, score: 0 };
+        const myScore = s.score;
+        const shareCents = (totalAllScores > 0 && poolCents > 0)
+          ? Math.round((myScore / totalAllScores) * poolCents)
+          : 0;
+        const readTimeAvg = s.views_unique > 0
+          ? Math.round(s.read_time_total_sec / s.views_unique)
+          : 0;
+        const minutes = Math.floor(readTimeAvg / 60);
+        const seconds = readTimeAvg % 60;
+        return {
+          title: art.title,
+          views_unique: s.views_unique,
+          read_time_avg: minutes + 'm ' + String(seconds).padStart(2, '0') + 's',
+          engagement: Math.round(s.engagement_sum / Math.max(1, byArticle.has(art.id) ? 1 : 1)),
+          score: myScore,
+          share_cents: shareCents
+        };
+      }).filter(a => a.score > 0 || a.views_unique > 0); // ne montre que les articles avec activité
+
+      // 6. Historique virements
+      const { data: payments } = await supa
+        .from('contributor_payments')
+        .select('amount_cents, status, stripe_transfer_id, requested_at, completed_at')
+        .eq('user_id', uid)
+        .order('requested_at', { ascending: false });
+
+      const payouts_history = (payments || []).map(p => ({
+        date: (p.completed_at || p.requested_at || '').slice(0, 10),
+        amount_cents: p.amount_cents,
+        status: p.status,
+        stripe_transfer_id: p.stripe_transfer_id
+      }));
+
+      // Build _data
+      this._data = {
+        current_month_label: this._monthLabel(currentMonth),
+        balance_cents: bal?.balance_cents || 0,
+        total_earned_cents: bal?.total_earned_cents || 0,
+        articles_count_lifetime: (myArticles || []).length,
+        kyc_completed: !!bal?.kyc_completed,
+        public_name_consent: !!bal?.public_name_consent,
+        my_articles_this_month,
+        payouts_history
+      };
+      this._dataIsReal = true;
+      this._renderFromData(this._data);
+    } catch (e) {
+      console.debug('[MonFin] loadFromSupabase failed', e?.message || e);
+    }
+  },
+  _monthLabel(yyyyMm) {
+    if (!yyyyMm) return '—';
+    const [y, m] = yyyyMm.split('-');
+    const names = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    return (names[parseInt(m, 10) - 1] || m) + ' ' + y;
   },
   init() {
     document.getElementById('mfBackBtn')?.addEventListener('click', () => switchView('articles'));
@@ -12321,9 +12603,27 @@ const MonFin = {
       // Scroll vers la section historique
       document.querySelector('#monFinView .mf-section:last-of-type')?.scrollIntoView({behavior:'smooth', block:'start'});
     });
-    document.getElementById('mfPublicConsent')?.addEventListener('change', e => {
-      MON_FIN_MOCK.public_name_consent = e.target.checked;
-      const msg = e.target.checked ? 'Pseudo désormais visible sur les pages publiques.' : 'Pseudo désormais anonyme sur les pages publiques.';
+    document.getElementById('mfPublicConsent')?.addEventListener('change', async e => {
+      const newValue = e.target.checked;
+      // Optimistic UI : on update local d'abord
+      MON_FIN_MOCK.public_name_consent = newValue;
+      if (this._data) this._data.public_name_consent = newValue;
+      // Persist via RPC si connecté
+      if (supa && typeof currentUser !== 'undefined' && currentUser) {
+        try {
+          const { error } = await supa.rpc('update_contributor_public_consent', { p_consent: newValue });
+          if (error) {
+            console.warn('[MonFin] consent update failed', error.message);
+            // Rollback UI
+            e.target.checked = !newValue;
+            if (typeof showToast === 'function') showToast('Erreur enregistrement préférence.', true);
+            return;
+          }
+        } catch (err) {
+          console.debug('[MonFin] consent RPC error', err);
+        }
+      }
+      const msg = newValue ? 'Pseudo désormais visible sur les pages publiques.' : 'Pseudo désormais anonyme sur les pages publiques.';
       if (typeof showToast === 'function') showToast(msg);
     });
   }
