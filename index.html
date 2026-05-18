@@ -8538,6 +8538,8 @@ async function openArticlePage(slug) {
   setArticleMeta(a);
   openModal('articlePageModal');
   document.body.classList.add('reading');
+  // v0.17.0 — démarre le tracking de la vue (10s min côté RPC)
+  if (typeof TrackView !== 'undefined') TrackView.start(a.id);
   try { history.replaceState(null, '', '#article/' + slug); } catch {}
   // Active le scroll listener pour la progress bar
   const scroller = document.querySelector('#articlePageModal .modal__body');
@@ -12327,6 +12329,87 @@ const MonFin = {
   }
 };
 
+// ═══════════════════════════════════════════════════════════
+// v0.17.0 — TrackView : enregistre les vues d'articles via RPC track_view
+// Démarre un timer à l'ouverture d'un article, envoie au close si >= 10s.
+// Dédup quotidienne côté serveur (1 vue/user/article/jour).
+// ═══════════════════════════════════════════════════════════
+
+const TrackView = {
+  _current: null,  // {articleId, startTs}
+  _sessionHash: null,
+
+  // Stable session_hash par navigateur (persisté en localStorage)
+  getSessionHash() {
+    if (this._sessionHash) return this._sessionHash;
+    try {
+      let h = localStorage.getItem('ab_session_hash');
+      if (!h || h.length < 12) {
+        // 16 chars : "sess_" + 12 base36
+        h = 'sess_' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-6);
+        localStorage.setItem('ab_session_hash', h);
+      }
+      this._sessionHash = h;
+    } catch (e) {
+      // localStorage indispo (mode privé certains browsers) → fallback in-memory
+      this._sessionHash = 'sess_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-6);
+    }
+    return this._sessionHash;
+  },
+
+  start(articleId) {
+    if (!articleId) return;
+    // Si une vue est déjà en cours sur un autre article, la finaliser d'abord
+    if (this._current && this._current.articleId !== articleId) {
+      this.stop();
+    }
+    this._current = { articleId, startTs: Date.now() };
+  },
+
+  async stop() {
+    if (!this._current) return;
+    const elapsed = Math.floor((Date.now() - this._current.startTs) / 1000);
+    const articleId = this._current.articleId;
+    this._current = null;
+    // Anti-spam : < 10s = ignore (le RPC vérifierait quand même, mais on évite un round-trip)
+    if (elapsed < 10) return;
+    if (!supa) return;
+    try {
+      const { error } = await supa.rpc('track_view', {
+        p_article_id: articleId,
+        p_read_time_sec: elapsed,
+        p_session_hash: this.getSessionHash()
+      });
+      if (error) {
+        // Bénin : RPC inexistante (migration pas appliquée), erreur réseau, etc.
+        console.debug('[track_view] skip', error.message || error);
+      }
+    } catch (e) {
+      console.debug('[track_view] error', e?.message || e);
+    }
+  },
+
+  init() {
+    // Filet de sécurité : si l'user ferme le browser pendant qu'un article est ouvert,
+    // on essaie d'envoyer la vue (best-effort, pas garanti).
+    window.addEventListener('beforeunload', () => {
+      if (!this._current) return;
+      const elapsed = Math.floor((Date.now() - this._current.startTs) / 1000);
+      if (elapsed < 10) return;
+      // sendBeacon ne marche pas avec supabase-js → on tente l'appel synchrone fire-and-forget
+      try {
+        if (supa) {
+          supa.rpc('track_view', {
+            p_article_id: this._current.articleId,
+            p_read_time_sec: elapsed,
+            p_session_hash: this.getSessionHash()
+          });
+        }
+      } catch (e) { /* swallow */ }
+    });
+  }
+};
+
 
 function refreshUserUI() {
   const authBtn = document.getElementById('authBtn');
@@ -12830,6 +12913,8 @@ function closeModal(id) {
     const bar = document.getElementById('readingProgressBar');
     if (bar) bar.style.transform = 'scaleX(0)';
     try { history.replaceState(null, '', location.pathname + location.search); } catch {}
+    // v0.17.0 — finalise le tracking de la vue (fire-and-forget si >= 10s)
+    if (typeof TrackView !== 'undefined') TrackView.stop();
   }
 }
 
@@ -13133,6 +13218,7 @@ async function init() {
   if (typeof TipModal !== 'undefined') TipModal.init();
   if (typeof Membre !== 'undefined') Membre.init();
   if (typeof MonFin !== 'undefined') MonFin.init();
+  if (typeof TrackView !== 'undefined') TrackView.init();
 
   // Hashchange (bouton back/forward du browser, liens internes)
   window.addEventListener('hashchange', () => {
