@@ -21,11 +21,12 @@
 ## Mission en cours : v0.17.0 — Économie collaborative
 - 7 phases successives, validation explicite à chaque palier
 - Phase 1 (squelette `/financement`) : ✅ livrée
-- Phase 3 UI (`/devenir-membre` + modale tip) : ✅ livrée — CTAs câblés sur UI, Stripe Checkout backend encore à faire
+- Phase 3 UI (`/devenir-membre` + modale tip + tip jar inline articles) : ✅ livrée
+- Phase 5 UI (`/mon-financement` dashboard contributeur) : ✅ livrée — mock data, KYC stub, bouton virement disabled si <20€
 - Phase 2 (migration SQL — 9 tables + 4 vues + RLS) : différée à la fin du chantier (décision user)
 - Phase 3 backend : Edge Functions `create-checkout-session` + `stripe-webhook` — à faire quand SQL en place
 - Phase 4 : branchement Realtime sur vraies données
-- Phase 5 : tracking vues + dashboard contributeur
+- Phase 5 backend : RPC track-view + agrégat quotidien — à faire avec SQL
 - Phase 6 : algo mensuel + cron compute-monthly-payout
 - Phase 7 : Stripe Connect + virements (⚠️ valider statut juridique ACPR avant)
 - Décisions actées : 5€/mois, 0 salaire admin, 100% surplus aux contributeurs, opt-in affichage anonyme par défaut, seuil virement 20€
