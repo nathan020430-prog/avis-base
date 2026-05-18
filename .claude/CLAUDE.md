@@ -23,7 +23,7 @@
 - Phase 1 (squelette `/financement`) : ✅ livrée
 - Phase 3 UI (`/devenir-membre` + modale tip + tip jar inline articles) : ✅ livrée
 - Phase 5 UI (`/mon-financement` dashboard contributeur) : ✅ livrée — mock data, KYC stub, bouton virement disabled si <20€
-- Phase 2 (migration SQL — 9 tables + 4 vues + RLS) : différée à la fin du chantier (décision user)
+- Phase 2 (migration SQL — `v0.17.0-financement-migration.sql` : 9 tables + 4 vues + 4 RPCs + RLS strict) : ✅ livrée — à exécuter dans Supabase SQL Editor
 - Phase 3 backend : Edge Functions `create-checkout-session` + `stripe-webhook` — à faire quand SQL en place
 - Phase 4 : branchement Realtime sur vraies données
 - Phase 5 backend : RPC track-view + agrégat quotidien — à faire avec SQL
