@@ -47,6 +47,8 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.18.2** — Hotfix audit (RLS server-side + politique certif) : restriction écriture 7j et email-confirmé déplacée côté Postgres (`account_can_publish()` + policy `articles_insert_auth_and_aged`), frais Stripe calculés via `balance_transactions.list()` au lieu de l'estimation 5% hardcodée, trigger d'auto-révocation de la certification quand un auteur retombe sous 3 articles publiés
+- **v0.18.1** — Hotfix race conditions money : crédit tips atomique + idempotent, request-payout verrouillé, durcissement RLS sur `contributor_balance`
 - **v0.18.0** — Trust & Identity : compte renforcé (captcha + charte + email confirm + min 8 chars + restriction écriture 7 jours), certification "Auteur rémunérable" (4 critères cumulatifs avec roadmap personnelle), crédibilité enrichie (badges multiples ⭐📝✓💛 + breakdown public + historique)
 - **v0.17.1** — Banner CTA Avis Basé+ discret au-dessus du masthead (dismissible)
 - **v0.17.0** — Économie collaborative complète :
@@ -92,7 +94,9 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 10. `v0.16.0-migration.sql` (V0.16.0 — user_blocks + account_deletion_requests pour Apple App Store)
 11. `v0.17.0-financement-migration.sql` (V0.17.0 — économie collaborative : 9 tables + 4 vues + 4 RPCs + RLS strict)
 12. `v0.18.0-trust-migration.sql` (V0.18.0 Phase 2 — certification rémunérable : `contributor_certifications` + 2 RPCs + vue publique)
-13. **`v0.18.0-credibility-migration.sql`** (V0.18.0 Phase 3 — `cred_score_history` + 3 RPCs `recompute_user_cred_score`, `get_user_cred_breakdown`, `recompute_all_cred_scores`) ← **NOUVEAU**
+13. `v0.18.0-credibility-migration.sql` (V0.18.0 Phase 3 — `cred_score_history` + 3 RPCs `recompute_user_cred_score`, `get_user_cred_breakdown`, `recompute_all_cred_scores`)
+14. `v0.18.1-hotfix-money-races.sql` (V0.18.1 — atomicité tips, idempotence webhook, lock request-payout, durcissement RLS `contributor_balance`)
+15. **`v0.18.2-hotfix-audit-rls-and-cert.sql`** (V0.18.2 — `account_can_publish()` + policy `articles_insert_auth_and_aged` server-side + trigger auto-révocation certif si articles publiés < 3) ← **NOUVEAU**
 
 ## Développement local
 
