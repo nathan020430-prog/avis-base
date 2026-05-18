@@ -29,6 +29,7 @@ Le code est mergé mais les migrations doivent être exécutées manuellement da
 1. `v0.17.0-financement-migration.sql` — 9 tables économie + 4 vues + 4 RPCs (✅ déjà appliquée)
 2. `v0.18.0-trust-migration.sql` — `contributor_certifications` + 2 RPCs + vue publique
 3. `v0.18.0-credibility-migration.sql` — `cred_score_history` + 3 RPCs
+4. `v0.18.1-hotfix-money-races.sql` — **CRITIQUE** : corrige 3 race conditions sur les flux d'argent (tips + payouts) + ferme une faille RLS sur `contributor_balance`. À appliquer AVANT tout déploiement Stripe en prod.
 
 Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
 

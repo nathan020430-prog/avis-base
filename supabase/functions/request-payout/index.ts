@@ -53,36 +53,20 @@ serve(async (req) => {
   // ---- service client pour écriture protégée ----
   const supa = createClient(supaUrl, serviceKey);
 
-  // ---- check balance + KYC ----
-  const { data: bal } = await supa
-    .from('contributor_balance')
-    .select('balance_cents, kyc_completed, stripe_connect_account_id')
-    .eq('user_id', userId)
-    .maybeSingle();
-
-  if (!bal) return jsonResponse({ error: 'no_balance' }, 400);
-  if (!bal.kyc_completed || !bal.stripe_connect_account_id) {
-    return jsonResponse({ error: 'kyc_not_completed' }, 400);
-  }
-  if ((bal.balance_cents || 0) < 2000) {
-    return jsonResponse({ error: 'below_threshold', balance_cents: bal.balance_cents }, 400);
-  }
-
-  // v0.18.0 Phase 2 — Vérifier la certification "Auteur rémunérable"
-  // Cumul de 4 critères : KYC, ≥3 articles publiés, ≥30j ancienneté, score ≥50.
-  // On utilise la RPC pour avoir une source de vérité unique côté SQL.
+  // v0.18.0 Phase 2 — Certification "Auteur rémunérable"
+  // (4 critères : KYC + ≥3 articles + ≥30j + score ≥50)
+  // Vérifié AVANT reserve_payout pour donner une erreur claire au front
+  // sans gaspiller un verrou Postgres.
   const { data: certData, error: certErr } = await supa.rpc('check_contributor_certification', { p_user_id: userId });
   if (certErr) {
-    // Si la RPC n'existe pas (migration Phase 2 pas appliquée), on continue
-    // pour ne pas bloquer le flow legacy. À durcir en prod après stabilisation.
     console.warn('[request-payout] cert RPC unavailable, allowing payout (migration not applied?)', certErr.message);
   } else if (certData && certData.certified !== true) {
     const missing: string[] = [];
     const m = certData.milestones_met || {};
     if (!m.articles_published_3) missing.push('articles_published_3');
-    if (!m.account_age_30d) missing.push('account_age_30d');
-    if (!m.credibility_50) missing.push('credibility_50');
-    if (!m.kyc_completed) missing.push('kyc_completed');
+    if (!m.account_age_30d)      missing.push('account_age_30d');
+    if (!m.credibility_50)       missing.push('credibility_50');
+    if (!m.kyc_completed)        missing.push('kyc_completed');
     return jsonResponse({
       error: 'not_certified',
       missing_criteria: missing,
@@ -90,71 +74,88 @@ serve(async (req) => {
     }, 403);
   }
 
-  // ---- vérifier qu'il n'y a pas de virement en attente ----
-  const { data: pendingPay } = await supa
-    .from('contributor_payments')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('status', 'pending')
-    .limit(1);
-  if (pendingPay && pendingPay.length > 0) {
-    return jsonResponse({ error: 'payment_already_pending', payment_id: pendingPay[0].id }, 409);
+  // v0.18.1 — Réservation atomique via RPC SECURITY DEFINER.
+  // Verrouille contributor_balance + contributor_payments (FOR UPDATE),
+  // débite la balance, crée le payment 'pending' en une seule tx.
+  // → Impossible que deux requêtes concurrentes passent.
+  const { data: reserveData, error: reserveErr } = await supa.rpc('reserve_payout', {
+    p_user_id:             userId,
+    p_min_threshold_cents: 2000,
+  });
+
+  if (reserveErr) {
+    // Les erreurs métier sont remontées via raise exception → message Postgres
+    const msg = String(reserveErr.message || '');
+    if (msg.includes('no_balance'))                return jsonResponse({ error: 'no_balance' }, 400);
+    if (msg.includes('kyc_not_completed'))         return jsonResponse({ error: 'kyc_not_completed' }, 400);
+    if (msg.includes('below_threshold'))           {
+      const match = msg.match(/below_threshold:(\d+)/);
+      return jsonResponse({ error: 'below_threshold', balance_cents: match ? parseInt(match[1]) : null }, 400);
+    }
+    if (msg.includes('payment_already_pending'))   {
+      const match = msg.match(/payment_already_pending:([0-9a-f-]+)/);
+      return jsonResponse({ error: 'payment_already_pending', payment_id: match ? match[1] : null }, 409);
+    }
+    console.error('[request-payout] reserve_payout failed', reserveErr);
+    return jsonResponse({ error: 'reserve_failed' }, 500);
   }
 
-  const amountCents = bal.balance_cents;
+  // reserve_payout returns table — supabase-js renvoie un tableau
+  const reserve = Array.isArray(reserveData) ? reserveData[0] : reserveData;
+  if (!reserve?.payout_id) {
+    console.error('[request-payout] reserve_payout returned no payout_id', reserveData);
+    return jsonResponse({ error: 'reserve_failed' }, 500);
+  }
+  const paymentId   = reserve.payout_id as string;
+  const amountCents = reserve.amount_cents as number;
+  const destAccount = reserve.stripe_connect_account_id as string;
+
+  // À partir d'ici, la balance est DÉJÀ débitée et un payment 'pending'
+  // existe. Toute sortie sans finalize_payout() doit appeler rollback_payout().
   const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' });
 
-  // ---- insert pending payment ----
-  const { data: payment, error: payErr } = await supa
-    .from('contributor_payments')
-    .insert({
-      user_id: userId,
-      amount_cents: amountCents,
-      status: 'pending',
-    })
-    .select('id')
-    .single();
-  if (payErr || !payment) return jsonResponse({ error: 'insert_failed' }, 500);
-
   try {
-    // ---- Stripe Transfer ----
     const transfer = await stripe.transfers.create({
-      amount: amountCents,
-      currency: 'eur',
-      destination: bal.stripe_connect_account_id,
-      transfer_group: `payout_${payment.id}`,
+      amount:         amountCents,
+      currency:       'eur',
+      destination:    destAccount,
+      transfer_group: `payout_${paymentId}`,
       metadata: {
-        user_id: userId,
-        payment_id: payment.id,
+        user_id:    userId,
+        payment_id: paymentId,
       },
     });
 
-    // ---- update payment + decrement balance ----
-    await supa.from('contributor_payments').update({
-      stripe_transfer_id: transfer.id,
-      status: 'completed',
-      completed_at: new Date().toISOString(),
-    }).eq('id', payment.id);
-
-    await supa.from('contributor_balance').update({
-      balance_cents: 0,
-      updated_at: new Date().toISOString(),
-    }).eq('user_id', userId);
+    const { error: finErr } = await supa.rpc('finalize_payout', {
+      p_payment_id:         paymentId,
+      p_stripe_transfer_id: transfer.id,
+    });
+    if (finErr) {
+      // Cas anormal : Stripe a transféré mais on n'a pas pu marquer 'completed'.
+      // On NE rollback PAS la balance (l'argent est parti). On log fort.
+      console.error('[request-payout] STRIPE OK BUT finalize_payout FAILED — manual review', {
+        paymentId, transferId: transfer.id, err: finErr,
+      });
+    }
 
     return jsonResponse({
-      payment_id: payment.id,
+      payment_id:         paymentId,
       stripe_transfer_id: transfer.id,
-      amount_cents: amountCents,
-      status: 'completed',
+      amount_cents:       amountCents,
+      status:             'completed',
     });
   } catch (e: any) {
-    // Mark payment as failed, preserve balance
-    await supa.from('contributor_payments').update({
-      status: 'failed',
-      failed_at: new Date().toISOString(),
-      failure_reason: String(e?.message || e).slice(0, 500),
-    }).eq('id', payment.id);
+    // Stripe a refusé → restaure la balance
+    const { error: rbErr } = await supa.rpc('rollback_payout', {
+      p_payment_id:     paymentId,
+      p_failure_reason: String(e?.message || e),
+    });
+    if (rbErr) {
+      console.error('[request-payout] rollback_payout failed — balance NOT restored', {
+        paymentId, originalErr: e?.message, rbErr,
+      });
+    }
     console.error('[request-payout] transfer failed', e);
-    return jsonResponse({ error: String(e?.message || e), payment_id: payment.id }, 500);
+    return jsonResponse({ error: String(e?.message || e), payment_id: paymentId }, 500);
   }
 });
