@@ -80,6 +80,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.21.1** | 🪟 Polish RGPD | Bandeau cookies informatif (sticky-bottom dismissible, lien vers /confidentialite.html) + Page Changelog publique (modale `#changelog` reliée depuis footer + /a-propos) | ✅ Livré |
 | **v0.22.0** | 💰 Finance — Customer Portal | Nouvelle Edge Function `create-portal-session` (Stripe Billing Portal) + section "Mon adhésion Avis Basé+" sur `/mon-financement` (statut, prochain renouvellement, bouton "Gérer mon abonnement") + historique des tips reçus en tant que contributeur, agrégé par mois | ✅ Livré |
 | **v0.22.1** | 💰 Finance — Top tippers | RPC `get_public_top_tippers(limit, days)` + section "Top donateurs — 30 derniers jours" sur `/financement` (opt-in via `display_consent`). Confirme que `/financement` est désormais 100 % live data (les vues `public_economy_current` / `public_donor_wall` / `public_article_leaderboard` / `public_monthly_archive` étaient déjà branchées depuis v0.17.0) | ✅ Livré |
+| **v0.23.0** | 📖 UX lecture | Préférences typo (3 tailles + serif/sans-serif, persistance localStorage) + temps de lecture restant dynamique (badge flottant top-right) + 3 articles suggérés en fin d'article (algorithme : même thème + likes + reads, exclusion des articles déjà lus en session) | ✅ Livré |
 | **v0.23.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -722,6 +723,45 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 📖 v0.23.0 — UX lecture améliorée ✅
+
+> **Livré le 2026-05-19.** Trois petites améliorations qui rendent la lecture des articles plus agréable et plus engageante.
+
+**Livré :**
+
+### Phase 1 — Préférences typographiques
+- Bouton `Aa` flottant en haut à droite de la page article (visible uniquement en mode lecture)
+- Popover avec 2 réglages : **taille** (S/M/L) et **police** (Serif Fraunces / Sans-serif Manrope)
+- Application via classes CSS sur `<body>` (`read-prefs--size-l`, `read-prefs--font-sans`, etc.)
+- Persistance via `localStorage.avb_read_prefs_v1`
+- Bouton "↺ Réinitialiser" pour revenir aux valeurs par défaut (M + Serif)
+- Préférences appliquées au boot pour qu'elles tiennent entre sessions
+
+### Phase 2 — Articles suggérés en fin d'article
+- Section « 📰 Articles à découvrir » insérée après le vote bar, en bas de chaque article publié
+- 3 cartes max avec : thème, titre tronqué 3 lignes, auteur, temps de lecture, niveau de Basitude coloré
+- Algorithme de scoring : `+5 même thème, +likes/10, +reads/100, -3 si déjà vu en session`
+- Tracking des articles vus via `sessionStorage.avb_seen_articles` (50 derniers)
+- Clic sur une carte → scroll top + ouverture du nouvel article (sans fermer la modale)
+
+### Phase 3 — Temps de lecture restant
+- Badge flottant top-right `⏱ X min restantes` qui met à jour à chaque scroll
+- Calcul : `ceil(readingMinutes × (1 - scrollPct))`
+- À 98.5 % de progression : badge passe en `✓ lu` (vert)
+- Co-localisé avec le bouton `Aa` (même container)
+- Disparaît en sortie de mode lecture
+
+### ✅ Critères de validation
+- [x] Ouvrir un article fait apparaître le badge `⏱ X min restantes` en haut à droite
+- [x] Le temps diminue en scrollant, passe à `✓ lu` à la fin
+- [x] Cliquer sur `Aa` ouvre la popover de réglages
+- [x] Changer la taille modifie le rendu de l'article en live
+- [x] Recharger garde la préférence
+- [x] La section "Articles à découvrir" affiche 3 suggestions pertinentes
+- [x] Clic sur une suggestion ouvre l'article sans fermer la modale
 
 ---
 

@@ -6,6 +6,22 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.23.0] — UX lecture : prefs typo + temps restant + articles suggérés
+- **Préférences typographiques** :
+  - Bouton flottant `Aa` en haut à droite de la page article (visible en mode lecture)
+  - Popover avec taille (S/M/L) et police (Serif Fraunces / Sans-serif Manrope)
+  - Persistance dans `localStorage.avb_read_prefs_v1`, appliqué dès le chargement
+  - Bouton "Réinitialiser" pour revenir aux valeurs par défaut
+- **Temps de lecture restant** :
+  - Badge `⏱ X min restantes` co-localisé avec le bouton Aa
+  - Mise à jour à chaque scroll : `ceil(readingMinutes × (1 - pct))`
+  - Passe à `✓ lu` (vert) à 98.5 % de progression
+- **Articles suggérés en fin d'article** :
+  - Section « 📰 Articles à découvrir » avec 3 cartes après le vote bar
+  - Algorithme de scoring : `+5 même thème, +likes/10, +reads/100, -3 si déjà vu en session`
+  - Tracking des articles vus via `sessionStorage.avb_seen_articles` (50 derniers)
+  - Clic sur une carte → scroll top + ouverture du nouvel article (sans fermer la modale)
+
 ## [v0.22.1] — Finance — Top tippers publics
 - Nouvelle RPC publique `get_public_top_tippers(p_limit, p_days)` : top des donateurs sur les N derniers jours, agrégés par username + somme + nombre + dernier tip. Filtre strict `tips.status='succeeded'` AND `display_consent=true`.
 - Nouvelle section **"Top donateurs — 30 derniers jours"** sur `/financement`, entre le Mur des soutiens et les Articles rémunérés. Liste numérotée, 1er rang en couleur accent, empty state explicite si personne n'a opt-in.
