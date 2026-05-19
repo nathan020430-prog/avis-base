@@ -6,6 +6,21 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.24.0] — Liste d'attente pré-lancement
+- Nouvelle **table `waitlist`** : email (unique case-insensitive), kind (`launch` ou `beta`), source, name, user_id, ip_hash, timestamps
+- Nouvelle **RPC publique `submit_waitlist(email, kind, source, name)`** ouverte à `anon` :
+  - Validation regex email + longueur 5-254
+  - Idempotente : si email déjà inscrit avec même kind → `{status: 'already'}`, avec kind différent → update + `{status: 'updated'}`, sinon insert + `{status: 'created'}`
+- RLS : lecture admin/superadmin uniquement
+- Vue `waitlist_summary` pour les agrégats (total, pending, notified par kind)
+- Nouvelle **modale frontend `Waitlist`** : form en 2 champs (email + nom optionnel) + radio cards pour choisir `launch` (notif jour J) ou `beta` (rejoindre les beta-testeurs)
+- États de succès distincts selon `created` / `updated` / `already`
+- 2 entry points :
+  - Home, section "App mobile" : « rejoindre les bêta-testeurs » + « être prévenu du lancement public »
+  - Modale `/a-propos` : 2 entrées dédiées
+- Anti-zoom iOS (font-size 16px), shake animation sur email invalide
+- Migration : `v0.24.0-waitlist-migration.sql` (à appliquer après v0.22.1)
+
 ## [v0.23.3] — Auto-link sources [N] dans le corps d'article
 - Les références numériques `[1]`, `[2]` etc. dans le corps d'un article deviennent désormais des **liens cliquables** qui smooth-scroll vers la source citée correspondante dans la section "Sources citées"
 - Flash visuel de 1.7s sur la source cible pour attirer le regard

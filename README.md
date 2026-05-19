@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.24.0** — Liste d'attente pré-lancement : table `waitlist` + RPC publique `submit_waitlist()` (idempotente) + modale form accessible depuis la home et la page À propos. 2 kinds : `launch` (notification jour J) ou `beta` (rejoindre les beta-testeurs actifs).
 - **v0.23.3** — Auto-link sources `[N]` : les références numériques dans le corps d'article deviennent des liens cliquables qui smooth-scroll vers la source citée, avec flash visuel.
 - **v0.23.2** — Reprise de lecture : la position de scroll est mémorisée par article dans localStorage. À la réouverture, banner "Reprendre à X %" avec choix Reprendre / Recommencer. Cleanup auto 30j + max 100 entrées.
 - **v0.23.1** — Citation partageable : sélectionner du texte dans un article fait apparaître un tooltip "Twitter / Copier / Partager", avec attribution auteur + lien article. Format Twitter : `« citation » — @auteur via @avis_base.nth`.
@@ -108,7 +109,8 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 15. `v0.19.0-moderation-migration.sql` (V0.19.0 — modération avancée : extension `reports` + `moderation_state` sur articles/clips + tables `moderation_actions` & `peer_reviews` + RPCs `submit_report`/`submit_peer_review`/`mod_apply_action`/`get_moderation_queue`/`get_peer_review_queue`)
 16. `v0.19.1-moderation-notifs.sql` (V0.19.1 — étend `notifications.type` (+`content_hidden`, `content_restored`) + trigger `notify_on_moderation_change` sur articles/clips)
 17. `v0.20.0-stats-migration.sql` (V0.20.0 — RPCs publiques `get_public_stats()` + `get_public_top_contributors()`)
-18. **`v0.22.1-top-tippers-migration.sql`** (V0.22.1 — RPC publique `get_public_top_tippers(limit, days)` filtrée sur display_consent=true) ← **NOUVEAU**
+18. `v0.22.1-top-tippers-migration.sql` (V0.22.1 — RPC publique `get_public_top_tippers(limit, days)` filtrée sur display_consent=true)
+19. **`v0.24.0-waitlist-migration.sql`** (V0.24.0 — table `waitlist` + RPC `submit_waitlist()` + vue admin `waitlist_summary` pour la liste d'attente pré-lancement) ← **NOUVEAU**
 
 ## Développement local
 
@@ -123,4 +125,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.23.3
+© Avis Basé · Beta · v0.24.0
