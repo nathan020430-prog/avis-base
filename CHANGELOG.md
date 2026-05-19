@@ -6,6 +6,13 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.23.3] — Auto-link sources [N] dans le corps d'article
+- Les références numériques `[1]`, `[2]` etc. dans le corps d'un article deviennent désormais des **liens cliquables** qui smooth-scroll vers la source citée correspondante dans la section "Sources citées"
+- Flash visuel de 1.7s sur la source cible pour attirer le regard
+- Implémenté dans `renderArticleMarkdown` après les footnotes, avec garde anti-match sur les constructs comme `var[0]`
+- Chaque source citée a maintenant un `id="cited-N"` pour servir de cible aux ancres
+- Convention alignée sur celle de Wikipédia, parfaitement cohérente avec le concept éditorial du « média qui source tout »
+
 ## [v0.23.2] — Reprise de lecture mémorisée par article
 - Module `ReadResume` qui mémorise la **position de scroll** (en %) par slug d'article dans `localStorage.avb_reading_positions_v1`
 - À la réouverture d'un article : banner discret **"🔖 Tu en étais à X %. Reprendre ?"** au-dessus du contenu
