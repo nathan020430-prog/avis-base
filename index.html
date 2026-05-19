@@ -6544,6 +6544,35 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
 .onboarding__suggestion-meta{font-size:11.5px;color:var(--ink-muted);margin-top:2px}
 .onboarding__suggestion .follow-btn{font-size:11px;padding:5px 12px;flex-shrink:0}
 
+/* v0.29.0 — Themes chips (etape "Choisis tes sujets") */
+.onboarding__themes{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+  margin:14px 0 10px
+}
+.onboarding__theme-chip{
+  padding:9px 16px;border-radius:100px;
+  background:var(--surface);border:1.5px solid var(--rule);
+  color:var(--ink);font-family:var(--fs);font-size:0.86rem;font-weight:500;
+  cursor:pointer;
+  transition:all 0.18s cubic-bezier(0.32,0.72,0,1);
+  letter-spacing:-0.005em
+}
+.onboarding__theme-chip:hover{
+  border-color:var(--ink);
+  transform:translateY(-1px)
+}
+.onboarding__theme-chip--on{
+  background:var(--accent);color:#FDFAF3;border-color:var(--accent);
+  box-shadow:0 4px 12px -2px rgba(140,28,19,0.3)
+}
+.onboarding__theme-chip--on:hover{
+  background:var(--accent-dark);border-color:var(--accent-dark);color:#FDFAF3
+}
+.onboarding__themes-counter{
+  text-align:center;font-size:0.78rem;color:var(--ink-muted);
+  font-style:italic;margin-top:8px
+}
+
 .onboarding__actions{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid var(--rule)}
 .onboarding__skip-btn{margin-right:auto;font-size:12px;color:var(--ink-muted)}
 
@@ -6655,6 +6684,10 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
           <button class="nav-menu__item" data-nav="home">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
             Retour à la une
+          </button>
+          <button class="nav-menu__item" data-nav="foryou" id="navForYouBtn" style="display:none">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/><path d="M9 9l3 3 3-3"/></svg>
+            Pour toi
           </button>
           <button class="nav-menu__item" data-nav="myfeed" id="navMyFeedBtn" style="display:none">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
@@ -10115,6 +10148,19 @@ function getFilteredArticles() {
   if (feedMode === 'myfeed' && typeof Follow !== 'undefined') {
     const ids = Follow.followingIds;
     list = list.filter(a => ids.has(a.authorId));
+  } else if (feedMode === 'foryou') {
+    // v0.29.0 — Mode "Pour toi" : articles dans mes sujets OU auteurs suivis
+    const interests = (typeof window.userInterests !== 'undefined' && Array.isArray(window.userInterests)) ? new Set(window.userInterests) : new Set();
+    const followIds = (typeof Follow !== 'undefined' && Follow.followingIds) ? Follow.followingIds : new Set();
+    if (interests.size > 0 || followIds.size > 0) {
+      list = list.filter(a => interests.has(a.themeSlug) || followIds.has(a.authorId));
+      // Scoring : auteur suivi compte plus que sujet aime
+      list = list.map(a => ({
+        a,
+        score: (followIds.has(a.authorId) ? 3 : 0) + (interests.has(a.themeSlug) ? 2 : 0)
+              + Math.max(0, 1 - ((Date.now() - new Date(a.publishedAt || a.createdAt || 0).getTime()) / (30 * 86400000)))
+      })).sort((x, y) => y.score - x.score).map(x => x.a);
+    }
   }
 
   if (articleThemeFilter !== 'all') list = list.filter(a => a.themeSlug === articleThemeFilter);
@@ -14020,6 +14066,13 @@ const Onboarding = (() => {
       ]
     },
     {
+      icon: '🎯',
+      title: 'Choisis tes sujets',
+      desc: `Sélectionne <strong>3 à 5 thèmes</strong> qui t'intéressent. On te proposera des articles et des auteurs sur ces sujets en priorité.`,
+      list: null,
+      interests: true // v0.29.0 — etape interets
+    },
+    {
       icon: '🤝',
       title: 'Des contributeurs à suivre pour démarrer',
       desc: `Voici les profils les plus fiables du moment. Suis-en quelques-uns pour remplir ton <strong>Mon Feed</strong> personnalisé.`,
@@ -14027,6 +14080,9 @@ const Onboarding = (() => {
       suggestions: true
     }
   ];
+
+  // v0.29.0 — Etat des sujets selectionnes dans l'onboarding
+  let selectedInterests = new Set();
 
   async function maybeShow() {
     if (!currentUser || !currentProfile) return;
@@ -14044,6 +14100,12 @@ const Onboarding = (() => {
       const { data } = await supa.rpc('get_public_top_contributors', { p_limit: 5 });
       suggestions = (data || []).filter(u => !currentProfile || u.username !== currentProfile.username);
     } catch (e) { suggestions = []; }
+    // v0.29.0 — Pre-charge les interets actuels (si l'user relance l'onboarding)
+    selectedInterests = new Set();
+    try {
+      const { data: uiData } = await supa.rpc('get_user_interests');
+      if (Array.isArray(uiData)) uiData.forEach(s => selectedInterests.add(s));
+    } catch (e) { /* RPC manquante = on ignore */ }
     const bd = document.getElementById('onboardingBackdrop');
     if (!bd) return;
     bd.style.display = 'flex';
@@ -14069,6 +14131,17 @@ const Onboarding = (() => {
       listHtml = `<ul class="onboarding__list">${step.list.map(it => `
         <li><span class="onboarding__list-icon">${it.icon}</span><span><strong>${escapeHtml(it.label)}</strong>${escapeHtml(it.text)}</span></li>
       `).join('')}</ul>`;
+    } else if (step.interests) {
+      // v0.29.0 — Grille de themes a cocher (3-5 conseilles)
+      const themes = (typeof articleThemes !== 'undefined' && articleThemes.length)
+        ? articleThemes
+        : [{slug:'politique',label:'Politique'},{slug:'culture',label:'Culture'},{slug:'economie',label:'Économie'},{slug:'societe',label:'Société'},{slug:'tech',label:'Tech'},{slug:'environnement',label:'Environnement'}];
+      listHtml = `<div class="onboarding__themes" id="onbThemes">${themes.map(t => `
+        <button type="button" class="onboarding__theme-chip${selectedInterests.has(t.slug) ? ' onboarding__theme-chip--on' : ''}" data-onb-theme="${escapeHtml(t.slug)}">
+          ${t.emoji ? t.emoji + ' ' : ''}${escapeHtml(t.label)}
+        </button>
+      `).join('')}</div>
+      <div class="onboarding__themes-counter" id="onbThemesCounter">${selectedInterests.size} sélectionné${selectedInterests.size > 1 ? 's' : ''} · 3 minimum recommandé</div>`;
     } else if (step.suggestions) {
       if (!suggestions.length) {
         listHtml = `<p class="onboarding__desc" style="margin-top:14px;color:var(--ink-muted);font-style:italic">Pas encore de suggestion. Reviens dans quelques jours — la communauté grandit.</p>`;
@@ -14104,6 +14177,26 @@ const Onboarding = (() => {
     if (prevBtn) prevBtn.style.display = stepIdx > 0 ? 'inline-flex' : 'none';
     if (nextBtn) nextBtn.textContent = stepIdx === STEPS.length - 1 ? '✨ C\'est parti !' : 'Suivant →';
 
+    // v0.29.0 — Wire theme chips (interests step)
+    stepEl.querySelectorAll('[data-onb-theme]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const slug = chip.dataset.onbTheme;
+        if (selectedInterests.has(slug)) {
+          selectedInterests.delete(slug);
+          chip.classList.remove('onboarding__theme-chip--on');
+        } else {
+          if (selectedInterests.size >= 10) { showToast('Maximum 10 sujets', true); return; }
+          selectedInterests.add(slug);
+          chip.classList.add('onboarding__theme-chip--on');
+        }
+        const counter = document.getElementById('onbThemesCounter');
+        if (counter) {
+          const n = selectedInterests.size;
+          counter.textContent = n + ' sélectionné' + (n > 1 ? 's' : '') + ' · 3 minimum recommandé';
+        }
+      });
+    });
+
     // Wire follow buttons (suggestions)
     stepEl.querySelectorAll('[data-onb-follow]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -14128,7 +14221,15 @@ const Onboarding = (() => {
   }
   function prev() { if (stepIdx > 0) { stepIdx--; render(); } }
   function skip() { finish(); }
-  function finish() {
+  async function finish() {
+    // v0.29.0 — Sauvegarde des interets si l'user en a coche au moins 1
+    if (selectedInterests.size > 0) {
+      try {
+        const themes = Array.from(selectedInterests);
+        await supa.rpc('set_user_interests', { p_themes: themes });
+        if (typeof window.userInterests !== 'undefined') window.userInterests = themes;
+      } catch (e) { console.warn('set_user_interests failed:', e?.message); }
+    }
     try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
     const bd = document.getElementById('onboardingBackdrop');
     if (bd) bd.style.display = 'none';
@@ -15483,6 +15584,9 @@ const Follow = {
   refreshUI() {
     const myFeedBtn = document.getElementById('navMyFeedBtn');
     if (myFeedBtn) myFeedBtn.style.display = currentUser ? '' : 'none';
+    // v0.29.0 — Bouton "Pour toi" visible si connecte
+    const forYouBtn = document.getElementById('navForYouBtn');
+    if (forYouBtn) forYouBtn.style.display = currentUser ? '' : 'none';
     document.querySelectorAll('[data-follow-uid]').forEach(btn => {
       const uid = btn.dataset.followUid;
       if (uid === currentUser?.id) { btn.style.display = 'none'; return; }
@@ -15499,9 +15603,37 @@ const Follow = {
     this.loaded = false;
     const myFeedBtn = document.getElementById('navMyFeedBtn');
     if (myFeedBtn) myFeedBtn.style.display = 'none';
+    const forYouBtn = document.getElementById('navForYouBtn');
+    if (forYouBtn) forYouBtn.style.display = 'none';
     feedMode = 'discover';
   }
 };
+
+// ═══════════════════════════════════════════════════════════
+// v0.29.0 — Module UserInterests (intérêts par thème)
+// ═══════════════════════════════════════════════════════════
+const UserInterests = {
+  loaded: false,
+  async load() {
+    if (!currentUser || !supa) return;
+    try {
+      const { data } = await supa.rpc('get_user_interests');
+      window.userInterests = Array.isArray(data) ? data : [];
+      this.loaded = true;
+    } catch (e) {
+      window.userInterests = [];
+    }
+  },
+  has(slug) {
+    return Array.isArray(window.userInterests) && window.userInterests.includes(slug);
+  },
+  reset() {
+    window.userInterests = [];
+    this.loaded = false;
+  }
+};
+window.UserInterests = UserInterests;
+window.userInterests = [];
 
 // ─── Wiring V0.9.0 (à appeler au DOMContentLoaded) ─────────
 function bindV09Handlers() {
@@ -17367,6 +17499,28 @@ function handleNavAction(action) {
       renderArticles();
       window.scrollTo({ top: 0, behavior: 'smooth' });
       break;
+    case 'foryou':
+      // v0.29.0 — Feed personnalise (interets + auteurs suivis)
+      if (!currentUser) { openAuthModal('login'); return; }
+      feedMode = 'foryou';
+      articleSortBy = 'date-desc'; articleTimeFilter = 'all'; articleThemeFilter = 'all';
+      searchQuery = '';
+      const s4 = document.getElementById('search');
+      if (s4) s4.value = '';
+      // Si pas d'interets ET pas de follow, propose de relancer l'onboarding
+      const _hasInterests = Array.isArray(window.userInterests) && window.userInterests.length > 0;
+      const _hasFollows = (typeof Follow !== 'undefined' && Follow.followingIds && Follow.followingIds.size > 0);
+      if (!_hasInterests && !_hasFollows) {
+        if (typeof showToast === 'function') showToast('Choisis tes sujets ou suis quelques auteurs pour personnaliser ce feed.');
+        if (window.Onboarding && typeof window.Onboarding.start === 'function') {
+          try { localStorage.removeItem('avb_onboarding_done_v1'); } catch(e){}
+          setTimeout(() => window.Onboarding.start(), 300);
+          return;
+        }
+      }
+      renderArticles();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      break;
   }
 }
 
@@ -18014,7 +18168,7 @@ async function init() {
   refreshUserUI();
 
   // V0.9.7 — démarrer notifications si connecté
-  if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); }
+  if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); UserInterests.load(); }
 
   // v0.21.0 — Tour d'onboarding si premier passage
   if (typeof Onboarding !== 'undefined') Onboarding.maybeShow();
@@ -18191,7 +18345,7 @@ async function init() {
     await loadFavorites(); // V0.9.0
     refreshUserUI();
     // V0.9.7 — (re)bind notifications selon l'état
-    if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); }
+    if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); UserInterests.load(); }
     else { Notif.unsubscribe(); Follow.reset(); }
     // v0.21.0 — Onboarding au signup (event SIGNED_IN couvre login + signup)
     if (event === 'SIGNED_IN' && currentUser && typeof Onboarding !== 'undefined') {

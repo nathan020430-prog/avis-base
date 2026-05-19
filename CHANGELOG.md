@@ -6,6 +6,18 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.29.0] — Feed personnalisé + onboarding intérêts
+- **Onboarding** : nouvelle étape "🎯 Choisis tes sujets" insérée avant les suggestions de follow. Grille de chips multi-select (1-10 sujets), pré-coche les intérêts existants à la ré-ouverture, sauvegarde via RPC `set_user_interests` au finish.
+- **Mode "Pour toi"** dans la sidebar nav (visible si connecté) : bouton à côté de "Mon Feed". Filtre les articles par intérêts cochés OU auteurs suivis, scoring décroissant : auteur suivi (×3) + sujet aimé (×2) + bonus fraîcheur (×0-1 sur 30j).
+- **Fallback intelligent** : si l'user clique "Pour toi" sans avoir choisi de sujets ni suivi personne, relance automatiquement l'onboarding (toast + reset `avb_onboarding_done_v1`).
+- **Module `UserInterests`** : charge les intérêts à l'auth (`UserInterests.load()` appelé dans le boot après `Follow.load()`), expose `window.userInterests` (array de slugs) pour les filtres.
+- Migration `v0.29.0-user-interests.sql` :
+  - Table `user_interests(user_id, theme_slug, weight, created_at)` avec RLS user-owned
+  - RPC `set_user_interests(p_themes text[])` — replace idempotent, max 10 sujets, validation contre `article_themes`
+  - RPC `get_user_interests()` — retourne le tableau de slugs ordonné par weight desc
+  - RPC `get_suggested_authors_by_interest(p_limit int)` — top contributeurs dans mes sujets, que je ne suis pas, exclus moi
+- Si la migration absente : l'étape onboarding ne sauvegarde rien (pas d'erreur), le feed "Pour toi" retombe sur filtres auteurs suivis uniquement.
+
 ## [v0.28.0] — Profils créateurs magnétiques
 - **Cover band** 200px (au lieu de 120px) avec dégradé éditorial accent + ornement radial qui dérive lentement (12s animation).
 - **Avatar** agrandi 136px (au lieu de 120px) avec bordure 5px et ombre plus marquée, chevauche le cover à -68px.
