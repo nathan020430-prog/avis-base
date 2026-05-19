@@ -52,6 +52,18 @@ Deno.serve(async (req) => {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     return jsonResponse({ error: 'supabase_env_missing' }, 500);
   }
+
+  // Auth : seul l'appelant en possession du service_role_key peut envoyer un
+  // push (le trigger DB `notify_push_on_notification` l'attache via pg_net,
+  // cf. v0.30.0-push-subscriptions.sql). Sans cette garde, l'endpoint est
+  // ouvert sur internet et n'importe qui peut spoofer une push a un user_id
+  // arbitraire (phishing).
+  const authHeader = req.headers.get('authorization') || '';
+  const expected = `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`;
+  if (authHeader !== expected) {
+    return jsonResponse({ error: 'unauthorized' }, 401);
+  }
+
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
     // Pas de VAPID configure : silencieusement ignore (cas dev / pre-prod)
     return jsonResponse({ ok: true, sent: 0, skipped: 'vapid_not_configured' });
