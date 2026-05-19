@@ -5371,6 +5371,45 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   .mod-queue-item__actions{flex-direction:column}
   .mod-queue-item__actions .btn--sm{width:100%}
 }
+
+/* ───────────────────────────────────────────────────────────────
+   v0.20.0 — Page Stats publiques (transparence)
+─────────────────────────────────────────────────────────────── */
+.stats-modal{max-width:760px}
+.stats-modal__refreshed{display:inline-block;font-size:11.5px;color:var(--ink-light);font-style:italic}
+.stats-modal__loading{padding:32px;text-align:center;color:var(--ink-muted);font-family:var(--fb);font-size:13px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:14px;margin:14px 0 22px}
+.stats-card{padding:18px 16px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule);border-radius:3px;display:flex;flex-direction:column;gap:6px;transition:border-color .15s}
+.stats-card:hover{border-color:var(--ink-light)}
+.stats-card__value{font-family:var(--fd,var(--ff));font-size:32px;font-weight:500;line-height:1;color:var(--ink);font-feature-settings:"tnum"}
+.stats-card__label{font-family:var(--fb);font-size:12px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600;line-height:1.3}
+.stats-card__sub{font-family:var(--fb);font-size:11px;color:var(--ink-light);font-style:italic;font-feature-settings:"tnum"}
+.stats-card--accent .stats-card__value{color:var(--accent)}
+
+.stats-section{margin-top:24px}
+.stats-section__title{font-family:var(--ff);font-weight:600;font-size:17px;color:var(--ink);margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.stats-section__title-sub{margin-left:auto;font-family:var(--fb);font-size:11px;color:var(--ink-muted);text-transform:none;letter-spacing:0;font-weight:500}
+
+.stats-top{display:flex;flex-direction:column;gap:6px}
+.stats-top__row{display:grid;grid-template-columns:32px 1fr auto auto;gap:12px;align-items:center;padding:9px 12px;background:var(--surface);border:1px solid var(--rule);border-radius:3px;font-family:var(--fb);font-size:13px}
+.stats-top__rank{font-family:var(--fd);font-weight:600;color:var(--accent);font-size:15px;text-align:center;font-feature-settings:"tnum"}
+.stats-top__user{display:flex;align-items:center;gap:8px;min-width:0}
+.stats-top__user strong{color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats-top__badges{display:flex;gap:4px}
+.stats-top__articles{color:var(--ink-muted);font-feature-settings:"tnum";font-size:12px;white-space:nowrap}
+.stats-top__score{font-family:var(--fd);font-weight:600;color:var(--ink);font-feature-settings:"tnum";min-width:42px;text-align:right}
+
+.stats-mod-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:9px 12px;background:var(--paper-2,rgba(0,0,0,.02));border-left:2px solid var(--ink-light);font-family:var(--fb);font-size:12.5px;align-items:center}
+.stats-mod-row + .stats-mod-row{margin-top:6px}
+.stats-mod-row strong{color:var(--ink);font-weight:600;font-feature-settings:"tnum"}
+
+@media (max-width:640px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .stats-card__value{font-size:26px}
+  .stats-top__row{grid-template-columns:28px 1fr auto;gap:8px;font-size:12px}
+  .stats-top__articles{display:none}
+}
 </style>
 </head>
 <body>
@@ -6243,7 +6282,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.84-.1z"/></svg>
         @avis_base.nth
       </a>
-      <p class="footer__version">© <span id="yr"></span> · Beta · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a> · <a class="footer__charter-link" id="footerModerationCharterLink" href="#charte-moderation">Charte de modération</a></p>
+      <p class="footer__version">© <span id="yr"></span> · Beta · <a class="footer__charter-link" id="footerAboutLink" href="#a-propos">À propos</a> · <a class="footer__charter-link" id="footerStatsLink" href="#stats">Stats publiques</a> · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a> · <a class="footer__charter-link" id="footerModerationCharterLink" href="#charte-moderation">Charte de modération</a></p>
     </div>
   </div>
 </footer>
@@ -6950,6 +6989,76 @@ body.is-mobile .notif-bell{width:32px;height:32px}
     <p>Tu peux à tout moment supprimer un contenu que tu as publié, ou demander la suppression complète de ton compte via la page <a href="#suppression-compte" style="color:var(--accent)">Suppression du compte</a>. Les signalements liés à un contenu supprimé sont également effacés (cascade).</p>
 
     <p class="charter-modal__footer">Cette charte évolue avec la communauté. Pour proposer une modification, ouvre une issue sur le <a href="https://github.com/nathan020430-prog/avis-base" target="_blank" rel="noopener" style="color:var(--accent)">GitHub public</a> ou écris à <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a>.</p>
+  </div>
+</div>
+
+<!-- v0.20.0 — Stats publiques (transparence) -->
+<div class="v8-backdrop" id="statsBackdrop" style="display:none">
+  <div class="v8-modal stats-modal" role="dialog" aria-modal="true">
+    <button class="v8-modal__close" id="statsClose" aria-label="Fermer">×</button>
+    <h2>📊 Avis Basé en chiffres</h2>
+    <p class="charter-modal__lead">Toutes ces données sont publiques, agrégées en temps réel. <span id="statsGeneratedAt" class="stats-modal__refreshed">Calculé maintenant.</span></p>
+
+    <div id="statsContent">
+      <div class="stats-modal__loading">Chargement…</div>
+    </div>
+
+    <p class="charter-modal__footer">On publie nos chiffres parce qu'on n'a rien à cacher. Si tu vois une incohérence, écris-nous à <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a>.</p>
+  </div>
+</div>
+
+<!-- v0.20.0 — À propos d'Avis Basé -->
+<div class="v8-backdrop" id="aboutBackdrop" style="display:none">
+  <div class="v8-modal charter-modal" role="dialog" aria-modal="true">
+    <button class="v8-modal__close" id="aboutClose" aria-label="Fermer">×</button>
+    <h2>À propos d'Avis Basé</h2>
+    <p class="charter-modal__lead">Le média collaboratif qui source tout.</p>
+
+    <h3>🎯 Pourquoi on existe</h3>
+    <p>Avis Basé est une réponse au format court qui domine l'info aujourd'hui : titres putaclic, vidéos de 30 secondes, sources rarement vérifiables. On a voulu construire quelque chose qui prenne le temps inverse — partir d'une <strong>vidéo longue ou d'un sujet de fond</strong>, le décortiquer, citer ses sources, et laisser la communauté vérifier.</p>
+    <p>L'idée n'est pas de remplacer TikTok ou X, mais de <strong>s'en servir pour ramener des gens vers un format plus lent</strong>, plus exigeant, qui ne dépend pas d'un algorithme. La cible : les jeunes qui sentent que quelque chose cloche dans leur consommation d'info, sans toujours savoir quoi y faire.</p>
+
+    <h3>📐 Notre différence</h3>
+    <ul class="charter-modal__list">
+      <li><strong>Toute affirmation = source.</strong> Pas une opinion, un fait. Vérifiable.</li>
+      <li><strong>Score de Basitude.</strong> Chaque article est noté automatiquement selon la qualité de ses sources.</li>
+      <li><strong>Modération communautaire transparente.</strong> 8 raisons standardisées de signalement, peer review pour les contributeurs de confiance, journal d'actions consultable. <a href="#charte-moderation" id="aboutLinkToModeration" style="color:var(--accent);font-weight:600">Voir la charte</a>.</li>
+      <li><strong>Économie collaborative.</strong> 5 € par mois pour soutenir, 100 % du surplus reversé aux contributeurs. <a href="#financement" id="aboutLinkToFinancement" style="color:var(--accent);font-weight:600">Voir comment</a>.</li>
+      <li><strong>Pas d'algorithme manipulateur.</strong> Tu vois ce que tu choisis de voir.</li>
+    </ul>
+
+    <h3>💻 Pourquoi l'écriture est sur ordinateur uniquement</h3>
+    <p>Un article bien sourcé demande de la concentration. On a fait le choix de ne pas permettre la rédaction depuis mobile pour pousser à mieux structurer ses idées, vérifier les liens, prendre du temps. Le mobile est fait pour <strong>lire, débattre, signaler</strong> — la rédaction mérite un espace dédié.</p>
+    <p class="charter-modal__quote">« Sur Avis Basé, on n'écrit pas en attendant le bus. On prend le temps. »</p>
+
+    <h3>🛠 Comment ça marche</h3>
+    <ul class="charter-modal__list">
+      <li><strong>Lire.</strong> Le feed affiche les articles par thème ou popularité, avec la « Basitude » de chaque article en évidence.</li>
+      <li><strong>Contribuer.</strong> Inscription gratuite, période d'observation de 7 jours, puis tu peux écrire ton premier article (sur ordinateur) en citant tes sources.</li>
+      <li><strong>Débattre.</strong> Likes, dislikes, commentaires en thread, mentions — sur mobile comme sur ordinateur.</li>
+      <li><strong>Soutenir.</strong> Adhésion Avis Basé+ à 5 € par mois, ou tip ponctuel à un auteur dont tu as aimé le travail.</li>
+      <li><strong>Modérer.</strong> Tu peux signaler tout contenu qui enfreint la charte. Si ta Basitude dépasse 50, tu peux aussi voter sur les signalements en attente.</li>
+    </ul>
+
+    <h3>👥 L'équipe</h3>
+    <p>Avis Basé est porté par <strong>Nathan</strong>, son créateur, en solo pour la phase de soft-launch (0.x.x). L'objectif est d'agrandir l'équipe en parallèle de la croissance — un dev pro pour la stack, un éditorial pour l'animation, un modérateur dédié quand le volume le justifiera.</p>
+    <p>Le projet est <strong>open-source</strong> côté frontend et migrations SQL. Tout le code est visible : <a href="https://github.com/nathan020430-prog/avis-base" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">github.com/nathan020430-prog/avis-base</a>.</p>
+
+    <h3>📊 Transparence chiffrée</h3>
+    <p>On publie en temps réel <a href="#stats" id="aboutLinkToStats" style="color:var(--accent);font-weight:600">les statistiques du média</a> : nombre d'articles, contributeurs, sources citées, signalements traités. Aucun chiffre n'est caché, aucun classement n'est manipulé.</p>
+
+    <h3>🤝 Où nous trouver</h3>
+    <ul class="charter-modal__list">
+      <li><strong>TikTok</strong> — <a href="https://www.tiktok.com/@avis_base.nth" target="_blank" rel="noopener" style="color:var(--accent)">@avis_base.nth</a> (clips synthétiques des articles longs)</li>
+      <li><strong>GitHub</strong> — <a href="https://github.com/nathan020430-prog/avis-base" target="_blank" rel="noopener" style="color:var(--accent)">nathan020430-prog/avis-base</a> (code source + issues publiques)</li>
+      <li><strong>Contact</strong> — <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a></li>
+      <li><strong>Beta-testeurs app mobile</strong> — <a href="mailto:beta@avis-base.com?subject=Beta-testeur%20app" style="color:var(--accent)">beta@avis-base.com</a></li>
+    </ul>
+
+    <h3>🗓 Versions</h3>
+    <p>Avis Basé est en <strong>pré-release 0.x.x</strong>. La version <strong>v1.0.0</strong> marquera le lancement public officiel, avec communication massive sur TikTok et la presse. Jusque-là on construit, on itère, on observe — sans bruit. Pour suivre le détail des releases : <a href="https://github.com/nathan020430-prog/avis-base/blob/main/CHANGELOG.md" target="_blank" rel="noopener" style="color:var(--accent)">CHANGELOG public</a>.</p>
+
+    <p class="charter-modal__footer">Une suggestion, une remarque, un bug ? Le projet est jeune et écoute. Écris-nous à <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a> ou ouvre une issue sur GitHub.</p>
   </div>
 </div>
 
@@ -11387,6 +11496,171 @@ function closeModerationCharter() {
 }
 window.openModerationCharter = openModerationCharter;
 
+// v0.20.0 — À propos
+function openAboutModal() {
+  const bd = document.getElementById('aboutBackdrop');
+  if (!bd) return;
+  bd.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeAboutModal() {
+  const bd = document.getElementById('aboutBackdrop');
+  if (!bd) return;
+  bd.style.display = 'none';
+  document.body.style.overflow = '';
+}
+window.openAboutModal = openAboutModal;
+
+// v0.20.0 — Stats publiques
+function openStatsModal() {
+  const bd = document.getElementById('statsBackdrop');
+  if (!bd) return;
+  bd.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  loadAndRenderStats();
+}
+function closeStatsModal() {
+  const bd = document.getElementById('statsBackdrop');
+  if (!bd) return;
+  bd.style.display = 'none';
+  document.body.style.overflow = '';
+}
+window.openStatsModal = openStatsModal;
+
+async function loadAndRenderStats() {
+  const content = document.getElementById('statsContent');
+  const refreshed = document.getElementById('statsGeneratedAt');
+  if (!content) return;
+  content.innerHTML = `<div class="stats-modal__loading">Chargement…</div>`;
+
+  try {
+    const [statsRes, topRes] = await Promise.all([
+      supa.rpc('get_public_stats'),
+      supa.rpc('get_public_top_contributors', { p_limit: 10 })
+    ]);
+
+    if (statsRes.error) {
+      const msg = String(statsRes.error.message || '');
+      const isMissing = msg.includes('function') && msg.includes('does not exist');
+      content.innerHTML = `<div class="stats-modal__loading">
+        ${isMissing
+          ? '⚠️ Les stats ne sont pas encore disponibles : la migration <code>v0.20.0-stats-migration.sql</code> n\'a pas été appliquée côté Supabase.'
+          : 'Erreur de chargement : ' + escapeHtml(msg)
+        }
+      </div>`;
+      return;
+    }
+
+    const s = statsRes.data || {};
+    const top = topRes.error ? [] : (topRes.data || []);
+    if (refreshed && s.generated_at) {
+      const d = new Date(s.generated_at);
+      refreshed.textContent = `Mis à jour ${d.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}.`;
+    }
+
+    const articles = s.articles || {};
+    const clips = s.clips || {};
+    const contributors = s.contributors || {};
+    const sources = s.sources || {};
+    const comments = s.comments || {};
+    const cred = s.credibility || {};
+    const mod = s.moderation || {};
+
+    const totalReports = (mod.reports_pending || 0) + (mod.reports_resolved || 0) + (mod.reports_dismissed || 0);
+    const pctResolved = totalReports > 0 ? Math.round((mod.reports_resolved || 0) / totalReports * 100) : 0;
+    const pctDismissed = totalReports > 0 ? Math.round((mod.reports_dismissed || 0) / totalReports * 100) : 0;
+
+    let topHtml = '';
+    if (top && top.length) {
+      topHtml = `
+        <div class="stats-section">
+          <h3 class="stats-section__title">🏆 Top contributeurs <span class="stats-section__title-sub">par Basitude</span></h3>
+          <div class="stats-top">
+            ${top.map((u, i) => `
+              <div class="stats-top__row">
+                <span class="stats-top__rank">${i + 1}</span>
+                <div class="stats-top__user">
+                  <strong>${escapeHtml(u.username || '?')}</strong>
+                  <span class="stats-top__badges">
+                    ${u.is_certified ? '<span class="badge badge--certified" title="Auteur rémunérable" style="padding:1px 6px;font-size:10px"><span class="badge__icon">✓</span></span>' : ''}
+                    ${u.is_member ? '<span class="badge badge--member" title="Membre Avis Basé+" style="padding:1px 6px;font-size:10px"><span class="badge__icon">💛</span></span>' : ''}
+                  </span>
+                </div>
+                <span class="stats-top__articles">${u.articles_published || 0} article${(u.articles_published || 0) > 1 ? 's' : ''}</span>
+                <span class="stats-top__score">${u.credibility_score || 0}%</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+    }
+
+    content.innerHTML = `
+      <div class="stats-grid">
+        <div class="stats-card stats-card--accent">
+          <div class="stats-card__value">${articles.public_visible || 0}</div>
+          <div class="stats-card__label">Articles publiés</div>
+          ${articles.hidden_by_mod ? `<div class="stats-card__sub">${articles.hidden_by_mod} en cours de revue</div>` : ''}
+        </div>
+        <div class="stats-card">
+          <div class="stats-card__value">${contributors.total_authors || 0}</div>
+          <div class="stats-card__label">Contributeurs</div>
+          ${contributors.certified ? `<div class="stats-card__sub">dont ${contributors.certified} certifié${contributors.certified > 1 ? 's' : ''}</div>` : ''}
+        </div>
+        <div class="stats-card">
+          <div class="stats-card__value">${formatLargeNumber(sources.total_cited || 0)}</div>
+          <div class="stats-card__label">Sources citées</div>
+          ${articles.public_visible ? `<div class="stats-card__sub">≈ ${Math.round((sources.total_cited || 0) / Math.max(1, articles.public_visible))} par article</div>` : ''}
+        </div>
+        <div class="stats-card">
+          <div class="stats-card__value">${comments.visible_total || 0}</div>
+          <div class="stats-card__label">Commentaires</div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-card__value">${clips.published_total || 0}</div>
+          <div class="stats-card__label">Clips TikTok</div>
+        </div>
+        <div class="stats-card stats-card--accent">
+          <div class="stats-card__value">${cred.avg_score || 0}<span style="font-size:18px;opacity:.6">%</span></div>
+          <div class="stats-card__label">Basitude moyenne</div>
+          ${cred.max_score ? `<div class="stats-card__sub">record : ${cred.max_score}%</div>` : ''}
+        </div>
+      </div>
+
+      ${contributors.members ? `
+        <div class="stats-section">
+          <h3 class="stats-section__title">💛 Soutien <span class="stats-section__title-sub">Avis Basé+</span></h3>
+          <div class="stats-mod-row">
+            <span>Membres actifs</span>
+            <strong>${contributors.members}</strong>
+          </div>
+        </div>
+      ` : ''}
+
+      ${totalReports > 0 ? `
+        <div class="stats-section">
+          <h3 class="stats-section__title">🛡️ Modération <span class="stats-section__title-sub">depuis le lancement</span></h3>
+          <div class="stats-mod-row"><span>Signalements en attente</span><strong>${mod.reports_pending || 0}</strong></div>
+          <div class="stats-mod-row"><span>Signalements validés (contenu masqué)</span><strong>${mod.reports_resolved || 0} <span style="color:var(--ink-muted);font-weight:500">· ${pctResolved}%</span></strong></div>
+          <div class="stats-mod-row"><span>Signalements classés sans suite</span><strong>${mod.reports_dismissed || 0} <span style="color:var(--ink-muted);font-weight:500">· ${pctDismissed}%</span></strong></div>
+          ${mod.auto_hidden_active ? `<div class="stats-mod-row"><span>Contenus masqués automatiquement (en revue)</span><strong>${mod.auto_hidden_active}</strong></div>` : ''}
+          ${mod.mod_actions_total ? `<div class="stats-mod-row"><span>Actions de modération journalisées</span><strong>${mod.mod_actions_total}</strong></div>` : ''}
+        </div>
+      ` : ''}
+
+      ${topHtml}
+    `;
+  } catch (e) {
+    content.innerHTML = `<div class="stats-modal__loading">Erreur : ${escapeHtml(String(e))}</div>`;
+  }
+}
+
+function formatLargeNumber(n) {
+  if (n == null) return '0';
+  if (n < 1000) return String(n);
+  if (n < 1_000_000) return (n / 1000).toFixed(n < 10000 ? 1 : 0).replace(/\.0$/, '') + 'k';
+  return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+}
+
 // ─── Éditeur de profil ──────────────────────────────────────
 function openProfileEditor() {
   if (!currentUser || !currentProfile) { openAuthModal('login'); return; }
@@ -12371,6 +12645,41 @@ function bindV09Handlers() {
     openModerationCharter();
   });
 
+  // v0.20.0 — À propos
+  document.getElementById('aboutClose')?.addEventListener('click', closeAboutModal);
+  document.getElementById('aboutBackdrop')?.addEventListener('click', e => {
+    if (e.target.id === 'aboutBackdrop') closeAboutModal();
+  });
+  document.getElementById('footerAboutLink')?.addEventListener('click', e => {
+    e.preventDefault();
+    openAboutModal();
+  });
+  document.getElementById('aboutLinkToModeration')?.addEventListener('click', e => {
+    e.preventDefault();
+    closeAboutModal();
+    openModerationCharter();
+  });
+  document.getElementById('aboutLinkToStats')?.addEventListener('click', e => {
+    e.preventDefault();
+    closeAboutModal();
+    openStatsModal();
+  });
+  document.getElementById('aboutLinkToFinancement')?.addEventListener('click', e => {
+    e.preventDefault();
+    closeAboutModal();
+    if (typeof switchView === 'function') switchView('financement');
+  });
+
+  // v0.20.0 — Stats publiques
+  document.getElementById('statsClose')?.addEventListener('click', closeStatsModal);
+  document.getElementById('statsBackdrop')?.addEventListener('click', e => {
+    if (e.target.id === 'statsBackdrop') closeStatsModal();
+  });
+  document.getElementById('footerStatsLink')?.addEventListener('click', e => {
+    e.preventDefault();
+    openStatsModal();
+  });
+
   // Profile editor
   document.getElementById('profileEditClose')?.addEventListener('click', closeProfileEditor);
   document.getElementById('profileEditCancel')?.addEventListener('click', closeProfileEditor);
@@ -12436,7 +12745,7 @@ function bindV09Handlers() {
   // Esc to close v0.9.0 modals
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    ['profileEditBackdrop','favoritesBackdrop','reportContentBackdrop','charterModalBackdrop','moderationCharterBackdrop'].forEach(id => {
+    ['profileEditBackdrop','favoritesBackdrop','reportContentBackdrop','charterModalBackdrop','moderationCharterBackdrop','aboutBackdrop','statsBackdrop'].forEach(id => {
       const el = document.getElementById(id);
       if (el && el.style.display === 'flex') el.style.display = 'none';
     });
@@ -14566,11 +14875,17 @@ async function init() {
     else if (h === '#mon-financement') switchView('mon-financement');
     else if (h === '#archive') switchView('archive');
     else if (h === '#charte-moderation') { if (typeof openModerationCharter === 'function') openModerationCharter(); }
+    else if (h === '#a-propos') { if (typeof openAboutModal === 'function') openAboutModal(); }
+    else if (h === '#stats') { if (typeof openStatsModal === 'function') openStatsModal(); }
     else if (!h.startsWith('#article/')) switchView('articles');
   });
-  // v0.19.1 — Hash initial : ouvrir directement la charte de modération
+  // v0.19.1 + v0.20.0 — Hash initial : ouvrir directement la charte ou la page
   if (window.location.hash === '#charte-moderation') {
     if (typeof openModerationCharter === 'function') openModerationCharter();
+  } else if (window.location.hash === '#a-propos') {
+    if (typeof openAboutModal === 'function') openAboutModal();
+  } else if (window.location.hash === '#stats') {
+    if (typeof openStatsModal === 'function') openStatsModal();
   }
 
   if (isAdmin()) {

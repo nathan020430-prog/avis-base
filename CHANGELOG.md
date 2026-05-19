@@ -6,6 +6,18 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.20.0] — Transparence & Identité
+- Nouvelle page **/a-propos** (modale, hash `#a-propos`) : manifeste éditorial, différenciateurs, "pourquoi desktop-only", équipe, liens externes (TikTok, GitHub, contact, beta-testeurs), pointeur vers le changelog public
+- Nouvelle page **/stats** (modale, hash `#stats`) :
+  - Grille de 6 cards principales : articles publiés (+ en revue), contributeurs (+ certifiés), sources citées (+ moyenne par article), commentaires, clips TikTok, basitude moyenne (+ record)
+  - Section "Soutien Avis Basé+" si membres actifs
+  - Section modération : signalements pending / validés / dismissed (avec %), contenus auto-masqués actifs, actions journalisées
+  - Top 10 contributeurs (badges certified ✓ / member 💛 inclus)
+- 4 liens propres dans le footer : `À propos · Stats publiques · Charte éditoriale · Charte de modération`
+- Hash deep-link initial supporté : `avis-base.com/#a-propos` ou `#stats` ouvre directement la modale
+- SQL : `v0.20.0-stats-migration.sql` — RPCs `get_public_stats()` (jsonb) et `get_public_top_contributors(limit)`, ouvertes à `anon` et `authenticated`. Tolérance migrations partielles via `begin/exception when undefined_table` autour des tables optionnelles.
+- Compat : si la migration n'est pas appliquée, la page stats affiche un message clair au lieu de crasher.
+
 ## [v0.19.1] — Notifs modération + charte publique
 - 2 nouveaux types de notif : `content_hidden` (ton article/clip a été masqué) et `content_restored` (de nouveau visible)
 - Trigger PG `notify_on_moderation_change` sur `articles` et `clips` qui détecte les transitions `moderation_state` et insère la notif à l'auteur

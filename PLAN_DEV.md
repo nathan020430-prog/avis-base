@@ -75,6 +75,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.18.0** | 🛡️ Trust & Identity | Phase 1 : compte renforcé (captcha + charte + email confirm + 8 chars + restriction écriture 7j). Phase 2 : certification rémunérable (4 critères + roadmap + lock virement). Phase 3 : crédibilité enrichie (badges multiples + breakdown public + historique) | ✅ Livré (3/3 phases) |
 | **v0.19.0** | 🛡️ Modération | Signalement enrichi (8 raisons + sévérité), masquage auto (seuil 3 distincts ou 1 priorité haute), peer review communautaire (quorum 3 votes, score ≥50), dashboard mod (score ≥75 OU admin), journal d'actions | ✅ Livré |
 | **v0.19.1** | 🛡️ Modération (suite) | Notifications auteur quand son contenu est masqué/restauré (trigger DB + 2 nouveaux types de notif) + Charte de modération publique (modal accessible depuis footer + signalement) | ✅ Livré |
+| **v0.20.0** | 🪟 Transparence & Identité | Page **/a-propos** (manifeste, différenciateurs, équipe, liens) + Page **/stats** publiques (compteurs articles/contributeurs/sources/commentaires/basitude moyenne + stats modération + top contributeurs) + RPCs `get_public_stats()` / `get_public_top_contributors()` | ✅ Livré |
 | **v0.20.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -717,6 +718,35 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 🪟 v0.20.0 — Transparence & Identité ✅
+
+> **Livré le 2026-05-19.** Étape de polish pré-lancement : raconter qui on est et montrer les chiffres.
+
+**Livré :**
+
+### SQL (`v0.20.0-stats-migration.sql`)
+- RPC publique `get_public_stats()` (callable par `anon` + `authenticated`) : retourne un JSON agrégé avec compteurs articles, clips, contributeurs, sources, commentaires, basitude moyenne, stats de modération.
+- RPC publique `get_public_top_contributors(p_limit)` : top des contributeurs par score de Basitude, avec badges certified / member.
+- Tolérance migrations partielles : `begin/exception when undefined_table` autour des tables optionnelles (`contributor_certifications`, `members`, `moderation_actions`).
+
+### Frontend (`index.html`)
+- Nouvelle modale **/a-propos** (hash `#a-propos`) : pourquoi on existe, manifeste éditorial, différenciateurs (avec liens internes vers charte modération, financement, stats), explication du choix desktop-only, l'équipe (Nathan + open-source GitHub), liens externes (TikTok, GitHub, contact, beta-testeurs), versions / changelog.
+- Nouvelle modale **/stats** (hash `#stats`) : grille de 6 stats cards principales (articles publiés, contributeurs, sources, commentaires, clips, basitude moyenne) + section soutien (membres Avis Basé+ si > 0) + section modération (signalements pending / validés / dismissed avec % calculés) + top 10 contributeurs.
+- Liens dans le footer : `À propos · Stats publiques · Charte éditoriale · Charte de modération`.
+- Hash deep-link initial supporté : `avis-base.com/#a-propos` ou `#stats` ouvre directement la modale.
+- Esc ferme la modale ouverte.
+- Fallback gracieux : si la migration SQL n'est pas appliquée, la page stats affiche "Migration non appliquée" au lieu de crasher.
+
+### ✅ Critères de validation
+- [x] Le footer expose les 4 liens : À propos, Stats publiques, Charte éditoriale, Charte de modération
+- [x] Hash `#a-propos` et `#stats` ouvrent directement la modale correspondante
+- [x] La page stats affiche les chiffres en temps réel avec un timestamp
+- [x] Les RPCs sont accessibles à `anon` + `authenticated` (lecture publique)
+- [x] Les liens internes entre modales (À propos → modération / stats / financement) fonctionnent
+- [x] Top contributeurs affiche les badges certified / member
 
 ---
 

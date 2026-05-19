@@ -13,17 +13,19 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.19.1 (Modération suite : notifs + charte publique) — 2026-05-19
+## Version actuelle — v0.20.0 (Transparence & Identité : /a-propos + /stats) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
 - v0.18.0 → Trust & Identity (compte renforcé + certification rémunérable + crédibilité enrichie)
 - v0.18.1 → Hotfix race conditions tips/payouts + RLS contributor_balance
 - v0.19.0 → Modération avancée (signalement enrichi + masquage auto + peer review + dashboard mod)
-- **v0.19.1 → Notifs + charte modération publique** :
-  - Trigger DB qui notifie l'auteur quand son contenu passe en hidden_auto/hidden_mod ou revient en visible/reviewed_ok
-  - Page (modale) `/charte-moderation` publique liée depuis footer + signalement + charte éditoriale
-  - Module Notif étendu : navigation au clic pour articles/clips/profile + libellés content_hidden/content_restored
+- v0.19.1 → Notifs auteur + charte de modération publique
+- **v0.20.0 → Transparence & Identité** :
+  - Modale `/a-propos` (manifeste + différenciateurs + équipe + liens externes)
+  - Modale `/stats` (compteurs publics live + stats modération + top 10 contributeurs)
+  - RPCs publiques `get_public_stats()` et `get_public_top_contributors()` (callable par `anon`)
+  - Footer enrichi : "À propos · Stats publiques · Charte éditoriale · Charte de modération"
 
 Tags sur origin : `v0.16.0-prep`, `v0.16.1`, `v0.17.0`, `v0.17.0-ui-and-sql`, `v0.18.0`
 
@@ -35,6 +37,7 @@ Le code est mergé mais les migrations doivent être exécutées manuellement da
 4. `v0.18.1-hotfix-money-races.sql` — **CRITIQUE** : corrige 3 race conditions sur les flux d'argent (tips + payouts) + ferme une faille RLS sur `contributor_balance`. À appliquer AVANT tout déploiement Stripe en prod.
 5. `v0.19.0-moderation-migration.sql` — étend `reports` + tables `moderation_actions` & `peer_reviews` + colonnes `moderation_state`/`reports_count` sur `articles`/`clips` + RPCs `submit_report`/`submit_peer_review`/`mod_apply_action`/`get_moderation_queue`/`get_peer_review_queue`/`get_user_moderation_summary`. Tant que la migration n'est pas appliquée, le frontend retombe sur l'INSERT direct dans `reports` (compat v0.18 préservée). (✅ appliquée 2026-05-19)
 6. `v0.19.1-moderation-notifs.sql` — étend `notifications.type` avec `content_hidden`/`content_restored` + trigger `notify_on_moderation_change` sur articles et clips. Sans cette migration, les notifs de masquage ne se déclencheront pas (mais aucune erreur côté front).
+7. `v0.20.0-stats-migration.sql` — RPCs publiques `get_public_stats()` + `get_public_top_contributors()` pour la page `/stats`. Sans cette migration, la page affiche "Migration non appliquée" au lieu de crasher.
 
 Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
 
