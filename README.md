@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.25.0** — Éditeur de clips refondu : layout 2-col avec preview format téléphone vertical 9:16 (toggle 16:9) avec overlay live hook + sous-titre + durée. 8 templates de hook prêts à l'emploi, suggestions de hashtags par thème, mode bulk paste pour générer N sous-titres équidistants, indicateur multi-plateforme TikTok/Twitter/Instagram en temps réel.
 - **v0.24.0** — Liste d'attente pré-lancement : table `waitlist` + RPC publique `submit_waitlist()` (idempotente) + modale form accessible depuis la home et la page À propos. 2 kinds : `launch` (notification jour J) ou `beta` (rejoindre les beta-testeurs actifs).
 - **v0.23.3** — Auto-link sources `[N]` : les références numériques dans le corps d'article deviennent des liens cliquables qui smooth-scroll vers la source citée, avec flash visuel.
 - **v0.23.2** — Reprise de lecture : la position de scroll est mémorisée par article dans localStorage. À la réouverture, banner "Reprendre à X %" avec choix Reprendre / Recommencer. Cleanup auto 30j + max 100 entrées.
@@ -125,4 +126,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.24.0
+© Avis Basé · Beta · v0.25.0

@@ -85,6 +85,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.23.2** | 🔖 Reprise de lecture | Mémorisation de la position de scroll par article dans localStorage (debounced, cleanup 30j, max 100 entrées). Banner discret "Reprendre à X %" à la réouverture avec choix Reprendre / Recommencer | ✅ Livré |
 | **v0.23.3** | 🔗 Auto-link sources `[N]` | Les références numériques `[1]`, `[2]` dans le corps d'article deviennent des liens cliquables qui smooth-scroll vers la source citée correspondante, avec flash visuel sur la cible | ✅ Livré |
 | **v0.24.0** | 📬 Liste d'attente pré-lancement | Table `waitlist` (email unique, kind beta/launch, source) + RPC `submit_waitlist()` (idempotente, validation email) + vue admin `waitlist_summary`. Modale frontend accessible depuis la home app-cta + page /a-propos. Form simple : email + nom optionnel + choix beta-tester / notification lancement | ✅ Livré |
+| **v0.25.0** | ✂️ Éditeur de clips refondu | Layout 2-col avec preview type téléphone 9:16 (toggle 16:9), overlay live hook + 1er sous-titre + durée, 8 templates de hook prêts à l'emploi, suggestions de hashtags selon thème de l'article, mode bulk paste pour les sous-titres (auto-découpe équitable), indicateur multi-plateforme TikTok/Twitter/Instagram en temps réel | ✅ Livré |
 | **v0.23.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -727,6 +728,55 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## ✂️ v0.25.0 — Éditeur de clips refondu ✅
+
+> **Livré le 2026-05-19.** L'éditeur de clips était fonctionnel mais abstrait. Refonte UI/UX pour le rendre concret : on voit ce qu'on fabrique, on a des modèles, on peut bosser vite.
+
+**Livré (4 phases) :**
+
+### Phase 1 — Layout + preview agrandi format mobile
+- Grid 2 colonnes : preview à gauche (sticky desktop), form à droite
+- Preview façon téléphone vertical avec frame stylisée (gradient noir, border-radius)
+- **Toggle 9:16 (TikTok/Reels) ↔ 16:9 (paysage)** avec animation
+- Overlay live sur le preview : hook en haut, 1er sous-titre au milieu, footer `@avis_base.nth · 15s` en bas
+- Placeholder élégant tant que les timestamps ne sont pas renseignés
+- Mobile : stack vertical, preview plus petite
+
+### Phase 2 — Templates de hook + suggestions hashtags
+- Bouton `✨ Templates` à côté du label du hook ouvre un panneau de 8 modèles cliquables :
+  - "🤯 Le saviez-vous ? {sujet}"
+  - "🚨 Ce qu'on ne te dit pas sur {sujet}"
+  - "📊 N % des gens ignorent que…"
+  - etc.
+- Au clic, le hook est rempli ET le `{placeholder}` est auto-sélectionné pour qu'on l'écrase direct
+- Hashtags suggérés sous forme de chips dashed : 2 base (`avisbase`, `sourcer`) + ~4 spécifiques au thème de l'article (politique → `politique #actu #democratie #france`, sciences → `sciences #recherche #decouverte #tech`, etc.)
+- Click sur un chip de suggestion → ajout dans la liste + retrait de la suggestion
+
+### Phase 3 — Sous-titres workflow simplifié
+- Toggle `Timeline / Collage rapide` à côté du label sous-titres
+- Mode **Timeline** : workflow existant (timestamp début + fin + texte par ligne)
+- Mode **Collage rapide** : grand textarea où on colle son texte ligne par ligne, bouton "Appliquer les sous-titres" qui auto-découpe en N segments équidistants sur la durée du clip
+- Hint live : `4 lignes · ~3.8s chacune`
+- Switch automatique en mode Timeline après application pour permettre des ajustements
+
+### Phase 4 — Indicateur multi-plateforme du hook
+- Sous le compteur de caractères : trois pills colorés `TikTok 100 ✓ · Twitter 240 ✓ · Instagram 125 ✓` avec couleurs vert/orange/rouge selon distance à l'optimum
+- Hint de durée contextuel sous les timestamps : `✓ Excellente durée pour TikTok / Reels / Twitter (15-60 s)`, `⚠️ Format long`, etc.
+
+### ✅ Critères de validation
+- [x] Ouvrir un clip à proposer : preview type mobile visible à gauche
+- [x] Bouger les timestamps → le preview se met à jour live + overlay
+- [x] Taper le hook → l'overlay affiche le hook + pills plateformes se colorent selon longueur
+- [x] Cliquer "Templates" → 8 modèles cliquables
+- [x] Coller un texte en mode bulk + Appliquer → N sous-titres équirépartis
+- [x] Hashtags suggérés varient selon le thème de l'article parent
+- [x] Toggle 9:16 / 16:9 fonctionne
+
+### Note
+Pas de migration SQL pour cette version. La table `clips` reste inchangée — c'est uniquement une refonte de l'UI d'édition.
 
 ---
 
