@@ -74,6 +74,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.17.1** | UX | Banner CTA Avis Basé+ dismissible sur la home | ✅ Livré |
 | **v0.18.0** | 🛡️ Trust & Identity | Phase 1 : compte renforcé (captcha + charte + email confirm + 8 chars + restriction écriture 7j). Phase 2 : certification rémunérable (4 critères + roadmap + lock virement). Phase 3 : crédibilité enrichie (badges multiples + breakdown public + historique) | ✅ Livré (3/3 phases) |
 | **v0.19.0** | 🛡️ Modération | Signalement enrichi (8 raisons + sévérité), masquage auto (seuil 3 distincts ou 1 priorité haute), peer review communautaire (quorum 3 votes, score ≥50), dashboard mod (score ≥75 OU admin), journal d'actions | ✅ Livré |
+| **v0.19.1** | 🛡️ Modération (suite) | Notifications auteur quand son contenu est masqué/restauré (trigger DB + 2 nouveaux types de notif) + Charte de modération publique (modal accessible depuis footer + signalement) | ✅ Livré |
 | **v0.20.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -716,6 +717,35 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 🛡️ v0.19.1 — Notifs masquage + charte de modération publique ✅
+
+> **Livré le 2026-05-19.** Phase 2 du chantier modération : rendre transparent ce qui s'est passé en v0.19.0 et notifier les auteurs concernés.
+
+**Livré :**
+
+### SQL (`v0.19.1-moderation-notifs.sql`)
+- Étend le CHECK sur `notifications.type` avec 2 nouveaux types : `content_hidden` et `content_restored`
+- Fonction `notify_on_moderation_change()` + triggers AFTER UPDATE OF `moderation_state` sur `articles` et `clips`
+- Transitions gérées :
+  - `visible|reviewed_ok → hidden_auto|hidden_mod` → notif `content_hidden`
+  - `hidden_auto|hidden_mod → visible|reviewed_ok` → notif `content_restored`
+
+### Frontend (`index.html`)
+- Module `Notif` étendu : libellés pour les 2 nouveaux types (titre article/clip + statut), avatars système colorés (rouge pour hidden, vert pour restored)
+- Navigation au clic : ouvre l'article concerné, ou l'article parent du clip
+- Bonus : navigation `profile` (notifs follow) qui était cassée
+- Nouvelle modale **Charte de modération** publique (`#charte-moderation`) avec 8 sections : principe, signalement, masquage auto, peer review, action mod, conséquences crédibilité, recours, droit à l'oubli
+- Liens d'accès : footer (à côté de "Charte éditoriale"), bas de la modale de signalement, lien depuis la charte éditoriale, support du hash `#charte-moderation` pour deep-link
+
+### ✅ Critères de validation
+- [x] Quand un article passe à `hidden_auto` ou `hidden_mod`, une notif `content_hidden` apparaît à l'auteur
+- [x] Quand l'article repasse à `visible` ou `reviewed_ok`, une notif `content_restored` apparaît
+- [x] Le clic sur la notif ouvre l'article concerné
+- [x] La charte de modération est accessible depuis le footer et depuis la modale de signalement
+- [x] La modale gère le hash `#charte-moderation` pour un partage de lien direct
 
 ---
 

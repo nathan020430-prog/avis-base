@@ -6243,7 +6243,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.84-.1z"/></svg>
         @avis_base.nth
       </a>
-      <p class="footer__version">© <span id="yr"></span> · Beta · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a></p>
+      <p class="footer__version">© <span id="yr"></span> · Beta · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a> · <a class="footer__charter-link" id="footerModerationCharterLink" href="#charte-moderation">Charte de modération</a></p>
     </div>
   </div>
 </footer>
@@ -6885,7 +6885,71 @@ body.is-mobile .notif-bell{width:32px;height:32px}
       <li>Contenu illégal ou portant atteinte à autrui</li>
     </ul>
 
-    <p class="charter-modal__footer">Tu peux signaler tout contenu qui ne respecte pas cette charte via le bouton ⚠️ Signaler.</p>
+    <p class="charter-modal__footer">Tu peux signaler tout contenu qui ne respecte pas cette charte via le bouton ⚠️ Signaler. Pour le détail du processus de modération, voir la <a id="charterLinkToModeration" href="#" style="color:var(--accent);font-weight:600">charte de modération</a>.</p>
+  </div>
+</div>
+
+<!-- v0.19.1 — Charte de modération publique -->
+<div class="v8-backdrop" id="moderationCharterBackdrop" style="display:none">
+  <div class="v8-modal charter-modal" role="dialog" aria-modal="true">
+    <button class="v8-modal__close" id="moderationCharterClose" aria-label="Fermer">×</button>
+    <h2>Charte de modération</h2>
+    <p class="charter-modal__lead">Comment Avis Basé modère ses contenus, dans la transparence et sans algorithme caché.</p>
+
+    <h3>🛡️ Notre principe</h3>
+    <p>La modération est <strong>communautaire et transparente</strong>. Tout le monde peut signaler un contenu. Les contributeurs de confiance peuvent voter pour décider si un signalement est valide. Les modérateurs interviennent quand nécessaire, et leurs actions sont journalisées.</p>
+
+    <h3>🚩 Comment signaler un contenu</h3>
+    <p>Sur chaque article, clip ou commentaire, le bouton <strong>⚠️ Signaler</strong> ouvre une fenêtre avec 8 raisons standardisées, regroupées en 3 catégories :</p>
+    <ul class="charter-modal__list">
+      <li><strong>Éditorial</strong> — Désinformation / fait erroné · Source manquante ou douteuse · Hors-sujet</li>
+      <li><strong>Comportement</strong> — Spam / pub déguisée · Harcèlement (priorité haute) · Contenu illégal (priorité haute)</li>
+      <li><strong>Droits</strong> — Atteinte au droit d'auteur · Autre</li>
+    </ul>
+    <p>Ton signalement est <strong>anonyme</strong> vis-à-vis des autres utilisateurs. Tu peux le répéter en cas d'oubli — la plateforme déduplique automatiquement.</p>
+
+    <h3>⚙️ Masquage automatique</h3>
+    <p>Un contenu est automatiquement <strong>masqué le temps d'une revue</strong> dès que :</p>
+    <ul class="charter-modal__list">
+      <li>3 utilisateurs distincts l'ont signalé pour n'importe quelle raison, OU</li>
+      <li>1 utilisateur l'a signalé avec une raison de priorité haute (harcèlement / contenu illégal).</li>
+    </ul>
+    <p>Le contenu masqué reste visible pour son auteur (qui peut le modifier) et pour les modérateurs. Le public ne le voit plus tant que la revue n'a pas abouti.</p>
+
+    <h3>🤝 Peer review communautaire</h3>
+    <p>Les utilisateurs avec un <strong>score de Basitude ≥ 50</strong> peuvent voter sur les signalements en attente, dans l'onglet « Aider la modération ». Le système exclut :</p>
+    <ul class="charter-modal__list">
+      <li>L'auteur du signalement (ne peut pas voter sur son propre signalement)</li>
+      <li>L'auteur du contenu signalé (ne peut pas s'auto-blanchir)</li>
+    </ul>
+    <p>Les votes possibles sont : <strong>Valide</strong> (le signalement est légitime), <strong>Pas un problème</strong> (le signalement est invalide), <strong>Passer</strong> (je ne me prononce pas).</p>
+    <p>Dès qu'un signalement atteint <strong>3 votes « valide »</strong>, le contenu est masqué définitivement par la communauté. À <strong>3 votes « pas un problème »</strong>, le signalement est classé sans suite et le contenu, s'il avait été masqué automatiquement, redevient public.</p>
+
+    <h3>👮 Action manuelle des modérateurs</h3>
+    <p>Les comptes admin et les utilisateurs avec un <strong>score ≥ 75</strong> accèdent à un dashboard de modération qui leur permet d'agir directement, sans attendre la peer review. Les 4 actions possibles sont :</p>
+    <ul class="charter-modal__list">
+      <li><strong>Masquer</strong> — retire le contenu du feed public</li>
+      <li><strong>Rendre visible</strong> — restaure un contenu masqué</li>
+      <li><strong>Valider les signalements</strong> — entérine les signalements, applique une pénalité de crédibilité à l'auteur</li>
+      <li><strong>Classer sans suite</strong> — rejette les signalements sans pénalité</li>
+    </ul>
+    <p>Chaque action est <strong>journalisée</strong> dans une table dédiée, avec auteur, date et raison. Ce journal est consultable par tous les modérateurs.</p>
+
+    <h3>📊 Conséquences sur la crédibilité</h3>
+    <p>Quand un contenu est validé comme problématique (par la peer review ou un modérateur), un point de pénalité est ajouté au compteur <em>« signalements validés »</em> de son auteur. Ce compteur compte pour <strong>−5 points bruts</strong> dans le calcul du score de Basitude. La pénalité est visible publiquement dans le breakdown « D'où vient ce score ? » sur le profil.</p>
+
+    <h3>🔁 Recours</h3>
+    <p>Si tu estimes qu'un masquage de ton contenu est injustifié :</p>
+    <ul class="charter-modal__list">
+      <li>Modifie ton article pour corriger ce qui était reproché (sources manquantes, ton, etc.), puis demande une nouvelle revue par un modérateur.</li>
+      <li>Contacte l'équipe à <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a> si tu juges la décision arbitraire.</li>
+    </ul>
+    <p>Notre objectif n'est pas de punir mais de fiabiliser. La crédibilité se construit dans la durée — un masquage isolé ne casse pas un parcours sourcé.</p>
+
+    <h3>🗑️ Droit à l'oubli</h3>
+    <p>Tu peux à tout moment supprimer un contenu que tu as publié, ou demander la suppression complète de ton compte via la page <a href="#suppression-compte" style="color:var(--accent)">Suppression du compte</a>. Les signalements liés à un contenu supprimé sont également effacés (cascade).</p>
+
+    <p class="charter-modal__footer">Cette charte évolue avec la communauté. Pour proposer une modification, ouvre une issue sur le <a href="https://github.com/nathan020430-prog/avis-base" target="_blank" rel="noopener" style="color:var(--accent)">GitHub public</a> ou écris à <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a>.</p>
   </div>
 </div>
 
@@ -6963,7 +7027,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 
     <textarea id="reportContentDetails" placeholder="Précisions (optionnel, 500 max)" maxlength="500"></textarea>
 
-    <p class="report-content-modal__note">À partir de 3 signalements distincts, ou 1 signalement de priorité haute, le contenu est masqué automatiquement le temps d'une revue.</p>
+    <p class="report-content-modal__note">À partir de 3 signalements distincts, ou 1 signalement de priorité haute, le contenu est masqué automatiquement le temps d'une revue. <a href="#charte-moderation" id="reportContentCharterLink" style="color:var(--accent);font-weight:600">Voir la charte de modération →</a></p>
 
     <div class="report-content-modal__actions">
       <button class="btn btn--ghost" id="reportContentCancel">Annuler</button>
@@ -11308,6 +11372,21 @@ function closeCharterModal() {
   document.body.style.overflow = '';
 }
 
+// v0.19.1 — Charte de modération
+function openModerationCharter() {
+  const bd = document.getElementById('moderationCharterBackdrop');
+  if (!bd) return;
+  bd.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeModerationCharter() {
+  const bd = document.getElementById('moderationCharterBackdrop');
+  if (!bd) return;
+  bd.style.display = 'none';
+  document.body.style.overflow = '';
+}
+window.openModerationCharter = openModerationCharter;
+
 // ─── Éditeur de profil ──────────────────────────────────────
 function openProfileEditor() {
   if (!currentUser || !currentProfile) { openAuthModal('login'); return; }
@@ -11843,6 +11922,15 @@ const Notif = {
         return `Ton article ${preview} a été publié 🎉`;
       case 'follow':
         return `${a} te suit`;
+      // v0.19.1 — Notifs de modération
+      case 'content_hidden':
+        if (n.target_type === 'article') return `Ton article ${preview} a été masqué le temps d'une revue de modération.`;
+        if (n.target_type === 'clip')    return `Ton clip ${preview} a été masqué le temps d'une revue de modération.`;
+        return `Ton contenu ${preview} a été masqué le temps d'une revue.`;
+      case 'content_restored':
+        if (n.target_type === 'article') return `Ton article ${preview} est de nouveau visible. ✅`;
+        if (n.target_type === 'clip')    return `Ton clip ${preview} est de nouveau visible. ✅`;
+        return `Ton contenu ${preview} est de nouveau visible.`;
       default:
         return `${a} a interagi avec ton contenu`;
     }
@@ -11851,6 +11939,13 @@ const Notif = {
   avatarHtml(n) {
     if (n.type === 'article_validated') {
       return '<div class="notif-item__avatar notif-item__avatar--system" aria-hidden="true">✓</div>';
+    }
+    // v0.19.1 — Avatar système pour les notifs de modération
+    if (n.type === 'content_hidden') {
+      return '<div class="notif-item__avatar notif-item__avatar--system" style="background:#FBF1ED;color:#7A2D1A;border:1px solid #E5B8A8" aria-hidden="true">⚠</div>';
+    }
+    if (n.type === 'content_restored') {
+      return '<div class="notif-item__avatar notif-item__avatar--system" style="background:#E0F0E5;color:#1F4025;border:1px solid #5C8A6E" aria-hidden="true">✓</div>';
     }
     const u = n.actor;
     if (u?.avatar_url) {
@@ -11938,9 +12033,19 @@ const Notif = {
       }
       targetArticleId = data.article_id;
     } else if (n.target_type === 'clip') {
-      // v0.10.0 : pas encore de notif clip, mais prêt pour futur
-      targetArticleId = null;
-      showToast('Clip introuvable', true);
+      // v0.19.1 — Ouvre l'article parent du clip (pas de page clip standalone)
+      const clip = clips.find(c => c.id === n.target_id);
+      if (clip && clip.articleId) {
+        targetArticleId = clip.articleId;
+      } else {
+        showToast('Clip introuvable', true);
+        return;
+      }
+    } else if (n.target_type === 'profile') {
+      // v0.10.0 — notif "follow" cible un profil
+      if (typeof openPublicProfile === 'function' && n.target_id) {
+        openPublicProfile(n.target_id);
+      }
       return;
     }
 
@@ -12247,6 +12352,25 @@ function bindV09Handlers() {
     openCharterModal();
   });
 
+  // v0.19.1 — Charte de modération
+  document.getElementById('moderationCharterClose')?.addEventListener('click', closeModerationCharter);
+  document.getElementById('moderationCharterBackdrop')?.addEventListener('click', e => {
+    if (e.target.id === 'moderationCharterBackdrop') closeModerationCharter();
+  });
+  document.getElementById('charterLinkToModeration')?.addEventListener('click', e => {
+    e.preventDefault();
+    closeCharterModal();
+    openModerationCharter();
+  });
+  document.getElementById('footerModerationCharterLink')?.addEventListener('click', e => {
+    e.preventDefault();
+    openModerationCharter();
+  });
+  document.getElementById('reportContentCharterLink')?.addEventListener('click', e => {
+    e.preventDefault();
+    openModerationCharter();
+  });
+
   // Profile editor
   document.getElementById('profileEditClose')?.addEventListener('click', closeProfileEditor);
   document.getElementById('profileEditCancel')?.addEventListener('click', closeProfileEditor);
@@ -12312,7 +12436,7 @@ function bindV09Handlers() {
   // Esc to close v0.9.0 modals
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    ['profileEditBackdrop','favoritesBackdrop','reportContentBackdrop','charterModalBackdrop'].forEach(id => {
+    ['profileEditBackdrop','favoritesBackdrop','reportContentBackdrop','charterModalBackdrop','moderationCharterBackdrop'].forEach(id => {
       const el = document.getElementById(id);
       if (el && el.style.display === 'flex') el.style.display = 'none';
     });
@@ -14441,8 +14565,13 @@ async function init() {
     else if (h === '#devenir-membre') switchView('membre');
     else if (h === '#mon-financement') switchView('mon-financement');
     else if (h === '#archive') switchView('archive');
+    else if (h === '#charte-moderation') { if (typeof openModerationCharter === 'function') openModerationCharter(); }
     else if (!h.startsWith('#article/')) switchView('articles');
   });
+  // v0.19.1 — Hash initial : ouvrir directement la charte de modération
+  if (window.location.hash === '#charte-moderation') {
+    if (typeof openModerationCharter === 'function') openModerationCharter();
+  }
 
   if (isAdmin()) {
     await loadSubmissions();

@@ -6,6 +6,15 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.19.1] — Notifs modération + charte publique
+- 2 nouveaux types de notif : `content_hidden` (ton article/clip a été masqué) et `content_restored` (de nouveau visible)
+- Trigger PG `notify_on_moderation_change` sur `articles` et `clips` qui détecte les transitions `moderation_state` et insère la notif à l'auteur
+- Module `Notif` côté frontend : libellés français + avatars système colorés + navigation au clic vers l'article/clip parent
+- Bonus : navigation `target_type='profile'` fixée pour les notifs follow
+- Nouvelle modale **Charte de modération** publique (8 sections : principe, signalement, masquage auto, peer review, action mod, conséquences crédibilité, recours, droit à l'oubli)
+- Liens d'accès à la charte : footer (à côté de "Charte éditoriale"), bas de la modale de signalement, depuis la charte éditoriale, hash deep-link `#charte-moderation`
+- SQL : `v0.19.1-moderation-notifs.sql` (idempotente, ASCII pur). À appliquer **après** `v0.19.0-moderation-migration.sql`. Sans elle, aucune erreur frontend mais les notifs de masquage ne se déclencheront pas.
+
 ## [v0.19.0] — Modération avancée + peer review
 - Signalement enrichi : 8 raisons standardisées (désinformation, source douteuse, hors-sujet, spam, harcèlement, contenu illégal, droit d'auteur, autre) avec marquage automatique de sévérité (low/normal/high)
 - Masquage automatique des contenus problématiques : seuil 3 signalements distincts OU 1 signalement de priorité haute (`hidden_auto`)
