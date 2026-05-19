@@ -58,6 +58,7 @@ Le code est mergé mais les migrations doivent être exécutées manuellement da
 9. `v0.24.0-waitlist-migration.sql` — table `waitlist` + RPC `submit_waitlist()` + vue `waitlist_summary`. Permet de collecter les emails pré-lancement. Sans elle, le form affiche "Migration non appliquée" au lieu de crasher.
 10. `v0.25.1-clip-publications-migration.sql` — table `clip_publications` (multi-plateforme) + trigger sync `clips.status` + vue `clip_publications_by_clip` + backfill TikTok. Sans elle, la modale de publication retombe sur l'ancien comportement (`clips.published_tiktok_url`) avec toast d'info.
 11. `v0.26.1-public-finance-stats-migration.sql` — RPCs publiques `get_public_finance_summary()` + `get_public_finance_history(n)` pour la section "Transparence financière" sur `/stats`. Sans elle, la section est masquée silencieusement.
+12. `v0.26.4-fix-stats-rpc.sql` — **HOTFIX** : la RPC `get_public_stats()` (v0.20.0) plantait en prod (`column reports.validated does not exist`) → page `/stats` cassée. Cette migration recrée la RPC avec un handler `undefined_column` qui retombe gracieusement sur "tous les `resolved` comptent" si la colonne manque. À appliquer après v0.26.1.
 
 Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
 
