@@ -77,6 +77,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.19.1** | 🛡️ Modération (suite) | Notifications auteur quand son contenu est masqué/restauré (trigger DB + 2 nouveaux types de notif) + Charte de modération publique (modal accessible depuis footer + signalement) | ✅ Livré |
 | **v0.20.0** | 🪟 Transparence & Identité | Page **/a-propos** (manifeste, différenciateurs, équipe, liens) + Page **/stats** publiques (compteurs articles/contributeurs/sources/commentaires/basitude moyenne + stats modération + top contributeurs) + RPCs `get_public_stats()` / `get_public_top_contributors()` | ✅ Livré |
 | **v0.21.0** | 🧹 Polish pre-launch | Modération clips (UI hide/unhide dans dashboard) + Audit OG/Twitter Cards (NewsArticle JSON-LD + article:* meta) + Onboarding nouveau user (tour guidé 5 étapes + suggestions à suivre) + Audit perf (preconnect, dns-prefetch, defer Supabase JS) | ✅ Livré |
+| **v0.21.1** | 🪟 Polish RGPD | Bandeau cookies informatif (sticky-bottom dismissible, lien vers /confidentialite.html) + Page Changelog publique (modale `#changelog` reliée depuis footer + /a-propos) | ✅ Livré |
 | **v0.22.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -719,6 +720,27 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 🪟 v0.21.1 — RGPD + Changelog public ✅
+
+> **Livré le 2026-05-19.** Coche les 2 dernières cases pré-lancement de la liste v1.0.0 : bandeau RGPD informatif + page changelog publique.
+
+**Livré :**
+- Bandeau cookies / RGPD sticky-bottom (informatif, pas d'opt-in puisque seuls des cookies fonctionnels sont posés). Persistance via `localStorage.avb_rgpd_ack_v1`. Lien vers `/confidentialite.html`.
+- Modale `#changelog` avec les 9 dernières releases (v0.10–v0.21.1), structurée par version avec date + tag (Feature / Polish / Fix / Bundle) + bullet points. Liens internes vers À propos, Stats, Charte modération, Financement.
+- Footer enrichi : `À propos · Stats publiques · Changelog · Charte éditoriale · Charte de modération`
+- Lien depuis /a-propos : « Changelog public en un clic » + « version complète sur GitHub »
+- Hash deep-link `#changelog` supporté
+- Esc + clic backdrop ferment la modale
+
+### ✅ Critères de validation
+- [x] Le bandeau cookies apparaît au premier passage et disparaît après "J'ai compris"
+- [x] Le flag reste en localStorage : pas de réapparition à la navigation suivante
+- [x] La modale changelog s'ouvre depuis le footer
+- [x] Le hash `#changelog` ouvre la modale au chargement
+- [x] Les liens internes (vers À propos, Stats, etc.) ferment la modale et ouvrent la cible
 
 ---
 

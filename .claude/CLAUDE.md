@@ -13,7 +13,7 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.21.0 (Polish pre-launch : mod clips + SEO + onboarding + perf) — 2026-05-19
+## Version actuelle — v0.21.1 (Polish RGPD + Changelog public) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
@@ -22,11 +22,11 @@
 - v0.19.0 → Modération avancée (signalement enrichi + masquage auto + peer review + dashboard mod)
 - v0.19.1 → Notifs auteur + charte de modération publique
 - v0.20.0 → Transparence & Identité (/a-propos + /stats + RPCs publiques)
-- **v0.21.0 → Polish pre-launch** :
-  - Modération clips dans le dashboard mod (ouverture article parent / commentaire)
-  - Audit SEO : `setArticleMeta` enrichi (article:* meta + NewsArticle JSON-LD avec sources citées)
-  - Onboarding nouveau user : tour guidé 5 étapes (concept, Basitude, mobile/desktop, modération, suggestions follow) déclenché au 1er login (flag localStorage)
-  - Audit perf : preconnect Supabase + CDN, dns-prefetch YouTube + Cloudflare, `defer` sur Supabase JS, meta `color-scheme` + `format-detection`
+- v0.21.0 → Polish pre-launch (mod clips dashboard + SEO JSON-LD + onboarding + perf preconnect)
+- **v0.21.1 → Polish RGPD + Changelog public** :
+  - Bandeau cookies informatif sticky-bottom (dismissible, lien vers /confidentialite.html)
+  - Modale Changelog publique (#changelog) avec les 9 dernières releases (v0.10 → v0.21.1), tags Feature/Polish/Fix
+  - Footer 5 liens : À propos · Stats · Changelog · Charte éditoriale · Charte de modération
 
 Tags sur origin : `v0.16.0-prep`, `v0.16.1`, `v0.17.0`, `v0.17.0-ui-and-sql`, `v0.18.0`
 

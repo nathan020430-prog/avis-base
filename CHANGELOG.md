@@ -6,6 +6,13 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.21.1] — Polish RGPD + Changelog public
+- Bandeau cookies/RGPD informatif sticky-bottom : explique qu'on utilise des cookies fonctionnels (auth Supabase) + localStorage pour le thème, l'onboarding et les brouillons, sans tracker publicitaire. Persistance via `localStorage.avb_rgpd_ack_v1`. Lien vers `/confidentialite.html`.
+- Nouvelle modale **Changelog public** (hash `#changelog`) avec les 9 dernières releases v0.10 → v0.21.1, structurées par version + date + tag (Feature / Polish / Fix / Bundle). Liens internes vers À propos / Stats / Charte de modération / Financement.
+- Footer enrichi à 5 liens : `À propos · Stats publiques · Changelog · Charte éditoriale · Charte de modération`.
+- Lien depuis /a-propos vers le Changelog en un clic (alternative au lien GitHub déjà présent).
+- Esc et clic backdrop ferment la modale changelog.
+
 ## [v0.21.0] — Polish pre-launch
 - **Modération clips dans le dashboard mod** : la file mod affiche maintenant un bouton "👁 Voir article parent" pour les clips et "👁 Voir l'article" pour les commentaires (avec scroll + highlight). Les actions hide/unhide/dismiss/resolve fonctionnaient déjà côté RPC, c'est l'UI qui n'était branchée que pour les articles.
 - **Audit SEO** :
