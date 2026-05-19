@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="theme-color" content="#FAFAF7" id="themeMeta" media="(prefers-color-scheme: light)"/>
 <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)"/>
+<meta name="color-scheme" content="light dark"/>
+<meta name="format-detection" content="telephone=no"/>
 <title>Avis Basé — Le média collaboratif qui source tout</title>
 <meta name="description" id="metaDescription" content="Média collaboratif qui vérifie et source l'actualité. Articles écrits par la communauté, sources citées sur TikTok @avis_base.nth."/>
 <meta name="author" content="Avis Basé — Communauté"/>
@@ -56,9 +58,17 @@
 {"@context":"https://schema.org","@type":"NewsMediaOrganization","name":"Avis Basé","url":"https://avis-base.com/","logo":"https://avis-base.com/logo.png","description":"Média collaboratif qui vérifie et source l'actualité","sameAs":["https://www.tiktok.com/@avis_base.nth"]}
 </script>
 
+<!-- v0.21.0 — Preconnect + dns-prefetch des origines critiques (perf TTFB) -->
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preconnect" href="https://panjgsqwitwduxckgbbq.supabase.co" crossorigin/>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<link rel="dns-prefetch" href="https://i.ytimg.com"/>
+<link rel="dns-prefetch" href="https://www.youtube.com"/>
+<link rel="dns-prefetch" href="https://challenges.cloudflare.com"/>
+
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,500;1,9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<!-- Supabase JS doit etre charge AVANT l'inline script qui fait window.supabase.createClient() en body. Pas de defer. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Chart.js v4 — utilisé par la page /financement (camembert + ligne historique) -->
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
@@ -5288,6 +5298,167 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   .fin-top__item{grid-template-columns:32px 1fr 80px;gap:10px}
   .fin-top__share{grid-column:2/-1;text-align:left;color:var(--accent);font-size:14px}
 }
+
+/* ───────────────────────────────────────────────────────────────
+   v0.19.0 — Modération avancée : signalement enrichi, badges
+                                  contenu masqué, dashboard mod
+─────────────────────────────────────────────────────────────── */
+
+/* Modale signalement enrichie */
+.report-content-modal__lead{font-family:var(--fb);font-size:13.5px;color:var(--ink-muted);line-height:1.55;margin:0 0 14px}
+.report-content-modal__reasons{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.report-content-modal__group-label{font-family:var(--fb);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-light);margin-top:10px;margin-bottom:2px}
+.report-content-modal__group-label:first-child{margin-top:0}
+.report-content-modal__reasons label{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--rule);background:var(--surface);cursor:pointer;font-family:var(--fb);font-size:13.5px;color:var(--ink);transition:background .15s ease,border-color .15s ease;border-radius:3px}
+.report-content-modal__reasons label:hover{background:var(--paper-2,rgba(0,0,0,.03));border-color:var(--ink-light)}
+.report-content-modal__reasons label input{accent-color:var(--accent);width:14px;height:14px;flex-shrink:0;margin:0}
+.report-content-modal__reasons label span:first-of-type{flex:1}
+.report-content-modal__reason--high{border-color:#E5B8A8 !important;background:#FBF1ED}
+[data-theme="dark"] .report-content-modal__reason--high{background:#3A2017;border-color:#7A3F2D !important}
+.report-content-modal__severity{font-family:var(--fb);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:2px;background:#B83A2D;color:#FDFAF3;flex-shrink:0}
+.report-content-modal__note{font-family:var(--fb);font-size:11.5px;color:var(--ink-muted);font-style:italic;line-height:1.5;margin:10px 0 14px;padding:9px 12px;background:var(--paper-2,rgba(0,0,0,.02));border-left:2px solid var(--ink-light)}
+.report-content-modal__actions{display:flex;gap:10px;justify-content:flex-end}
+#reportContentDetails{width:100%;padding:10px 12px;border:1px solid var(--rule);background:var(--surface);font-family:var(--fb);font-size:13.5px;color:var(--ink);resize:vertical;min-height:70px;border-radius:3px;line-height:1.5;box-sizing:border-box}
+#reportContentDetails:focus{outline:none;border-color:var(--accent)}
+
+/* Badge "Contenu masqué" sur les cartes article/clip (visible auteur + mods) */
+.mod-flag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#FBF1ED;border:1px solid #E5B8A8;color:#7A2D1A;font-family:var(--fb);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;border-radius:2px}
+.mod-flag--auto{background:#FFF4D8;border-color:#E0B65A;color:#7A5800}
+.mod-flag--mod{background:#FBF1ED;border-color:#E5B8A8;color:#7A2D1A}
+.mod-flag--ok{background:#E0F0E5;border-color:#5C8A6E;color:#1F4025}
+[data-theme="dark"] .mod-flag--auto{background:#3D2E12;border-color:#7A5A24;color:#F5D58C}
+[data-theme="dark"] .mod-flag--mod{background:#3A2017;border-color:#7A3F2D;color:#F5A3A3}
+[data-theme="dark"] .mod-flag--ok{background:#1F4025;border-color:#5C8A6E;color:#9DD4A8}
+.mod-flag__icon{font-size:13px;line-height:1}
+
+/* Carte article/clip masquée (vu par l'auteur) */
+.card--moderated{position:relative;opacity:.65;outline:2px dashed #E5B8A8;outline-offset:-2px}
+.card--moderated::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent 0 9px,rgba(184,58,45,.03) 9px 11px);pointer-events:none;z-index:1}
+
+/* Page /moderation (dashboard mod) — déjà à l'intérieur d'un .modal__body, donc pas de padding extra */
+.mod-page{max-width:980px;margin:0 auto;padding:4px 0 24px}
+.mod-page__hero{padding-bottom:20px;border-bottom:1px solid var(--rule);margin-bottom:22px}
+.mod-page__title{font-family:var(--ff);font-weight:600;font-size:32px;color:var(--ink);margin:0 0 6px;letter-spacing:-.01em}
+.mod-page__lead{font-family:var(--fb);font-size:14px;color:var(--ink-muted);line-height:1.55;margin:0;max-width:640px}
+.mod-tabs-row{display:flex;gap:0;border-bottom:1px solid var(--rule);margin-bottom:22px;overflow-x:auto}
+.mod-tab-pill{padding:11px 16px;border:none;background:none;font-family:var(--fb);font-size:13px;font-weight:500;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;letter-spacing:.01em}
+.mod-tab-pill:hover{color:var(--ink)}
+.mod-tab-pill--active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.mod-tab-pill .count{display:inline-block;margin-left:6px;padding:1px 7px;background:var(--accent);color:#FDFAF3;font-family:var(--fb);font-size:10.5px;font-weight:600;border-radius:999px;line-height:1.4}
+.mod-tab-pill--active .count{background:var(--ink)}
+
+.mod-queue{display:flex;flex-direction:column;gap:14px}
+.mod-queue-item{padding:18px;border:1px solid var(--rule);background:var(--surface);border-radius:3px;display:flex;flex-direction:column;gap:12px;transition:border-color .15s}
+.mod-queue-item:hover{border-color:var(--ink-light)}
+.mod-queue-item--high{border-left:3px solid #B83A2D}
+.mod-queue-item__head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--fb);font-size:12px;color:var(--ink-muted)}
+.mod-queue-item__type{font-family:var(--fb);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;background:var(--accent-soft);color:var(--accent);border-radius:2px}
+.mod-queue-item__preview{font-family:var(--ff);font-size:15.5px;color:var(--ink);line-height:1.5;margin:0;font-weight:500}
+.mod-queue-item__author{font-family:var(--fb);font-size:12px;color:var(--ink-muted)}
+.mod-queue-item__reasons{display:flex;flex-wrap:wrap;gap:6px}
+.mod-queue-item__reason-tag{font-family:var(--fb);font-size:10.5px;font-weight:600;letter-spacing:.04em;padding:3px 8px;border:1px solid var(--rule);background:var(--paper-2,rgba(0,0,0,.02));border-radius:999px;color:var(--ink)}
+.mod-queue-item__reason-tag--high{background:#B83A2D;color:#FDFAF3;border-color:#B83A2D}
+.mod-queue-item__meta{display:flex;gap:14px;font-family:var(--fb);font-size:11.5px;color:var(--ink-muted);font-feature-settings:"tnum"}
+.mod-queue-item__actions{display:flex;flex-wrap:wrap;gap:8px;padding-top:10px;border-top:1px dashed var(--rule)}
+.mod-queue-item__actions .btn--sm{font-size:12px;padding:6px 12px}
+.mod-empty-card{padding:48px 20px;text-align:center;border:1px dashed var(--rule);font-family:var(--fb);color:var(--ink-muted)}
+.mod-empty-card__icon{font-size:32px;margin-bottom:10px}
+
+/* Peer review pane */
+.pr-card{padding:16px;border:1px solid var(--rule);background:var(--surface);border-radius:3px;display:flex;flex-direction:column;gap:10px}
+.pr-card__type{font-family:var(--fb);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.pr-card__preview{font-family:var(--ff);font-size:15px;color:var(--ink);line-height:1.5;margin:0}
+.pr-card__details{font-family:var(--fb);font-size:12.5px;color:var(--ink-muted);font-style:italic;line-height:1.5}
+.pr-card__votes{display:flex;gap:14px;font-family:var(--fb);font-size:12px;color:var(--ink-muted);font-feature-settings:"tnum"}
+.pr-card__votes b{color:var(--ink);font-weight:600}
+.pr-card__actions{display:flex;gap:8px;padding-top:8px;border-top:1px dashed var(--rule)}
+.pr-card__actions .btn{flex:1}
+
+@media (max-width:640px){
+  .mod-page{padding:0 0 24px}
+  .mod-page__title{font-size:26px}
+  .mod-queue-item{padding:14px}
+  .mod-queue-item__actions{flex-direction:column}
+  .mod-queue-item__actions .btn--sm{width:100%}
+}
+
+/* ───────────────────────────────────────────────────────────────
+   v0.20.0 — Page Stats publiques (transparence)
+─────────────────────────────────────────────────────────────── */
+.stats-modal{max-width:760px}
+.stats-modal__refreshed{display:inline-block;font-size:11.5px;color:var(--ink-light);font-style:italic}
+.stats-modal__loading{padding:32px;text-align:center;color:var(--ink-muted);font-family:var(--fb);font-size:13px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:14px;margin:14px 0 22px}
+.stats-card{padding:18px 16px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule);border-radius:3px;display:flex;flex-direction:column;gap:6px;transition:border-color .15s}
+.stats-card:hover{border-color:var(--ink-light)}
+.stats-card__value{font-family:var(--fd,var(--ff));font-size:32px;font-weight:500;line-height:1;color:var(--ink);font-feature-settings:"tnum"}
+.stats-card__label{font-family:var(--fb);font-size:12px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600;line-height:1.3}
+.stats-card__sub{font-family:var(--fb);font-size:11px;color:var(--ink-light);font-style:italic;font-feature-settings:"tnum"}
+.stats-card--accent .stats-card__value{color:var(--accent)}
+
+.stats-section{margin-top:24px}
+.stats-section__title{font-family:var(--ff);font-weight:600;font-size:17px;color:var(--ink);margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.stats-section__title-sub{margin-left:auto;font-family:var(--fb);font-size:11px;color:var(--ink-muted);text-transform:none;letter-spacing:0;font-weight:500}
+
+.stats-top{display:flex;flex-direction:column;gap:6px}
+.stats-top__row{display:grid;grid-template-columns:32px 1fr auto auto;gap:12px;align-items:center;padding:9px 12px;background:var(--surface);border:1px solid var(--rule);border-radius:3px;font-family:var(--fb);font-size:13px}
+.stats-top__rank{font-family:var(--fd);font-weight:600;color:var(--accent);font-size:15px;text-align:center;font-feature-settings:"tnum"}
+.stats-top__user{display:flex;align-items:center;gap:8px;min-width:0}
+.stats-top__user strong{color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats-top__badges{display:flex;gap:4px}
+.stats-top__articles{color:var(--ink-muted);font-feature-settings:"tnum";font-size:12px;white-space:nowrap}
+.stats-top__score{font-family:var(--fd);font-weight:600;color:var(--ink);font-feature-settings:"tnum";min-width:42px;text-align:right}
+
+.stats-mod-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:9px 12px;background:var(--paper-2,rgba(0,0,0,.02));border-left:2px solid var(--ink-light);font-family:var(--fb);font-size:12.5px;align-items:center}
+.stats-mod-row + .stats-mod-row{margin-top:6px}
+.stats-mod-row strong{color:var(--ink);font-weight:600;font-feature-settings:"tnum"}
+
+@media (max-width:640px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .stats-card__value{font-size:26px}
+  .stats-top__row{grid-template-columns:28px 1fr auto;gap:8px;font-size:12px}
+  .stats-top__articles{display:none}
+}
+
+/* ───────────────────────────────────────────────────────────────
+   v0.21.0 — Onboarding nouveau user
+─────────────────────────────────────────────────────────────── */
+.onboarding-modal{max-width:560px;padding-top:30px}
+.onboarding__progress{display:flex;gap:6px;justify-content:center;margin-bottom:22px}
+.onboarding__progress-dot{width:24px;height:3px;border-radius:2px;background:var(--rule);transition:background .2s}
+.onboarding__progress-dot--active{background:var(--accent)}
+.onboarding__progress-dot--done{background:var(--ink-light)}
+
+.onboarding__step{min-height:280px;display:flex;flex-direction:column;justify-content:center}
+.onboarding__icon{font-size:48px;line-height:1;margin-bottom:14px;text-align:center}
+.onboarding__title{font-family:var(--ff);font-weight:600;font-size:22px;color:var(--ink);margin:0 0 12px;text-align:center;letter-spacing:-.01em}
+.onboarding__desc{font-family:var(--fb);font-size:14.5px;color:var(--ink);line-height:1.6;margin:0 0 14px;text-align:center}
+.onboarding__desc strong{font-weight:600;color:var(--accent)}
+.onboarding__list{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:8px}
+.onboarding__list li{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule);border-radius:3px;font-family:var(--fb);font-size:13.5px;color:var(--ink);line-height:1.5}
+.onboarding__list li strong{display:block;font-weight:600;margin-bottom:2px}
+.onboarding__list-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+
+.onboarding__suggestions{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.onboarding__suggestion{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--rule);border-radius:3px;font-family:var(--fb)}
+.onboarding__suggestion-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#FDFAF3;display:flex;align-items:center;justify-content:center;font-family:var(--ff);font-weight:600;font-size:15px}
+.onboarding__suggestion-body{min-width:0}
+.onboarding__suggestion-name{font-size:13.5px;color:var(--ink);font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.onboarding__suggestion-meta{font-size:11.5px;color:var(--ink-muted);margin-top:2px}
+.onboarding__suggestion .follow-btn{font-size:11px;padding:5px 12px;flex-shrink:0}
+
+.onboarding__actions{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid var(--rule)}
+.onboarding__skip-btn{margin-right:auto;font-size:12px;color:var(--ink-muted)}
+
+@media (max-width:640px){
+  .onboarding-modal{padding-left:18px;padding-right:18px}
+  .onboarding__step{min-height:240px}
+  .onboarding__title{font-size:19px}
+  .onboarding__desc{font-size:13.5px}
+  .onboarding__actions{flex-wrap:wrap;gap:8px}
+  .onboarding__skip-btn{order:3;width:100%;margin-right:0;margin-top:6px;text-align:center}
+}
 </style>
 </head>
 <body>
@@ -5402,6 +5573,13 @@ body.is-mobile .notif-bell{width:32px;height:32px}
           <button class="nav-menu__item" id="navMyFinBtn" style="display:none">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             Mon financement
+          </button>
+
+          <!-- v0.19.0 — Modération (visible si admin OU credibility >= 50) -->
+          <button class="nav-menu__item" id="navModerationBtn" style="display:none">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Modération
+            <span class="nav-menu__item-badge" id="navModBadge" style="display:none">0</span>
           </button>
 
           <!-- Section Admin -->
@@ -6153,7 +6331,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.84-.1z"/></svg>
         @avis_base.nth
       </a>
-      <p class="footer__version">© <span id="yr"></span> · Beta · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a></p>
+      <p class="footer__version">© <span id="yr"></span> · Beta · <a class="footer__charter-link" id="footerAboutLink" href="#a-propos">À propos</a> · <a class="footer__charter-link" id="footerStatsLink" href="#stats">Stats publiques</a> · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a> · <a class="footer__charter-link" id="footerModerationCharterLink" href="#charte-moderation">Charte de modération</a></p>
     </div>
   </div>
 </footer>
@@ -6637,6 +6815,30 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   </div>
 </div>
 
+<!-- ═══ v0.19.0 — DASHBOARD MODÉRATION ═══ -->
+<div class="modal" id="moderationModal">
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__box modal__box--xl">
+    <div class="modal__head">
+      <div>
+        <h2 class="modal__title">🛡️ Modération</h2>
+        <div class="modal__title-sub">Signalements communautaires · peer review · actions</div>
+      </div>
+      <button class="modal__close" data-close>×</button>
+    </div>
+    <div class="modal__body" id="moderationContent">
+      <div class="mod-page">
+        <div class="mod-page__hero">
+          <h1 class="mod-page__title" id="modPageTitle">Modération</h1>
+          <p class="mod-page__lead" id="modPageLead">Aide la communauté à fiabiliser le média : examine les signalements, vote sur leur validité, ou retire un contenu qui enfreint la charte.</p>
+        </div>
+        <div class="mod-tabs-row" id="modTabsRow"></div>
+        <div id="modTabContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ CLIP EDITOR MODAL ═══ -->
 <div class="modal" id="clipEditorModal">
   <div class="modal__backdrop" data-close></div>
@@ -6771,7 +6973,155 @@ body.is-mobile .notif-bell{width:32px;height:32px}
       <li>Contenu illégal ou portant atteinte à autrui</li>
     </ul>
 
-    <p class="charter-modal__footer">Tu peux signaler tout contenu qui ne respecte pas cette charte via le bouton ⚠️ Signaler.</p>
+    <p class="charter-modal__footer">Tu peux signaler tout contenu qui ne respecte pas cette charte via le bouton ⚠️ Signaler. Pour le détail du processus de modération, voir la <a id="charterLinkToModeration" href="#" style="color:var(--accent);font-weight:600">charte de modération</a>.</p>
+  </div>
+</div>
+
+<!-- v0.19.1 — Charte de modération publique -->
+<div class="v8-backdrop" id="moderationCharterBackdrop" style="display:none">
+  <div class="v8-modal charter-modal" role="dialog" aria-modal="true">
+    <button class="v8-modal__close" id="moderationCharterClose" aria-label="Fermer">×</button>
+    <h2>Charte de modération</h2>
+    <p class="charter-modal__lead">Comment Avis Basé modère ses contenus, dans la transparence et sans algorithme caché.</p>
+
+    <h3>🛡️ Notre principe</h3>
+    <p>La modération est <strong>communautaire et transparente</strong>. Tout le monde peut signaler un contenu. Les contributeurs de confiance peuvent voter pour décider si un signalement est valide. Les modérateurs interviennent quand nécessaire, et leurs actions sont journalisées.</p>
+
+    <h3>🚩 Comment signaler un contenu</h3>
+    <p>Sur chaque article, clip ou commentaire, le bouton <strong>⚠️ Signaler</strong> ouvre une fenêtre avec 8 raisons standardisées, regroupées en 3 catégories :</p>
+    <ul class="charter-modal__list">
+      <li><strong>Éditorial</strong> — Désinformation / fait erroné · Source manquante ou douteuse · Hors-sujet</li>
+      <li><strong>Comportement</strong> — Spam / pub déguisée · Harcèlement (priorité haute) · Contenu illégal (priorité haute)</li>
+      <li><strong>Droits</strong> — Atteinte au droit d'auteur · Autre</li>
+    </ul>
+    <p>Ton signalement est <strong>anonyme</strong> vis-à-vis des autres utilisateurs. Tu peux le répéter en cas d'oubli — la plateforme déduplique automatiquement.</p>
+
+    <h3>⚙️ Masquage automatique</h3>
+    <p>Un contenu est automatiquement <strong>masqué le temps d'une revue</strong> dès que :</p>
+    <ul class="charter-modal__list">
+      <li>3 utilisateurs distincts l'ont signalé pour n'importe quelle raison, OU</li>
+      <li>1 utilisateur l'a signalé avec une raison de priorité haute (harcèlement / contenu illégal).</li>
+    </ul>
+    <p>Le contenu masqué reste visible pour son auteur (qui peut le modifier) et pour les modérateurs. Le public ne le voit plus tant que la revue n'a pas abouti.</p>
+
+    <h3>🤝 Peer review communautaire</h3>
+    <p>Les utilisateurs avec un <strong>score de Basitude ≥ 50</strong> peuvent voter sur les signalements en attente, dans l'onglet « Aider la modération ». Le système exclut :</p>
+    <ul class="charter-modal__list">
+      <li>L'auteur du signalement (ne peut pas voter sur son propre signalement)</li>
+      <li>L'auteur du contenu signalé (ne peut pas s'auto-blanchir)</li>
+    </ul>
+    <p>Les votes possibles sont : <strong>Valide</strong> (le signalement est légitime), <strong>Pas un problème</strong> (le signalement est invalide), <strong>Passer</strong> (je ne me prononce pas).</p>
+    <p>Dès qu'un signalement atteint <strong>3 votes « valide »</strong>, le contenu est masqué définitivement par la communauté. À <strong>3 votes « pas un problème »</strong>, le signalement est classé sans suite et le contenu, s'il avait été masqué automatiquement, redevient public.</p>
+
+    <h3>👮 Action manuelle des modérateurs</h3>
+    <p>Les comptes admin et les utilisateurs avec un <strong>score ≥ 75</strong> accèdent à un dashboard de modération qui leur permet d'agir directement, sans attendre la peer review. Les 4 actions possibles sont :</p>
+    <ul class="charter-modal__list">
+      <li><strong>Masquer</strong> — retire le contenu du feed public</li>
+      <li><strong>Rendre visible</strong> — restaure un contenu masqué</li>
+      <li><strong>Valider les signalements</strong> — entérine les signalements, applique une pénalité de crédibilité à l'auteur</li>
+      <li><strong>Classer sans suite</strong> — rejette les signalements sans pénalité</li>
+    </ul>
+    <p>Chaque action est <strong>journalisée</strong> dans une table dédiée, avec auteur, date et raison. Ce journal est consultable par tous les modérateurs.</p>
+
+    <h3>📊 Conséquences sur la crédibilité</h3>
+    <p>Quand un contenu est validé comme problématique (par la peer review ou un modérateur), un point de pénalité est ajouté au compteur <em>« signalements validés »</em> de son auteur. Ce compteur compte pour <strong>−5 points bruts</strong> dans le calcul du score de Basitude. La pénalité est visible publiquement dans le breakdown « D'où vient ce score ? » sur le profil.</p>
+
+    <h3>🔁 Recours</h3>
+    <p>Si tu estimes qu'un masquage de ton contenu est injustifié :</p>
+    <ul class="charter-modal__list">
+      <li>Modifie ton article pour corriger ce qui était reproché (sources manquantes, ton, etc.), puis demande une nouvelle revue par un modérateur.</li>
+      <li>Contacte l'équipe à <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a> si tu juges la décision arbitraire.</li>
+    </ul>
+    <p>Notre objectif n'est pas de punir mais de fiabiliser. La crédibilité se construit dans la durée — un masquage isolé ne casse pas un parcours sourcé.</p>
+
+    <h3>🗑️ Droit à l'oubli</h3>
+    <p>Tu peux à tout moment supprimer un contenu que tu as publié, ou demander la suppression complète de ton compte via la page <a href="#suppression-compte" style="color:var(--accent)">Suppression du compte</a>. Les signalements liés à un contenu supprimé sont également effacés (cascade).</p>
+
+    <p class="charter-modal__footer">Cette charte évolue avec la communauté. Pour proposer une modification, ouvre une issue sur le <a href="https://github.com/nathan020430-prog/avis-base" target="_blank" rel="noopener" style="color:var(--accent)">GitHub public</a> ou écris à <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a>.</p>
+  </div>
+</div>
+
+<!-- v0.21.0 — Onboarding nouveau user (1er login) -->
+<div class="v8-backdrop" id="onboardingBackdrop" style="display:none">
+  <div class="v8-modal onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="onbTitle">
+    <button class="v8-modal__close" id="onboardingSkip" aria-label="Fermer">×</button>
+    <div class="onboarding__progress" id="onboardingProgress" aria-hidden="true"></div>
+    <div class="onboarding__step" id="onboardingStep"></div>
+    <div class="onboarding__actions">
+      <button class="btn btn--ghost" id="onboardingPrev" style="display:none">← Précédent</button>
+      <button class="btn btn--ghost onboarding__skip-btn" id="onboardingSkipBtn">Passer le tour</button>
+      <button class="btn btn--primary" id="onboardingNext">Suivant →</button>
+    </div>
+  </div>
+</div>
+
+<!-- v0.20.0 — Stats publiques (transparence) -->
+<div class="v8-backdrop" id="statsBackdrop" style="display:none">
+  <div class="v8-modal stats-modal" role="dialog" aria-modal="true">
+    <button class="v8-modal__close" id="statsClose" aria-label="Fermer">×</button>
+    <h2>📊 Avis Basé en chiffres</h2>
+    <p class="charter-modal__lead">Toutes ces données sont publiques, agrégées en temps réel. <span id="statsGeneratedAt" class="stats-modal__refreshed">Calculé maintenant.</span></p>
+
+    <div id="statsContent">
+      <div class="stats-modal__loading">Chargement…</div>
+    </div>
+
+    <p class="charter-modal__footer">On publie nos chiffres parce qu'on n'a rien à cacher. Si tu vois une incohérence, écris-nous à <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a>.</p>
+  </div>
+</div>
+
+<!-- v0.20.0 — À propos d'Avis Basé -->
+<div class="v8-backdrop" id="aboutBackdrop" style="display:none">
+  <div class="v8-modal charter-modal" role="dialog" aria-modal="true">
+    <button class="v8-modal__close" id="aboutClose" aria-label="Fermer">×</button>
+    <h2>À propos d'Avis Basé</h2>
+    <p class="charter-modal__lead">Le média collaboratif qui source tout.</p>
+
+    <h3>🎯 Pourquoi on existe</h3>
+    <p>Avis Basé est une réponse au format court qui domine l'info aujourd'hui : titres putaclic, vidéos de 30 secondes, sources rarement vérifiables. On a voulu construire quelque chose qui prenne le temps inverse — partir d'une <strong>vidéo longue ou d'un sujet de fond</strong>, le décortiquer, citer ses sources, et laisser la communauté vérifier.</p>
+    <p>L'idée n'est pas de remplacer TikTok ou X, mais de <strong>s'en servir pour ramener des gens vers un format plus lent</strong>, plus exigeant, qui ne dépend pas d'un algorithme. La cible : les jeunes qui sentent que quelque chose cloche dans leur consommation d'info, sans toujours savoir quoi y faire.</p>
+
+    <h3>📐 Notre différence</h3>
+    <ul class="charter-modal__list">
+      <li><strong>Toute affirmation = source.</strong> Pas une opinion, un fait. Vérifiable.</li>
+      <li><strong>Score de Basitude.</strong> Chaque article est noté automatiquement selon la qualité de ses sources.</li>
+      <li><strong>Modération communautaire transparente.</strong> 8 raisons standardisées de signalement, peer review pour les contributeurs de confiance, journal d'actions consultable. <a href="#charte-moderation" id="aboutLinkToModeration" style="color:var(--accent);font-weight:600">Voir la charte</a>.</li>
+      <li><strong>Économie collaborative.</strong> 5 € par mois pour soutenir, 100 % du surplus reversé aux contributeurs. <a href="#financement" id="aboutLinkToFinancement" style="color:var(--accent);font-weight:600">Voir comment</a>.</li>
+      <li><strong>Pas d'algorithme manipulateur.</strong> Tu vois ce que tu choisis de voir.</li>
+    </ul>
+
+    <h3>💻 Pourquoi l'écriture est sur ordinateur uniquement</h3>
+    <p>Un article bien sourcé demande de la concentration. On a fait le choix de ne pas permettre la rédaction depuis mobile pour pousser à mieux structurer ses idées, vérifier les liens, prendre du temps. Le mobile est fait pour <strong>lire, débattre, signaler</strong> — la rédaction mérite un espace dédié.</p>
+    <p class="charter-modal__quote">« Sur Avis Basé, on n'écrit pas en attendant le bus. On prend le temps. »</p>
+
+    <h3>🛠 Comment ça marche</h3>
+    <ul class="charter-modal__list">
+      <li><strong>Lire.</strong> Le feed affiche les articles par thème ou popularité, avec la « Basitude » de chaque article en évidence.</li>
+      <li><strong>Contribuer.</strong> Inscription gratuite, période d'observation de 7 jours, puis tu peux écrire ton premier article (sur ordinateur) en citant tes sources.</li>
+      <li><strong>Débattre.</strong> Likes, dislikes, commentaires en thread, mentions — sur mobile comme sur ordinateur.</li>
+      <li><strong>Soutenir.</strong> Adhésion Avis Basé+ à 5 € par mois, ou tip ponctuel à un auteur dont tu as aimé le travail.</li>
+      <li><strong>Modérer.</strong> Tu peux signaler tout contenu qui enfreint la charte. Si ta Basitude dépasse 50, tu peux aussi voter sur les signalements en attente.</li>
+    </ul>
+
+    <h3>👥 L'équipe</h3>
+    <p>Avis Basé est porté par <strong>Nathan</strong>, son créateur, en solo pour la phase de soft-launch (0.x.x). L'objectif est d'agrandir l'équipe en parallèle de la croissance — un dev pro pour la stack, un éditorial pour l'animation, un modérateur dédié quand le volume le justifiera.</p>
+    <p>Le projet est <strong>open-source</strong> côté frontend et migrations SQL. Tout le code est visible : <a href="https://github.com/nathan020430-prog/avis-base" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">github.com/nathan020430-prog/avis-base</a>.</p>
+
+    <h3>📊 Transparence chiffrée</h3>
+    <p>On publie en temps réel <a href="#stats" id="aboutLinkToStats" style="color:var(--accent);font-weight:600">les statistiques du média</a> : nombre d'articles, contributeurs, sources citées, signalements traités. Aucun chiffre n'est caché, aucun classement n'est manipulé.</p>
+
+    <h3>🤝 Où nous trouver</h3>
+    <ul class="charter-modal__list">
+      <li><strong>TikTok</strong> — <a href="https://www.tiktok.com/@avis_base.nth" target="_blank" rel="noopener" style="color:var(--accent)">@avis_base.nth</a> (clips synthétiques des articles longs)</li>
+      <li><strong>GitHub</strong> — <a href="https://github.com/nathan020430-prog/avis-base" target="_blank" rel="noopener" style="color:var(--accent)">nathan020430-prog/avis-base</a> (code source + issues publiques)</li>
+      <li><strong>Contact</strong> — <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a></li>
+      <li><strong>Beta-testeurs app mobile</strong> — <a href="mailto:beta@avis-base.com?subject=Beta-testeur%20app" style="color:var(--accent)">beta@avis-base.com</a></li>
+    </ul>
+
+    <h3>🗓 Versions</h3>
+    <p>Avis Basé est en <strong>pré-release 0.x.x</strong>. La version <strong>v1.0.0</strong> marquera le lancement public officiel, avec communication massive sur TikTok et la presse. Jusque-là on construit, on itère, on observe — sans bruit. Pour suivre le détail des releases : <a href="https://github.com/nathan020430-prog/avis-base/blob/main/CHANGELOG.md" target="_blank" rel="noopener" style="color:var(--accent)">CHANGELOG public</a>.</p>
+
+    <p class="charter-modal__footer">Une suggestion, une remarque, un bug ? Le projet est jeune et écoute. Écris-nous à <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a> ou ouvre une issue sur GitHub.</p>
   </div>
 </div>
 
@@ -6824,23 +7174,32 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   </div>
 </div>
 
-<!-- Signalement de contenu (article / clip / source) -->
+<!-- Signalement de contenu (article / clip / commentaire / profil) -->
 <div class="v8-backdrop" id="reportContentBackdrop" style="display:none">
   <div class="v8-modal report-content-modal" role="dialog" aria-modal="true">
     <button class="v8-modal__close" id="reportContentClose" aria-label="Fermer">×</button>
     <h2>Signaler ce contenu</h2>
-    <p class="report-content-modal__lead">Ton signalement est anonyme pour les autres utilisateurs. Notre équipe de modération va l'examiner.</p>
+    <p class="report-content-modal__lead">Ton signalement est anonyme pour les autres utilisateurs. Il sera examiné par la modération et la communauté.</p>
 
     <div class="report-content-modal__reasons">
+      <div class="report-content-modal__group-label">Éditorial</div>
       <label><input type="radio" name="reportReason" value="misinformation"/> <span>🚫 Désinformation / fait erroné</span></label>
-      <label><input type="radio" name="reportReason" value="harassment"/> <span>😡 Harcèlement / discours haineux</span></label>
-      <label><input type="radio" name="reportReason" value="spam"/> <span>📧 Spam / pub déguisée</span></label>
+      <label><input type="radio" name="reportReason" value="unsourced"/> <span>📎 Source manquante ou douteuse</span></label>
       <label><input type="radio" name="reportReason" value="off_topic"/> <span>🎯 Hors-sujet</span></label>
+
+      <div class="report-content-modal__group-label">Comportement</div>
+      <label><input type="radio" name="reportReason" value="spam"/> <span>📧 Spam / pub déguisée</span></label>
+      <label class="report-content-modal__reason--high"><input type="radio" name="reportReason" value="harassment"/> <span>😡 Harcèlement / discours haineux</span><span class="report-content-modal__severity">priorité haute</span></label>
+      <label class="report-content-modal__reason--high"><input type="radio" name="reportReason" value="illegal"/> <span>⚠️ Contenu illégal (menace, doxxing, mineur)</span><span class="report-content-modal__severity">priorité haute</span></label>
+
+      <div class="report-content-modal__group-label">Droits</div>
       <label><input type="radio" name="reportReason" value="copyright"/> <span>©️ Atteinte au droit d'auteur</span></label>
       <label><input type="radio" name="reportReason" value="other"/> <span>❓ Autre</span></label>
     </div>
 
-    <textarea id="reportContentDetails" placeholder="Précisions (optionnel)" maxlength="500"></textarea>
+    <textarea id="reportContentDetails" placeholder="Précisions (optionnel, 500 max)" maxlength="500"></textarea>
+
+    <p class="report-content-modal__note">À partir de 3 signalements distincts, ou 1 signalement de priorité haute, le contenu est masqué automatiquement le temps d'une revue. <a href="#charte-moderation" id="reportContentCharterLink" style="color:var(--accent);font-weight:600">Voir la charte de modération →</a></p>
 
     <div class="report-content-modal__actions">
       <button class="btn btn--ghost" id="reportContentCancel">Annuler</button>
@@ -7243,6 +7602,21 @@ function setSyncState(online) { const dot = document.getElementById('syncDot'); 
 
 function isSuperadmin() { return currentProfile && currentProfile.role === 'superadmin'; }
 function isAdmin() { return currentProfile && (currentProfile.role === 'admin' || currentProfile.role === 'superadmin'); }
+// v0.19.0 — Modérateur = admin OU score crédibilité >= 75
+function isMod() {
+  if (isAdmin()) return true;
+  if (!currentProfile) return false;
+  return (currentProfile.credibility_score || currentProfile.credibilityScore || 0) >= 75;
+}
+// v0.19.0 — Peer reviewer (peut voter sur signalements) = score >= 50
+function canPeerReview() {
+  if (!currentProfile) return false;
+  return (currentProfile.credibility_score || currentProfile.credibilityScore || 0) >= 50;
+}
+// v0.19.0 — Est-ce qu'un contenu est masqué par la modération ?
+function isModerated(item) {
+  return item && (item.moderationState === 'hidden_auto' || item.moderationState === 'hidden_mod');
+}
 function isLoggedIn() { return !!currentUser; }
 function roleLabel(r) { return r === 'superadmin' ? 'Super' : r === 'admin' ? 'Admin' : 'Membre'; }
 function roleClass(r) { return r === 'superadmin' ? 'super' : r === 'admin' ? 'admin' : ''; }
@@ -8032,7 +8406,11 @@ function fromDbArticle(r) {
     submittedAt: r.submitted_at, reviewedAt: r.reviewed_at, publishedAt: r.published_at,
     reads: r.reads || 0, fromSourceId: r.from_source_id,
     likesCount: r.likes_count || 0, commentsCount: r.comments_count || 0,
-    authorCredScore: r.author_cred_score || 0
+    authorCredScore: r.author_cred_score || 0,
+    // v0.19.0 — Modération
+    moderationState: r.moderation_state || 'visible',
+    moderationHiddenAt: r.moderation_hidden_at || null,
+    reportsCount: r.reports_count || 0
   };
 }
 
@@ -8135,6 +8513,15 @@ function getFilteredArticles() {
     return false;
   });
 
+  // v0.19.0 — Masquer les articles en modération (hidden_auto / hidden_mod) du public,
+  // mais garder visible pour l'auteur et les mods (avec badge visuel).
+  list = list.filter(a => {
+    if (!isModerated(a)) return true;
+    if (currentUser && a.authorId === currentUser.id) return true;
+    if (isMod()) return true;
+    return false;
+  });
+
   if (feedMode === 'myfeed' && typeof Follow !== 'undefined') {
     const ids = Follow.followingIds;
     list = list.filter(a => ids.has(a.authorId));
@@ -8189,10 +8576,17 @@ function articleCardHtml(a, featured = false) {
   const titleHtml = searchQuery ? highlightText(a.title, searchQuery) : escapeHtml(a.title);
   const subtitleHtml = a.subtitle ? (searchQuery ? highlightText(a.subtitle, searchQuery) : escapeHtml(a.subtitle)) : '';
   const featuredClass = featured ? 'article-card--featured' : '';
+  // v0.19.0 — Badge modération (visible auteur + mods)
+  const moderated = isModerated(a);
+  const modClass = moderated ? 'card--moderated' : '';
+  const modFlag = moderated
+    ? `<span class="mod-flag mod-flag--${a.moderationState === 'hidden_auto' ? 'auto' : 'mod'}" title="${a.moderationState === 'hidden_auto' ? 'Masqué automatiquement après plusieurs signalements' : 'Masqué par un modérateur'}"><span class="mod-flag__icon">⚠️</span>${a.moderationState === 'hidden_auto' ? 'Masqué — revue en cours' : 'Masqué par un mod'}</span>`
+    : '';
 
-  return `<article class="article-card ${featuredClass} ${mineClass}" data-article-slug="${escapeHtml(a.slug)}">
+  return `<article class="article-card ${featuredClass} ${mineClass} ${modClass}" data-article-slug="${escapeHtml(a.slug)}">
     ${adminBtns}
     <div class="article-card__thumb">${duration}${statusBadge}${thumb}</div>
+    ${modFlag ? `<div style="padding:8px 14px 0">${modFlag}</div>` : ''}
     <div class="article-card__body">
       <div class="article-card__meta">
         ${toneLabel ? `<span class="article-card__tone">${escapeHtml(toneLabel)}</span><span class="article-card__meta-sep">·</span>` : ''}
@@ -8618,7 +9012,7 @@ function setArticleMeta(a) {
   if (!a) return resetMeta();
   const url = `${SITE_BASE_URL}/#article/${a.slug}`;
   const title = `${a.title} — Avis Basé`;
-  const desc = (a.subtitle || a.body || '').toString().replace(/[#*`\n>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
+  const desc = (a.subtitle || a.bodyMarkdown || '').toString().replace(/[#*`\n>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
   const img = buildArticleOgImage(a);
   document.title = title;
   setMetaTag('metaDescription', 'content', desc);
@@ -8631,6 +9025,18 @@ function setArticleMeta(a) {
   setMetaTag('twTitle', 'content', title);
   setMetaTag('twDescription', 'content', desc);
   setMetaTag('twImage', 'content', img);
+
+  // v0.21.0 — Métas article-spécifiques (article:* et NewsArticle JSON-LD)
+  setOrCreateMeta('article:published_time', a.publishedAt || a.createdAt || '', 'property');
+  setOrCreateMeta('article:modified_time', a.updatedAt || a.publishedAt || a.createdAt || '', 'property');
+  setOrCreateMeta('article:author', a.authorUsername || 'Avis Basé', 'property');
+  if (a.themeSlug) {
+    const theme = (typeof articleThemes !== 'undefined') ? articleThemes.find(t => t.slug === a.themeSlug) : null;
+    setOrCreateMeta('article:section', (theme && theme.label) || a.themeSlug, 'property');
+  }
+
+  // NewsArticle JSON-LD — injecté dynamiquement
+  injectArticleJsonLd(a, url, img);
 }
 function resetMeta() {
   const url = `${SITE_BASE_URL}/`;
@@ -8647,6 +9053,60 @@ function resetMeta() {
   setMetaTag('twTitle', 'content', title);
   setMetaTag('twDescription', 'content', desc);
   setMetaTag('twImage', 'content', DEFAULT_OG_IMAGE);
+  removeMeta('article:published_time');
+  removeMeta('article:modified_time');
+  removeMeta('article:author');
+  removeMeta('article:section');
+  removeArticleJsonLd();
+}
+
+// v0.21.0 — Helpers pour les meta tags article:* et JSON-LD dynamique
+function setOrCreateMeta(name, value, kind) {
+  if (!value) return removeMeta(name);
+  const sel = kind === 'property' ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+  let el = document.head.querySelector(sel);
+  if (!el) {
+    el = document.createElement('meta');
+    if (kind === 'property') el.setAttribute('property', name);
+    else el.setAttribute('name', name);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('content', value);
+}
+function removeMeta(name) {
+  document.head.querySelectorAll(`meta[property="${name}"], meta[name="${name}"]`).forEach(el => el.remove());
+}
+function injectArticleJsonLd(a, url, img) {
+  removeArticleJsonLd();
+  const sources = Array.isArray(a.citedSources) ? a.citedSources : [];
+  const jsonld = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: a.title,
+    description: (a.subtitle || '').toString().slice(0, 200) || undefined,
+    image: img ? [img] : undefined,
+    datePublished: a.publishedAt || a.createdAt,
+    dateModified: a.updatedAt || a.publishedAt || a.createdAt,
+    author: { '@type': 'Person', name: a.authorUsername || 'Avis Basé' },
+    publisher: {
+      '@type': 'NewsMediaOrganization',
+      name: 'Avis Basé',
+      logo: { '@type': 'ImageObject', url: SITE_BASE_URL + '/logo.png' }
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    citation: sources.length ? sources.slice(0, 20).map(s => s.url).filter(Boolean) : undefined
+  };
+  // Clean undefined keys
+  Object.keys(jsonld).forEach(k => jsonld[k] === undefined && delete jsonld[k]);
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.id = 'articleJsonLd';
+  script.textContent = JSON.stringify(jsonld);
+  document.head.appendChild(script);
+}
+function removeArticleJsonLd() {
+  const el = document.getElementById('articleJsonLd');
+  if (el) el.remove();
 }
 
 // ── Reading progress bar ──────────────────────────────────────
@@ -8781,6 +9241,14 @@ function renderArticlePage(a) {
   if (a.status === 'draft') banner = `<div class="article-banner article-banner--draft"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/></svg><div><strong>📝 Brouillon</strong><p>Visible seulement par toi. Finalise et envoie en relecture.</p></div></div>`;
   else if (a.status === 'review') banner = `<div class="article-banner article-banner--review">🟡 <div><strong>En relecture</strong><p>Un admin va vérifier ton article. Tu seras notifié.</p></div></div>`;
   else if (a.status === 'needs_changes') banner = `<div class="article-banner article-banner--needs">✏️ <div><strong>Modifications demandées</strong><p>${escapeHtml(a.adminNotes || 'Voir le commentaire admin.')}</p></div></div>`;
+
+  // v0.19.0 — Banner modération (auteur + mods)
+  if (isModerated(a)) {
+    const autoMsg  = `Cet article a été masqué automatiquement après plusieurs signalements. La communauté ou un modérateur vont l'examiner. Tu peux le modifier en attendant.`;
+    const modMsg   = `Cet article a été masqué par un modérateur${a.adminNotes ? ' : ' + escapeHtml(a.adminNotes) : '.'}`;
+    const msg = a.moderationState === 'hidden_auto' ? autoMsg : modMsg;
+    banner += `<div class="article-banner article-banner--needs" style="background:#FBF1ED;border-color:#E5B8A8;color:#7A2D1A">⚠️ <div><strong>Contenu masqué — en revue</strong><p>${msg}</p></div></div>`;
+  }
 
   let citedSection = '';
   if (a.citedSources && a.citedSources.length > 0) {
@@ -11142,6 +11610,362 @@ function closeCharterModal() {
   document.body.style.overflow = '';
 }
 
+// v0.19.1 — Charte de modération
+function openModerationCharter() {
+  const bd = document.getElementById('moderationCharterBackdrop');
+  if (!bd) return;
+  bd.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeModerationCharter() {
+  const bd = document.getElementById('moderationCharterBackdrop');
+  if (!bd) return;
+  bd.style.display = 'none';
+  document.body.style.overflow = '';
+}
+window.openModerationCharter = openModerationCharter;
+
+// v0.20.0 — À propos
+function openAboutModal() {
+  const bd = document.getElementById('aboutBackdrop');
+  if (!bd) return;
+  bd.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeAboutModal() {
+  const bd = document.getElementById('aboutBackdrop');
+  if (!bd) return;
+  bd.style.display = 'none';
+  document.body.style.overflow = '';
+}
+window.openAboutModal = openAboutModal;
+
+// ═══════════════════════════════════════════════════════════
+// v0.21.0 — Onboarding nouveau user
+// ═══════════════════════════════════════════════════════════
+const Onboarding = (() => {
+  const STORAGE_KEY = 'avb_onboarding_done_v1';
+  let stepIdx = 0;
+  let suggestions = [];
+
+  // 5 étapes du tour
+  const STEPS = [
+    {
+      icon: '👋',
+      title: 'Bienvenue sur Avis Basé',
+      desc: `On est un <strong>média collaboratif</strong> qui source tout. Chaque article cite ses sources, chaque affirmation peut être vérifiée. L'objectif : redonner aux lecteurs les outils pour comprendre l'actualité par eux-mêmes.`,
+      list: null
+    },
+    {
+      icon: '📎',
+      title: 'La Basitude — comment lire un article',
+      desc: `Chaque article a un score de <strong>Basitude</strong> entre 0 et 100. Il mesure la qualité des sources citées et la crédibilité de l'auteur.`,
+      list: [
+        { icon: '🌟', label: 'Base (≥90%)', text: 'Au moins 4 sources fiables, validées par la communauté.' },
+        { icon: '✅', label: 'Bon (≥70%)', text: 'Plusieurs sources reconnues, faits vérifiables.' },
+        { icon: '⚠️', label: 'Moyen (≥50%)', text: 'À lire avec recul, certaines sources mériteraient renfort.' },
+        { icon: '❓', label: 'Faible (<50%)', text: 'Peu sourcé ou auteur encore en phase d\'apprentissage.' }
+      ]
+    },
+    {
+      icon: '💬',
+      title: 'Tu peux interagir sur mobile, écrire sur ordinateur',
+      desc: `Sur mobile : <strong>likes, commentaires, follow, signalement</strong>. La rédaction d'articles et de clips se fait sur ordinateur uniquement — c'est un choix éditorial assumé pour pousser à mieux structurer.`,
+      list: [
+        { icon: '👍', label: 'Liker / Commenter', text: 'Sur tous les appareils.' },
+        { icon: '🚩', label: 'Signaler un contenu', text: '8 raisons standardisées. Au-delà de 3 signalements, le contenu est masqué automatiquement.' },
+        { icon: '✍️', label: 'Écrire un article', text: 'Desktop uniquement. Tu prends le temps de sourcer correctement.' }
+      ]
+    },
+    {
+      icon: '🛡️',
+      title: 'Modération communautaire transparente',
+      desc: `À partir d'un score de Basitude ≥ <strong>50</strong>, tu peux participer à la peer review des signalements. Toutes les actions sont journalisées — rien de caché.`,
+      list: [
+        { icon: '🤝', label: 'Quorum 3 votes', text: 'Trois "valide" → contenu masqué. Trois "pas un problème" → signalement classé.' },
+        { icon: '📜', label: 'Charte publique', text: 'Le détail complet du fonctionnement est dans la charte de modération, lisible par tous.' },
+        { icon: '🔁', label: 'Recours possible', text: 'Si ton contenu est masqué injustement, tu peux le modifier ou contacter l\'équipe.' }
+      ]
+    },
+    {
+      icon: '🤝',
+      title: 'Des contributeurs à suivre pour démarrer',
+      desc: `Voici les profils les plus fiables du moment. Suis-en quelques-uns pour remplir ton <strong>Mon Feed</strong> personnalisé.`,
+      list: null,
+      suggestions: true
+    }
+  ];
+
+  async function maybeShow() {
+    if (!currentUser || !currentProfile) return;
+    try {
+      if (localStorage.getItem(STORAGE_KEY)) return;
+    } catch (e) { return; }
+    // Petit délai pour ne pas spammer l'écran au démarrage
+    setTimeout(() => start(), 700);
+  }
+
+  async function start() {
+    stepIdx = 0;
+    // Pré-charge les suggestions pour le dernier step (silencieusement)
+    try {
+      const { data } = await supa.rpc('get_public_top_contributors', { p_limit: 5 });
+      suggestions = (data || []).filter(u => !currentProfile || u.username !== currentProfile.username);
+    } catch (e) { suggestions = []; }
+    const bd = document.getElementById('onboardingBackdrop');
+    if (!bd) return;
+    bd.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    render();
+  }
+
+  function render() {
+    const step = STEPS[stepIdx];
+    if (!step) { finish(); return; }
+    const stepEl = document.getElementById('onboardingStep');
+    const prog = document.getElementById('onboardingProgress');
+    if (!stepEl || !prog) return;
+
+    prog.innerHTML = STEPS.map((_, i) => {
+      const cls = i === stepIdx ? 'onboarding__progress-dot--active' :
+                  i <  stepIdx ? 'onboarding__progress-dot--done' : '';
+      return `<span class="onboarding__progress-dot ${cls}"></span>`;
+    }).join('');
+
+    let listHtml = '';
+    if (step.list && step.list.length) {
+      listHtml = `<ul class="onboarding__list">${step.list.map(it => `
+        <li><span class="onboarding__list-icon">${it.icon}</span><span><strong>${escapeHtml(it.label)}</strong>${escapeHtml(it.text)}</span></li>
+      `).join('')}</ul>`;
+    } else if (step.suggestions) {
+      if (!suggestions.length) {
+        listHtml = `<p class="onboarding__desc" style="margin-top:14px;color:var(--ink-muted);font-style:italic">Pas encore de suggestion. Reviens dans quelques jours — la communauté grandit.</p>`;
+      } else {
+        listHtml = `<div class="onboarding__suggestions">${suggestions.map(u => {
+          const init = (u.username || '?')[0].toUpperCase();
+          const lvl = (typeof getUserLevel === 'function') ? getUserLevel(u.credibility_score || 0) : { icon: '🌱', label: u.credibility_level || 'nouveau' };
+          return `<div class="onboarding__suggestion">
+            <div class="onboarding__suggestion-avatar">${escapeHtml(init)}</div>
+            <div class="onboarding__suggestion-body">
+              <div class="onboarding__suggestion-name">
+                ${escapeHtml(u.username)}
+                ${u.is_certified ? '<span title="Auteur rémunérable">✓</span>' : ''}
+                ${u.is_member ? '<span title="Membre Avis Basé+">💛</span>' : ''}
+              </div>
+              <div class="onboarding__suggestion-meta">${lvl.icon} ${escapeHtml(lvl.label || '')} · ${u.credibility_score || 0}% · ${u.articles_published || 0} article${(u.articles_published || 0) > 1 ? 's' : ''}</div>
+            </div>
+            <button class="btn btn--accent btn--sm follow-btn" data-onb-follow="${escapeHtml(u.username)}">Suivre</button>
+          </div>`;
+        }).join('')}</div>`;
+      }
+    }
+
+    stepEl.innerHTML = `
+      <div class="onboarding__icon" aria-hidden="true">${step.icon}</div>
+      <h2 class="onboarding__title" id="onbTitle">${escapeHtml(step.title)}</h2>
+      <p class="onboarding__desc">${step.desc}</p>
+      ${listHtml}
+    `;
+
+    const prevBtn = document.getElementById('onboardingPrev');
+    const nextBtn = document.getElementById('onboardingNext');
+    if (prevBtn) prevBtn.style.display = stepIdx > 0 ? 'inline-flex' : 'none';
+    if (nextBtn) nextBtn.textContent = stepIdx === STEPS.length - 1 ? '✨ C\'est parti !' : 'Suivant →';
+
+    // Wire follow buttons (suggestions)
+    stepEl.querySelectorAll('[data-onb-follow]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const username = btn.dataset.onbFollow;
+        const target = suggestions.find(s => s.username === username);
+        if (!target) return;
+        // On a besoin de l'id du profil — un fetch léger
+        const { data: p, error } = await supa.from('profiles').select('id').eq('username', username).maybeSingle();
+        if (error || !p?.id) { showToast('Impossible de récupérer le profil', true); return; }
+        if (typeof Follow !== 'undefined' && Follow.toggle) {
+          await Follow.toggle(p.id);
+          btn.textContent = Follow.isFollowing(p.id) ? '✓ Suivi' : 'Suivre';
+          btn.classList.toggle('follow-btn--active', Follow.isFollowing(p.id));
+        }
+      });
+    });
+  }
+
+  function next() {
+    if (stepIdx < STEPS.length - 1) { stepIdx++; render(); }
+    else finish();
+  }
+  function prev() { if (stepIdx > 0) { stepIdx--; render(); } }
+  function skip() { finish(); }
+  function finish() {
+    try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
+    const bd = document.getElementById('onboardingBackdrop');
+    if (bd) bd.style.display = 'none';
+    document.body.style.overflow = '';
+    showToast('Bienvenue dans la communauté 👋');
+  }
+
+  function bindHandlers() {
+    document.getElementById('onboardingNext')?.addEventListener('click', next);
+    document.getElementById('onboardingPrev')?.addEventListener('click', prev);
+    document.getElementById('onboardingSkip')?.addEventListener('click', skip);
+    document.getElementById('onboardingSkipBtn')?.addEventListener('click', skip);
+  }
+
+  // Permet de relancer manuellement le tour depuis la console : window.Onboarding.start()
+  return { maybeShow, start, next, prev, skip, finish, bindHandlers };
+})();
+window.Onboarding = Onboarding;
+
+// v0.20.0 — Stats publiques
+function openStatsModal() {
+  const bd = document.getElementById('statsBackdrop');
+  if (!bd) return;
+  bd.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  loadAndRenderStats();
+}
+function closeStatsModal() {
+  const bd = document.getElementById('statsBackdrop');
+  if (!bd) return;
+  bd.style.display = 'none';
+  document.body.style.overflow = '';
+}
+window.openStatsModal = openStatsModal;
+
+async function loadAndRenderStats() {
+  const content = document.getElementById('statsContent');
+  const refreshed = document.getElementById('statsGeneratedAt');
+  if (!content) return;
+  content.innerHTML = `<div class="stats-modal__loading">Chargement…</div>`;
+
+  try {
+    const [statsRes, topRes] = await Promise.all([
+      supa.rpc('get_public_stats'),
+      supa.rpc('get_public_top_contributors', { p_limit: 10 })
+    ]);
+
+    if (statsRes.error) {
+      const msg = String(statsRes.error.message || '');
+      const isMissing = msg.includes('function') && msg.includes('does not exist');
+      content.innerHTML = `<div class="stats-modal__loading">
+        ${isMissing
+          ? '⚠️ Les stats ne sont pas encore disponibles : la migration <code>v0.20.0-stats-migration.sql</code> n\'a pas été appliquée côté Supabase.'
+          : 'Erreur de chargement : ' + escapeHtml(msg)
+        }
+      </div>`;
+      return;
+    }
+
+    const s = statsRes.data || {};
+    const top = topRes.error ? [] : (topRes.data || []);
+    if (refreshed && s.generated_at) {
+      const d = new Date(s.generated_at);
+      refreshed.textContent = `Mis à jour ${d.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}.`;
+    }
+
+    const articles = s.articles || {};
+    const clips = s.clips || {};
+    const contributors = s.contributors || {};
+    const sources = s.sources || {};
+    const comments = s.comments || {};
+    const cred = s.credibility || {};
+    const mod = s.moderation || {};
+
+    const totalReports = (mod.reports_pending || 0) + (mod.reports_resolved || 0) + (mod.reports_dismissed || 0);
+    const pctResolved = totalReports > 0 ? Math.round((mod.reports_resolved || 0) / totalReports * 100) : 0;
+    const pctDismissed = totalReports > 0 ? Math.round((mod.reports_dismissed || 0) / totalReports * 100) : 0;
+
+    let topHtml = '';
+    if (top && top.length) {
+      topHtml = `
+        <div class="stats-section">
+          <h3 class="stats-section__title">🏆 Top contributeurs <span class="stats-section__title-sub">par Basitude</span></h3>
+          <div class="stats-top">
+            ${top.map((u, i) => `
+              <div class="stats-top__row">
+                <span class="stats-top__rank">${i + 1}</span>
+                <div class="stats-top__user">
+                  <strong>${escapeHtml(u.username || '?')}</strong>
+                  <span class="stats-top__badges">
+                    ${u.is_certified ? '<span class="badge badge--certified" title="Auteur rémunérable" style="padding:1px 6px;font-size:10px"><span class="badge__icon">✓</span></span>' : ''}
+                    ${u.is_member ? '<span class="badge badge--member" title="Membre Avis Basé+" style="padding:1px 6px;font-size:10px"><span class="badge__icon">💛</span></span>' : ''}
+                  </span>
+                </div>
+                <span class="stats-top__articles">${u.articles_published || 0} article${(u.articles_published || 0) > 1 ? 's' : ''}</span>
+                <span class="stats-top__score">${u.credibility_score || 0}%</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+    }
+
+    content.innerHTML = `
+      <div class="stats-grid">
+        <div class="stats-card stats-card--accent">
+          <div class="stats-card__value">${articles.public_visible || 0}</div>
+          <div class="stats-card__label">Articles publiés</div>
+          ${articles.hidden_by_mod ? `<div class="stats-card__sub">${articles.hidden_by_mod} en cours de revue</div>` : ''}
+        </div>
+        <div class="stats-card">
+          <div class="stats-card__value">${contributors.total_authors || 0}</div>
+          <div class="stats-card__label">Contributeurs</div>
+          ${contributors.certified ? `<div class="stats-card__sub">dont ${contributors.certified} certifié${contributors.certified > 1 ? 's' : ''}</div>` : ''}
+        </div>
+        <div class="stats-card">
+          <div class="stats-card__value">${formatLargeNumber(sources.total_cited || 0)}</div>
+          <div class="stats-card__label">Sources citées</div>
+          ${articles.public_visible ? `<div class="stats-card__sub">≈ ${Math.round((sources.total_cited || 0) / Math.max(1, articles.public_visible))} par article</div>` : ''}
+        </div>
+        <div class="stats-card">
+          <div class="stats-card__value">${comments.visible_total || 0}</div>
+          <div class="stats-card__label">Commentaires</div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-card__value">${clips.published_total || 0}</div>
+          <div class="stats-card__label">Clips TikTok</div>
+        </div>
+        <div class="stats-card stats-card--accent">
+          <div class="stats-card__value">${cred.avg_score || 0}<span style="font-size:18px;opacity:.6">%</span></div>
+          <div class="stats-card__label">Basitude moyenne</div>
+          ${cred.max_score ? `<div class="stats-card__sub">record : ${cred.max_score}%</div>` : ''}
+        </div>
+      </div>
+
+      ${contributors.members ? `
+        <div class="stats-section">
+          <h3 class="stats-section__title">💛 Soutien <span class="stats-section__title-sub">Avis Basé+</span></h3>
+          <div class="stats-mod-row">
+            <span>Membres actifs</span>
+            <strong>${contributors.members}</strong>
+          </div>
+        </div>
+      ` : ''}
+
+      ${totalReports > 0 ? `
+        <div class="stats-section">
+          <h3 class="stats-section__title">🛡️ Modération <span class="stats-section__title-sub">depuis le lancement</span></h3>
+          <div class="stats-mod-row"><span>Signalements en attente</span><strong>${mod.reports_pending || 0}</strong></div>
+          <div class="stats-mod-row"><span>Signalements validés (contenu masqué)</span><strong>${mod.reports_resolved || 0} <span style="color:var(--ink-muted);font-weight:500">· ${pctResolved}%</span></strong></div>
+          <div class="stats-mod-row"><span>Signalements classés sans suite</span><strong>${mod.reports_dismissed || 0} <span style="color:var(--ink-muted);font-weight:500">· ${pctDismissed}%</span></strong></div>
+          ${mod.auto_hidden_active ? `<div class="stats-mod-row"><span>Contenus masqués automatiquement (en revue)</span><strong>${mod.auto_hidden_active}</strong></div>` : ''}
+          ${mod.mod_actions_total ? `<div class="stats-mod-row"><span>Actions de modération journalisées</span><strong>${mod.mod_actions_total}</strong></div>` : ''}
+        </div>
+      ` : ''}
+
+      ${topHtml}
+    `;
+  } catch (e) {
+    content.innerHTML = `<div class="stats-modal__loading">Erreur : ${escapeHtml(String(e))}</div>`;
+  }
+}
+
+function formatLargeNumber(n) {
+  if (n == null) return '0';
+  if (n < 1000) return String(n);
+  if (n < 1_000_000) return (n / 1000).toFixed(n < 10000 ? 1 : 0).replace(/\.0$/, '') + 'k';
+  return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+}
+
 // ─── Éditeur de profil ──────────────────────────────────────
 function openProfileEditor() {
   if (!currentUser || !currentProfile) { openAuthModal('login'); return; }
@@ -11587,22 +12411,51 @@ async function submitReportContent() {
   if (!_reportTarget || !currentUser) return;
   const reasonInput = document.querySelector('input[name="reportReason"]:checked');
   if (!reasonInput) { showToast('Choisis une raison', true); return; }
-  const reason = reasonInput.value;
+  const reasonCode = reasonInput.value;
   const details = document.getElementById('reportContentDetails').value.trim();
-  const fullReason = details ? `${reason}: ${details}` : reason;
-  const { error } = await supa.from('reports').insert({
-    reporter_id: currentUser.id,
-    reporter_username: currentProfile?.username || null,
-    target_type: _reportTarget.type,
-    target_id: _reportTarget.id,
-    reason: fullReason
+
+  // v0.19.0 — RPC submit_report (gère masquage auto + idempotence + sévérité)
+  const { data, error } = await supa.rpc('submit_report', {
+    p_target_type: _reportTarget.type,
+    p_target_id:   _reportTarget.id,
+    p_reason_code: reasonCode,
+    p_details:     details || null
   });
+
   if (error) {
-    if (error.code === '23505') { showToast('Tu as déjà signalé ce contenu', true); }
-    else { showToast('Erreur : ' + error.message, true); }
+    // Fallback : si la RPC n'existe pas encore (migration non appliquée),
+    // on retombe sur l'INSERT direct pour ne pas casser l'UX.
+    const msg = String(error.message || '');
+    if (msg.includes('function') && msg.includes('does not exist')) {
+      const fullReason = details ? `${reasonCode}: ${details}` : reasonCode;
+      const { error: insErr } = await supa.from('reports').insert({
+        reporter_id: currentUser.id,
+        reporter_username: currentProfile?.username || null,
+        target_type: _reportTarget.type,
+        target_id: _reportTarget.id,
+        reason: fullReason
+      });
+      if (insErr) {
+        if (insErr.code === '23505') showToast('Tu as déjà signalé ce contenu', true);
+        else showToast('Erreur : ' + insErr.message, true);
+        return;
+      }
+      showToast('Signalement envoyé. Merci 🙏');
+      closeReportContentModal();
+      return;
+    }
+    showToast('Erreur : ' + (error.message || 'inconnue'), true);
     return;
   }
-  showToast('Signalement envoyé. Merci 🙏');
+
+  // data = { report_id, already_reported, moderation_state }
+  if (data && data.already_reported) {
+    showToast('Tu as déjà signalé ce contenu — merci 🙏');
+  } else if (data && data.moderation_state && data.moderation_state !== 'visible') {
+    showToast('Signalement envoyé. Le contenu a été masqué le temps de la revue.');
+  } else {
+    showToast('Signalement envoyé. Merci 🙏');
+  }
   closeReportContentModal();
 }
 
@@ -11648,6 +12501,15 @@ const Notif = {
         return `Ton article ${preview} a été publié 🎉`;
       case 'follow':
         return `${a} te suit`;
+      // v0.19.1 — Notifs de modération
+      case 'content_hidden':
+        if (n.target_type === 'article') return `Ton article ${preview} a été masqué le temps d'une revue de modération.`;
+        if (n.target_type === 'clip')    return `Ton clip ${preview} a été masqué le temps d'une revue de modération.`;
+        return `Ton contenu ${preview} a été masqué le temps d'une revue.`;
+      case 'content_restored':
+        if (n.target_type === 'article') return `Ton article ${preview} est de nouveau visible. ✅`;
+        if (n.target_type === 'clip')    return `Ton clip ${preview} est de nouveau visible. ✅`;
+        return `Ton contenu ${preview} est de nouveau visible.`;
       default:
         return `${a} a interagi avec ton contenu`;
     }
@@ -11656,6 +12518,13 @@ const Notif = {
   avatarHtml(n) {
     if (n.type === 'article_validated') {
       return '<div class="notif-item__avatar notif-item__avatar--system" aria-hidden="true">✓</div>';
+    }
+    // v0.19.1 — Avatar système pour les notifs de modération
+    if (n.type === 'content_hidden') {
+      return '<div class="notif-item__avatar notif-item__avatar--system" style="background:#FBF1ED;color:#7A2D1A;border:1px solid #E5B8A8" aria-hidden="true">⚠</div>';
+    }
+    if (n.type === 'content_restored') {
+      return '<div class="notif-item__avatar notif-item__avatar--system" style="background:#E0F0E5;color:#1F4025;border:1px solid #5C8A6E" aria-hidden="true">✓</div>';
     }
     const u = n.actor;
     if (u?.avatar_url) {
@@ -11743,9 +12612,19 @@ const Notif = {
       }
       targetArticleId = data.article_id;
     } else if (n.target_type === 'clip') {
-      // v0.10.0 : pas encore de notif clip, mais prêt pour futur
-      targetArticleId = null;
-      showToast('Clip introuvable', true);
+      // v0.19.1 — Ouvre l'article parent du clip (pas de page clip standalone)
+      const clip = clips.find(c => c.id === n.target_id);
+      if (clip && clip.articleId) {
+        targetArticleId = clip.articleId;
+      } else {
+        showToast('Clip introuvable', true);
+        return;
+      }
+    } else if (n.target_type === 'profile') {
+      // v0.10.0 — notif "follow" cible un profil
+      if (typeof openPublicProfile === 'function' && n.target_id) {
+        openPublicProfile(n.target_id);
+      }
       return;
     }
 
@@ -12052,6 +12931,60 @@ function bindV09Handlers() {
     openCharterModal();
   });
 
+  // v0.19.1 — Charte de modération
+  document.getElementById('moderationCharterClose')?.addEventListener('click', closeModerationCharter);
+  document.getElementById('moderationCharterBackdrop')?.addEventListener('click', e => {
+    if (e.target.id === 'moderationCharterBackdrop') closeModerationCharter();
+  });
+  document.getElementById('charterLinkToModeration')?.addEventListener('click', e => {
+    e.preventDefault();
+    closeCharterModal();
+    openModerationCharter();
+  });
+  document.getElementById('footerModerationCharterLink')?.addEventListener('click', e => {
+    e.preventDefault();
+    openModerationCharter();
+  });
+  document.getElementById('reportContentCharterLink')?.addEventListener('click', e => {
+    e.preventDefault();
+    openModerationCharter();
+  });
+
+  // v0.20.0 — À propos
+  document.getElementById('aboutClose')?.addEventListener('click', closeAboutModal);
+  document.getElementById('aboutBackdrop')?.addEventListener('click', e => {
+    if (e.target.id === 'aboutBackdrop') closeAboutModal();
+  });
+  document.getElementById('footerAboutLink')?.addEventListener('click', e => {
+    e.preventDefault();
+    openAboutModal();
+  });
+  document.getElementById('aboutLinkToModeration')?.addEventListener('click', e => {
+    e.preventDefault();
+    closeAboutModal();
+    openModerationCharter();
+  });
+  document.getElementById('aboutLinkToStats')?.addEventListener('click', e => {
+    e.preventDefault();
+    closeAboutModal();
+    openStatsModal();
+  });
+  document.getElementById('aboutLinkToFinancement')?.addEventListener('click', e => {
+    e.preventDefault();
+    closeAboutModal();
+    if (typeof switchView === 'function') switchView('financement');
+  });
+
+  // v0.20.0 — Stats publiques
+  document.getElementById('statsClose')?.addEventListener('click', closeStatsModal);
+  document.getElementById('statsBackdrop')?.addEventListener('click', e => {
+    if (e.target.id === 'statsBackdrop') closeStatsModal();
+  });
+  document.getElementById('footerStatsLink')?.addEventListener('click', e => {
+    e.preventDefault();
+    openStatsModal();
+  });
+
   // Profile editor
   document.getElementById('profileEditClose')?.addEventListener('click', closeProfileEditor);
   document.getElementById('profileEditCancel')?.addEventListener('click', closeProfileEditor);
@@ -12117,7 +13050,7 @@ function bindV09Handlers() {
   // Esc to close v0.9.0 modals
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    ['profileEditBackdrop','favoritesBackdrop','reportContentBackdrop','charterModalBackdrop'].forEach(id => {
+    ['profileEditBackdrop','favoritesBackdrop','reportContentBackdrop','charterModalBackdrop','moderationCharterBackdrop','aboutBackdrop','statsBackdrop'].forEach(id => {
       const el = document.getElementById(id);
       if (el && el.style.display === 'flex') el.style.display = 'none';
     });
@@ -13423,6 +14356,13 @@ function syncNavMenu() {
   if (contribBtn) contribBtn.style.display = showContrib ? 'flex' : 'none';
   if (myFinBtn) myFinBtn.style.display = showContrib ? 'flex' : 'none';
 
+  // v0.19.0 — Bouton Modération : visible si admin OU credibility_score >= 50 (peer reviewer)
+  const modBtn = document.getElementById('navModerationBtn');
+  if (modBtn) {
+    const eligible = connected && (admin || canPeerReview());
+    modBtn.style.display = eligible ? 'flex' : 'none';
+  }
+
   // Admin section
   const adminLabel = document.getElementById('navSectionAdmin');
   const adminSep = document.getElementById('navSepAdmin');
@@ -14097,6 +15037,9 @@ async function init() {
   // V0.9.7 — démarrer notifications si connecté
   if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); }
 
+  // v0.21.0 — Tour d'onboarding si premier passage
+  if (typeof Onboarding !== 'undefined') Onboarding.maybeShow();
+
   await loadCharter();
   // v0.6 : Load articles + themes + tones FIRST (main content)
   await loadArticleThemes();
@@ -14239,8 +15182,19 @@ async function init() {
     else if (h === '#devenir-membre') switchView('membre');
     else if (h === '#mon-financement') switchView('mon-financement');
     else if (h === '#archive') switchView('archive');
+    else if (h === '#charte-moderation') { if (typeof openModerationCharter === 'function') openModerationCharter(); }
+    else if (h === '#a-propos') { if (typeof openAboutModal === 'function') openAboutModal(); }
+    else if (h === '#stats') { if (typeof openStatsModal === 'function') openStatsModal(); }
     else if (!h.startsWith('#article/')) switchView('articles');
   });
+  // v0.19.1 + v0.20.0 — Hash initial : ouvrir directement la charte ou la page
+  if (window.location.hash === '#charte-moderation') {
+    if (typeof openModerationCharter === 'function') openModerationCharter();
+  } else if (window.location.hash === '#a-propos') {
+    if (typeof openAboutModal === 'function') openAboutModal();
+  } else if (window.location.hash === '#stats') {
+    if (typeof openStatsModal === 'function') openStatsModal();
+  }
 
   if (isAdmin()) {
     await loadSubmissions();
@@ -14257,6 +15211,10 @@ async function init() {
     // V0.9.7 — (re)bind notifications selon l'état
     if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); }
     else { Notif.unsubscribe(); Follow.reset(); }
+    // v0.21.0 — Onboarding au signup (event SIGNED_IN couvre login + signup)
+    if (event === 'SIGNED_IN' && currentUser && typeof Onboarding !== 'undefined') {
+      Onboarding.maybeShow();
+    }
     if (isAdmin()) {
       await loadSubmissions();
       await loadReports();
@@ -14338,7 +15296,11 @@ function fromDbClip(r) {
     publishedAt: r.published_at,
     tiktokViews: r.tiktok_views, tiktokLikes: r.tiktok_likes,
     tiktokComments: r.tiktok_comments, tiktokShares: r.tiktok_shares,
-    createdAt: r.created_at, updatedAt: r.updated_at
+    createdAt: r.created_at, updatedAt: r.updated_at,
+    // v0.19.0 — Modération
+    moderationState: r.moderation_state || 'visible',
+    moderationHiddenAt: r.moderation_hidden_at || null,
+    reportsCount: r.reports_count || 0
   };
 }
 
@@ -15635,6 +16597,286 @@ renderAdminDashboard = function() {
   });
 };
 
+// ═══════════════════════════════════════════════════════════
+// v0.19.0 — MODERATION : dashboard mod + peer review
+// ═══════════════════════════════════════════════════════════
+const Moderation = (() => {
+  // Tabs : 'queue' (mods seulement) | 'peer' (tous les peer reviewers)
+  let activeTab = null;
+  let queueData = [];     // [{ target_type, target_id, reports_count, ... }]
+  let peerData = [];      // [{ report_id, target_type, ... }]
+  let loading = false;
+
+  // Labels par code de raison
+  const REASON_LABELS = {
+    misinformation: 'Désinformation',
+    unsourced:      'Source douteuse',
+    harassment:     'Harcèlement',
+    spam:           'Spam',
+    off_topic:      'Hors-sujet',
+    copyright:      'Droit d\'auteur',
+    illegal:        'Contenu illégal',
+    other:          'Autre'
+  };
+  const TYPE_LABELS = { article: '📰 Article', clip: '✂️ Clip', comment: '💬 Commentaire', profile: '👤 Profil' };
+
+  function userIsMod()    { return isMod(); }
+  function userIsPeer()   { return canPeerReview(); }
+
+  async function open() {
+    if (!currentUser) { openAuthModal('login'); return; }
+    if (!userIsPeer() && !userIsMod()) {
+      showToast('Score de crédibilité insuffisant (50 minimum)', true);
+      return;
+    }
+    activeTab = userIsMod() ? 'queue' : 'peer';
+    queueData = [];
+    peerData = [];
+    openModal('moderationModal');
+    renderHeader();
+    renderTabs();
+    await loadActive();
+  }
+
+  function renderHeader() {
+    const title = document.getElementById('modPageTitle');
+    const lead  = document.getElementById('modPageLead');
+    if (!title || !lead) return;
+    if (userIsMod()) {
+      title.textContent = '🛡️ Modération';
+      lead.textContent  = 'Examine les signalements communautaires. Tu peux retirer un contenu, classer un signalement sans suite, ou laisser la peer review décider.';
+    } else {
+      title.textContent = '🤝 Aide la modération';
+      lead.textContent  = 'Ton score de Basitude te permet de voter sur les signalements en attente. Quorum 3 votes pour décider — valide ou pas un problème.';
+    }
+  }
+
+  function renderTabs() {
+    const row = document.getElementById('modTabsRow');
+    if (!row) return;
+    const tabs = [];
+    if (userIsMod()) tabs.push({ key: 'queue', label: '📋 File mod', count: queueData.length });
+    if (userIsPeer()) tabs.push({ key: 'peer', label: '🗳️ Peer review', count: peerData.length });
+    row.innerHTML = tabs.map(t =>
+      `<button class="mod-tab-pill ${activeTab === t.key ? 'mod-tab-pill--active' : ''}" data-mod-tab="${t.key}">${t.label}${t.count ? ` <span class="count">${t.count}</span>` : ''}</button>`
+    ).join('');
+    row.querySelectorAll('[data-mod-tab]').forEach(b => b.addEventListener('click', () => {
+      activeTab = b.dataset.modTab;
+      renderTabs();
+      loadActive();
+    }));
+  }
+
+  async function loadActive() {
+    const content = document.getElementById('modTabContent');
+    if (!content) return;
+    content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">⏳</div>Chargement…</div>`;
+    if (loading) return;
+    loading = true;
+    try {
+      if (activeTab === 'queue') {
+        const { data, error } = await supa.rpc('get_moderation_queue');
+        if (error) {
+          content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">⚠️</div><strong>Erreur de chargement</strong><div style="margin-top:6px;font-size:12px">${escapeHtml(error.message || 'inconnue')}.<br/>La migration v0.19.0 a-t-elle été appliquée ?</div></div>`;
+          loading = false; return;
+        }
+        queueData = data || [];
+        renderQueue();
+      } else if (activeTab === 'peer') {
+        const { data, error } = await supa.rpc('get_peer_review_queue', { p_limit: 30 });
+        if (error) {
+          content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">⚠️</div><strong>Erreur de chargement</strong><div style="margin-top:6px;font-size:12px">${escapeHtml(error.message || 'inconnue')}.<br/>La migration v0.19.0 a-t-elle été appliquée ?</div></div>`;
+          loading = false; return;
+        }
+        peerData = data || [];
+        renderPeer();
+      }
+      renderTabs();
+    } catch (e) {
+      content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">⚠️</div>Erreur : ${escapeHtml(String(e))}</div>`;
+    } finally {
+      loading = false;
+    }
+  }
+
+  function renderQueue() {
+    const content = document.getElementById('modTabContent');
+    if (!content) return;
+    if (!queueData.length) {
+      content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">✨</div><strong>File vide</strong><div style="margin-top:6px;font-size:13px">Aucun signalement en attente. Bon vent.</div></div>`;
+      return;
+    }
+    content.innerHTML = `<div class="mod-queue">${queueData.map(itemQueueHtml).join('')}</div>`;
+    bindQueueActions();
+  }
+
+  function itemQueueHtml(it) {
+    const highCls = (it.high_severity_count || 0) > 0 ? 'mod-queue-item--high' : '';
+    const reasons = (it.reason_codes || []).map(rc => {
+      const high = rc === 'harassment' || rc === 'illegal';
+      return `<span class="mod-queue-item__reason-tag ${high ? 'mod-queue-item__reason-tag--high' : ''}">${escapeHtml(REASON_LABELS[rc] || rc)}</span>`;
+    }).join('');
+    const stateBadge = it.moderation_state && it.moderation_state !== 'visible'
+      ? `<span class="mod-flag mod-flag--${it.moderation_state === 'hidden_auto' ? 'auto' : 'mod'}">${it.moderation_state === 'hidden_auto' ? 'Masqué auto' : 'Masqué par mod'}</span>`
+      : '';
+    return `<div class="mod-queue-item ${highCls}" data-target-type="${escapeHtml(it.target_type)}" data-target-id="${escapeHtml(it.target_id)}">
+      <div class="mod-queue-item__head">
+        <span class="mod-queue-item__type">${TYPE_LABELS[it.target_type] || it.target_type}</span>
+        <span class="mod-queue-item__author">par <strong>${escapeHtml(it.author_username || '?')}</strong></span>
+        ${stateBadge}
+      </div>
+      <p class="mod-queue-item__preview">${escapeHtml(it.preview || '(aucun aperçu)')}</p>
+      <div class="mod-queue-item__reasons">${reasons}</div>
+      <div class="mod-queue-item__meta">
+        <span>📊 ${it.reports_count} signalement${it.reports_count > 1 ? 's' : ''}</span>
+        ${(it.high_severity_count || 0) > 0 ? `<span style="color:#B83A2D;font-weight:600">⚠️ ${it.high_severity_count} priorité haute</span>` : ''}
+        <span>⏱ ${timeAgo(it.last_reported_at)}</span>
+      </div>
+      <div class="mod-queue-item__actions">
+        ${it.target_type === 'article' ? `<button class="btn btn--ghost btn--sm" data-mod-view-article="${escapeHtml(it.target_id)}">👁 Ouvrir</button>` : ''}
+        ${it.target_type === 'clip'    ? `<button class="btn btn--ghost btn--sm" data-mod-view-clip="${escapeHtml(it.target_id)}">👁 Voir article parent</button>` : ''}
+        ${it.target_type === 'comment' ? `<button class="btn btn--ghost btn--sm" data-mod-view-comment="${escapeHtml(it.target_id)}">👁 Voir l'article</button>` : ''}
+        <button class="btn btn--danger btn--sm" data-mod-act="hide">🚫 Masquer</button>
+        <button class="btn btn--success btn--sm" data-mod-act="resolve_reports">✅ Valider signalement (masquer)</button>
+        <button class="btn btn--ghost btn--sm" data-mod-act="dismiss_reports">❌ Classer sans suite</button>
+        ${it.moderation_state === 'hidden_auto' || it.moderation_state === 'hidden_mod' ? `<button class="btn btn--ghost btn--sm" data-mod-act="unhide">↩️ Rendre visible</button>` : ''}
+      </div>
+    </div>`;
+  }
+
+  function bindQueueActions() {
+    document.querySelectorAll('[data-mod-view-article]').forEach(b => {
+      b.addEventListener('click', () => {
+        const id = b.dataset.modViewArticle;
+        const a = articles.find(x => x.id === id);
+        if (!a) { showToast('Article introuvable côté front. Rafraîchis.', true); return; }
+        closeModal('moderationModal');
+        openArticlePage(a.slug);
+      });
+    });
+    document.querySelectorAll('[data-mod-view-clip]').forEach(b => {
+      b.addEventListener('click', () => {
+        const id = b.dataset.modViewClip;
+        const c = clips.find(x => x.id === id);
+        if (!c) { showToast('Clip introuvable côté front. Rafraîchis.', true); return; }
+        const a = articles.find(x => x.id === c.articleId);
+        if (!a) { showToast('Article parent introuvable.', true); return; }
+        closeModal('moderationModal');
+        openArticlePage(a.slug);
+      });
+    });
+    document.querySelectorAll('[data-mod-view-comment]').forEach(b => {
+      b.addEventListener('click', async () => {
+        const id = b.dataset.modViewComment;
+        const { data, error } = await supa.from('comments').select('article_id').eq('id', id).maybeSingle();
+        if (error || !data?.article_id) { showToast('Commentaire introuvable.', true); return; }
+        const a = articles.find(x => x.id === data.article_id);
+        if (!a) { showToast('Article parent introuvable.', true); return; }
+        closeModal('moderationModal');
+        openArticlePage(a.slug);
+        setTimeout(() => {
+          const el = document.getElementById('comment-' + id);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.style.background = 'var(--accent-soft)';
+            setTimeout(() => el.style.background = '', 1800);
+          }
+        }, 700);
+      });
+    });
+    document.querySelectorAll('[data-mod-act]').forEach(b => {
+      b.addEventListener('click', async () => {
+        const card = b.closest('[data-target-type]');
+        if (!card) return;
+        const action = b.dataset.modAct;
+        const targetType = card.dataset.targetType;
+        const targetId = card.dataset.targetId;
+        const verbs = {
+          hide:            'Masquer ce contenu ?',
+          unhide:          'Restaurer la visibilité publique ?',
+          resolve_reports: 'Valider les signalements (masquage + pénalité crédibilité auteur) ?',
+          dismiss_reports: 'Classer les signalements sans suite ?'
+        };
+        if (!confirm(verbs[action] || 'Confirmer ?')) return;
+        let reason = null;
+        if (action === 'hide' || action === 'resolve_reports') {
+          reason = prompt('Raison (facultatif, transmise dans le journal de modération) :', '');
+          if (reason === null) return;
+        }
+        const { error } = await supa.rpc('mod_apply_action', {
+          p_target_type: targetType,
+          p_target_id:   targetId,
+          p_action:      action,
+          p_reason:      reason || null,
+          p_related_report_id: null
+        });
+        if (error) { showToast('Erreur : ' + (error.message || 'inconnue'), true); return; }
+        showToast('Action appliquée ✓');
+        await Promise.all([loadActive(), loadArticles(), loadClips()]);
+      });
+    });
+  }
+
+  function renderPeer() {
+    const content = document.getElementById('modTabContent');
+    if (!content) return;
+    if (!peerData.length) {
+      content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">✨</div><strong>Rien à examiner</strong><div style="margin-top:6px;font-size:13px">Aucun signalement à reviewer pour le moment.</div></div>`;
+      return;
+    }
+    content.innerHTML = `<div class="mod-queue">${peerData.map(itemPeerHtml).join('')}</div>`;
+    bindPeerActions();
+  }
+
+  function itemPeerHtml(r) {
+    const high = r.severity === 'high';
+    const v = r.current_votes || { valid: 0, invalid: 0 };
+    return `<div class="mod-queue-item ${high ? 'mod-queue-item--high' : ''}" data-report-id="${escapeHtml(r.report_id)}">
+      <div class="mod-queue-item__head">
+        <span class="mod-queue-item__type">${TYPE_LABELS[r.target_type] || r.target_type}</span>
+        <span class="mod-queue-item__author">par <strong>${escapeHtml(r.author_username || '?')}</strong></span>
+        <span class="mod-queue-item__reason-tag ${high ? 'mod-queue-item__reason-tag--high' : ''}">${escapeHtml(REASON_LABELS[r.reason_code] || r.reason_code)}</span>
+      </div>
+      <p class="mod-queue-item__preview">${escapeHtml(r.preview || '(aucun aperçu)')}</p>
+      ${r.details ? `<p class="pr-card__details">Précisions du reporteur : « ${escapeHtml(r.details)} »</p>` : ''}
+      <div class="pr-card__votes">
+        <span>👍 <b>${v.valid || 0}</b> valides</span>
+        <span>👎 <b>${v.invalid || 0}</b> pas un problème</span>
+        <span>Quorum : 3</span>
+      </div>
+      <div class="mod-queue-item__actions">
+        <button class="btn btn--success btn--sm" data-peer-vote="valid">✅ Valide (problème)</button>
+        <button class="btn btn--ghost btn--sm" data-peer-vote="invalid">❌ Pas un problème</button>
+        <button class="btn btn--ghost btn--sm" data-peer-vote="skip">⏭️ Passer</button>
+      </div>
+    </div>`;
+  }
+
+  function bindPeerActions() {
+    document.querySelectorAll('[data-peer-vote]').forEach(b => {
+      b.addEventListener('click', async () => {
+        const card = b.closest('[data-report-id]');
+        if (!card) return;
+        const verdict = b.dataset.peerVote;
+        const reportId = card.dataset.reportId;
+        const { data, error } = await supa.rpc('submit_peer_review', {
+          p_report_id: reportId,
+          p_verdict:   verdict
+        });
+        if (error) { showToast('Erreur : ' + (error.message || 'inconnue'), true); return; }
+        const dec = data && data.decision;
+        if (dec === 'resolved') showToast('Quorum atteint → contenu masqué.');
+        else if (dec === 'dismissed') showToast('Quorum atteint → signalement classé.');
+        else showToast('Vote enregistré (' + (data?.valid_count || 0) + ' / ' + (data?.invalid_count || 0) + ').');
+        await loadActive();
+      });
+    });
+  }
+
+  return { open, refresh: loadActive };
+})();
+window.Moderation = Moderation;
+
 // ═══ EVENT BINDINGS ═══
 document.addEventListener('DOMContentLoaded', () => {
   // Theme
@@ -15645,6 +16887,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // V0.9.7 — Wiring notifications
   if (typeof Notif !== 'undefined') Notif.bindHandlers();
+
+  // v0.21.0 — Wiring onboarding
+  if (typeof Onboarding !== 'undefined') Onboarding.bindHandlers();
 
   // ═══ v0.7 NAV MENU ═══
   document.getElementById('navMenuBtn')?.addEventListener('click', e => {
@@ -15735,6 +16980,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('navAdminDashBtn')?.addEventListener('click', () => {
     closeNavMenu();
     openAdminDashboard();
+  });
+  // v0.19.0 — Dashboard modération
+  document.getElementById('navModerationBtn')?.addEventListener('click', () => {
+    closeNavMenu();
+    if (typeof Moderation !== 'undefined') Moderation.open();
   });
   document.getElementById('navCalendarBtn')?.addEventListener('click', () => {
     closeNavMenu();

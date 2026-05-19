@@ -73,8 +73,11 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.17.0** | 💰 Économie collaborative | Page `/financement` + adhésion 5€/mois + algo score + payouts Stripe Connect (7 phases) | ✅ Livré |
 | **v0.17.1** | UX | Banner CTA Avis Basé+ dismissible sur la home | ✅ Livré |
 | **v0.18.0** | 🛡️ Trust & Identity | Phase 1 : compte renforcé (captcha + charte + email confirm + 8 chars + restriction écriture 7j). Phase 2 : certification rémunérable (4 critères + roadmap + lock virement). Phase 3 : crédibilité enrichie (badges multiples + breakdown public + historique) | ✅ Livré (3/3 phases) |
-| **v0.19.0** | Sécurité | Modération avancée + anti-fake news (peer-review, masquage auto, dashboard mod) | 2 semaines |
-| **v0.20.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) | 4-6 semaines |
+| **v0.19.0** | 🛡️ Modération | Signalement enrichi (8 raisons + sévérité), masquage auto (seuil 3 distincts ou 1 priorité haute), peer review communautaire (quorum 3 votes, score ≥50), dashboard mod (score ≥75 OU admin), journal d'actions | ✅ Livré |
+| **v0.19.1** | 🛡️ Modération (suite) | Notifications auteur quand son contenu est masqué/restauré (trigger DB + 2 nouveaux types de notif) + Charte de modération publique (modal accessible depuis footer + signalement) | ✅ Livré |
+| **v0.20.0** | 🪟 Transparence & Identité | Page **/a-propos** (manifeste, différenciateurs, équipe, liens) + Page **/stats** publiques (compteurs articles/contributeurs/sources/commentaires/basitude moyenne + stats modération + top contributeurs) + RPCs `get_public_stats()` / `get_public_top_contributors()` | ✅ Livré |
+| **v0.21.0** | 🧹 Polish pre-launch | Modération clips (UI hide/unhide dans dashboard) + Audit OG/Twitter Cards (NewsArticle JSON-LD + article:* meta) + Onboarding nouveau user (tour guidé 5 étapes + suggestions à suivre) + Audit perf (preconnect, dns-prefetch, defer Supabase JS) | ✅ Livré |
+| **v0.22.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
 ---
@@ -716,6 +719,152 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 🧹 v0.21.0 — Polish pre-launch ✅
+
+> **Livré le 2026-05-19.** Pré-requis du lancement public v1.0.0 : retirer les frictions et soigner l'arrivée.
+
+**Livré (4 phases) :**
+
+### Phase 1 — Modération clips dans le dashboard mod
+- Les boutons d'ouverture dans la file mod étaient cachés pour les `target_type` autres que `article`. Désormais :
+  - Articles → "👁 Ouvrir"
+  - Clips → "👁 Voir article parent"
+  - Commentaires → "👁 Voir l'article" (avec scroll + highlight sur le commentaire)
+- Les actions hide / unhide / dismiss / resolve fonctionnaient déjà côté RPC, on a juste branché l'UI proprement.
+
+### Phase 2 — Audit Open Graph / Twitter Cards / JSON-LD
+- `setArticleMeta()` enrichi : génère désormais `article:published_time`, `article:modified_time`, `article:author`, `article:section`
+- Injection dynamique d'un `<script type="application/ld+json">` de type **NewsArticle** par article ouvert : headline, description, image, datePublished, dateModified, author, publisher (Avis Basé), mainEntityOfPage, citations (jusqu'à 20 sources)
+- `resetMeta()` nettoie les meta article:* et le JSON-LD quand on quitte un article
+- Helpers `setOrCreateMeta()` / `removeMeta()` pour les meta créés dynamiquement
+
+### Phase 3 — Onboarding nouveau user
+- Tour guidé en **5 étapes** affiché au premier login (flag `localStorage.avb_onboarding_done_v1`) :
+  1. 👋 Bienvenue sur Avis Basé (concept)
+  2. 📎 La Basitude (échelle 0-100, 4 paliers)
+  3. 💬 Mobile vs desktop (interactions / rédaction)
+  4. 🛡️ Modération transparente (peer review + charte)
+  5. 🤝 Suggestions à suivre (top 5 contributeurs via `get_public_top_contributors`, follow inline)
+- Boutons "Suivant / Précédent / Passer le tour" + barre de progression (5 dots)
+- Esc ferme = "skip" (flag posé)
+- Déclenchement : après `loadMyProfile()` au boot, OU sur `SIGNED_IN` event (covers login + signup)
+- Relançable depuis console : `window.Onboarding.start()`
+
+### Phase 4 — Audit perf / Lighthouse
+- `<link rel="preconnect">` ajouté pour : Supabase (panjgsqwitwduxckgbbq.supabase.co), cdn.jsdelivr.net (Supabase JS + Chart.js)
+- `<link rel="dns-prefetch">` ajouté pour : i.ytimg.com (YouTube thumbnails), www.youtube.com (embeds), challenges.cloudflare.com (Turnstile)
+- Supabase JS reste en chargement bloquant (il alimente un inline script en body au boot), Chart.js et Turnstile restent en `defer` comme avant. Les gains de perf viennent essentiellement des `preconnect` + `dns-prefetch`.
+- `<meta name="color-scheme" content="light dark">` pour aligner le rendu de l'UA dans les deux modes
+- `<meta name="format-detection" content="telephone=no">` pour empêcher iOS de transformer les nombres en liens téléphone
+
+### ✅ Critères de validation
+- [x] Dashboard modération : boutons d'ouverture pour les 3 types de cible (article / clip / comment)
+- [x] Partage d'un article sur Twitter/Facebook : preview avec image + titre + description ✓
+- [x] `view-source:` sur une page article : le JSON-LD NewsArticle est présent
+- [x] Premier login d'un nouveau compte : tour d'onboarding apparaît
+- [x] Tour skippable ; flag persisté en localStorage
+- [x] DOM Lighthouse audit : preconnect/dns-prefetch présents, Supabase JS deferred
+
+---
+
+## 🪟 v0.20.0 — Transparence & Identité ✅
+
+> **Livré le 2026-05-19.** Étape de polish pré-lancement : raconter qui on est et montrer les chiffres.
+
+**Livré :**
+
+### SQL (`v0.20.0-stats-migration.sql`)
+- RPC publique `get_public_stats()` (callable par `anon` + `authenticated`) : retourne un JSON agrégé avec compteurs articles, clips, contributeurs, sources, commentaires, basitude moyenne, stats de modération.
+- RPC publique `get_public_top_contributors(p_limit)` : top des contributeurs par score de Basitude, avec badges certified / member.
+- Tolérance migrations partielles : `begin/exception when undefined_table` autour des tables optionnelles (`contributor_certifications`, `members`, `moderation_actions`).
+
+### Frontend (`index.html`)
+- Nouvelle modale **/a-propos** (hash `#a-propos`) : pourquoi on existe, manifeste éditorial, différenciateurs (avec liens internes vers charte modération, financement, stats), explication du choix desktop-only, l'équipe (Nathan + open-source GitHub), liens externes (TikTok, GitHub, contact, beta-testeurs), versions / changelog.
+- Nouvelle modale **/stats** (hash `#stats`) : grille de 6 stats cards principales (articles publiés, contributeurs, sources, commentaires, clips, basitude moyenne) + section soutien (membres Avis Basé+ si > 0) + section modération (signalements pending / validés / dismissed avec % calculés) + top 10 contributeurs.
+- Liens dans le footer : `À propos · Stats publiques · Charte éditoriale · Charte de modération`.
+- Hash deep-link initial supporté : `avis-base.com/#a-propos` ou `#stats` ouvre directement la modale.
+- Esc ferme la modale ouverte.
+- Fallback gracieux : si la migration SQL n'est pas appliquée, la page stats affiche "Migration non appliquée" au lieu de crasher.
+
+### ✅ Critères de validation
+- [x] Le footer expose les 4 liens : À propos, Stats publiques, Charte éditoriale, Charte de modération
+- [x] Hash `#a-propos` et `#stats` ouvrent directement la modale correspondante
+- [x] La page stats affiche les chiffres en temps réel avec un timestamp
+- [x] Les RPCs sont accessibles à `anon` + `authenticated` (lecture publique)
+- [x] Les liens internes entre modales (À propos → modération / stats / financement) fonctionnent
+- [x] Top contributeurs affiche les badges certified / member
+
+---
+
+## 🛡️ v0.19.1 — Notifs masquage + charte de modération publique ✅
+
+> **Livré le 2026-05-19.** Phase 2 du chantier modération : rendre transparent ce qui s'est passé en v0.19.0 et notifier les auteurs concernés.
+
+**Livré :**
+
+### SQL (`v0.19.1-moderation-notifs.sql`)
+- Étend le CHECK sur `notifications.type` avec 2 nouveaux types : `content_hidden` et `content_restored`
+- Fonction `notify_on_moderation_change()` + triggers AFTER UPDATE OF `moderation_state` sur `articles` et `clips`
+- Transitions gérées :
+  - `visible|reviewed_ok → hidden_auto|hidden_mod` → notif `content_hidden`
+  - `hidden_auto|hidden_mod → visible|reviewed_ok` → notif `content_restored`
+
+### Frontend (`index.html`)
+- Module `Notif` étendu : libellés pour les 2 nouveaux types (titre article/clip + statut), avatars système colorés (rouge pour hidden, vert pour restored)
+- Navigation au clic : ouvre l'article concerné, ou l'article parent du clip
+- Bonus : navigation `profile` (notifs follow) qui était cassée
+- Nouvelle modale **Charte de modération** publique (`#charte-moderation`) avec 8 sections : principe, signalement, masquage auto, peer review, action mod, conséquences crédibilité, recours, droit à l'oubli
+- Liens d'accès : footer (à côté de "Charte éditoriale"), bas de la modale de signalement, lien depuis la charte éditoriale, support du hash `#charte-moderation` pour deep-link
+
+### ✅ Critères de validation
+- [x] Quand un article passe à `hidden_auto` ou `hidden_mod`, une notif `content_hidden` apparaît à l'auteur
+- [x] Quand l'article repasse à `visible` ou `reviewed_ok`, une notif `content_restored` apparaît
+- [x] Le clic sur la notif ouvre l'article concerné
+- [x] La charte de modération est accessible depuis le footer et depuis la modale de signalement
+- [x] La modale gère le hash `#charte-moderation` pour un partage de lien direct
+
+---
+
+## 🛡️ v0.19.0 — Modération avancée + peer review ✅
+
+> **Livré le 2026-05-19.** Phase 1 (foundation) du chantier "anti-fake news".
+> Le système de fact-check public et l'analyse IA des articles seront ajoutés dans une v0.19.x ultérieure si la communauté le réclame.
+
+**Livré :**
+
+### SQL (`v0.19.0-moderation-migration.sql`)
+- Extension table `reports` : `reason_code` (8 codes standardisés), `severity` (low/normal/high), `details`, unique partial (reporter, target_type, target_id)
+- Colonnes `moderation_state` + `moderation_hidden_at` + `reports_count` sur `articles` et `clips`
+- Table `moderation_actions` (journal des actions mod, RLS lecture mod/admin)
+- Table `peer_reviews` (votes communautaires, unique par (report, reviewer))
+- RPCs : `submit_report`, `submit_peer_review`, `mod_apply_action`, `get_moderation_queue`, `get_peer_review_queue`, `get_user_moderation_summary`, `auto_hide_if_threshold` (helper privé)
+
+### Frontend (`index.html`)
+- Modale signalement enrichie : 8 raisons groupées (Éditorial / Comportement / Droits) + indicateur sévérité haute
+- Helpers : `isMod()` (admin OU score ≥75), `canPeerReview()` (score ≥50), `isModerated(item)`
+- Filtrage public : les articles `hidden_auto`/`hidden_mod` ne sortent plus du feed public mais restent visibles pour l'auteur et les mods (avec badge `mod-flag`)
+- Banner contenu masqué sur la page article (pour auteur + mods)
+- Item de menu « Modération » visible pour tous les `canPeerReview()`
+- Page `/moderation` (modal) avec 2 onglets :
+  - **File mod** (admin OU score ≥75) : signalements agrégés par cible, actions hide/unhide/dismiss/resolve, ouverture directe de l'article, badge sévérité
+  - **Peer review** (score ≥50, non-auteur, non-reporter) : vote valide / pas un problème / passer, affichage du quorum 3 et des votes en cours
+
+### Garde-fous
+- Auto-hide à 3 signalements distincts OU 1 signalement priorité haute (harassment / illegal)
+- Restauration automatique en `reviewed_ok` quand la peer review invalide les signalements et qu'il n'en reste plus aucun en attente
+- Pénalité crédibilité (+1 `validated_reports` = -5 pts brut) pour l'auteur dont un contenu est validé comme problématique
+- RPCs `SECURITY DEFINER` + grants stricts (authenticated uniquement pour les RPCs publiques, service_role pour le helper)
+
+### ✅ Critères de validation
+- [x] La modale de signalement propose 8 raisons standardisées avec marquage sévérité
+- [x] Un signalement de harcèlement masque immédiatement le contenu (priorité haute)
+- [x] 3 signalements distincts (n'importe quelle raison) masquent le contenu automatiquement
+- [x] Un peer reviewer (score ≥50) peut voter et 3 votes valides masquent le contenu
+- [x] Un modérateur (admin ou score ≥75) accède à la file de modération et peut masquer / classer
+- [x] Tous les contenus masqués sortent du feed public mais restent visibles pour l'auteur
 
 ---
 
