@@ -2,10 +2,10 @@
 // Strategy: network-first for HTML (so updates apply instantly like big social apps),
 // cache-first for static assets, no caching for Supabase API calls.
 //
-// v0.29.0 — Bump VERSION pour buster les caches a chaque release importante.
-//           Feed personnalise (interets + auteurs suivis) + onboarding interets.
+// v0.30.0 — Bump VERSION pour buster les caches a chaque release importante.
+//           Web Push notifications (VAPID, SW push handler, notificationclick).
 
-const VERSION = 'v0.29.0';
+const VERSION = 'v0.30.0';
 const SHELL_CACHE = `avis-shell-${VERSION}`;
 const STATIC_CACHE = `avis-static-${VERSION}`;
 
@@ -113,4 +113,44 @@ async function cacheFirst(request, cacheName) {
 // Listen for skipWaiting message from page (manual update trigger)
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
+});
+
+// v0.30.0 — Web Push notifications
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+  let payload = {};
+  try { payload = event.data.json(); }
+  catch { payload = { title: 'Avis Basé', body: event.data.text() }; }
+
+  const title = payload.title || 'Avis Basé';
+  const options = {
+    body: payload.body || '',
+    icon: payload.icon || '/icon-192.png',
+    badge: payload.badge || '/icon-72.png',
+    tag: payload.tag || 'avis-base',
+    data: { url: payload.url || '/' },
+    requireInteraction: false,
+    silent: false,
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil((async () => {
+    const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    // Si une fenetre Avis Base est deja ouverte, on la focus et navigate
+    for (const client of clientsList) {
+      if (client.url.includes(self.location.origin)) {
+        await client.focus();
+        if ('navigate' in client) {
+          try { await client.navigate(targetUrl); } catch {}
+        }
+        return;
+      }
+    }
+    // Sinon ouvre un nouvel onglet
+    await self.clients.openWindow(targetUrl);
+  })());
 });
