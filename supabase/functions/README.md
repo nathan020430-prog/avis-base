@@ -1,11 +1,12 @@
-# Edge Functions — v0.17.0 Économie collaborative
+# Edge Functions — v0.17.0+ Économie collaborative
 
-5 Edge Functions Deno + Stripe SDK pour câbler l'économie collaborative.
+6 Edge Functions Deno + Stripe SDK pour câbler l'économie collaborative.
 Skeletons fonctionnels — il manque uniquement la config Stripe pour les activer.
 
 | Function | Rôle | Auth | Cron-callable |
 |---|---|---|---|
 | `create-checkout-session` | Crée une session Stripe Checkout (subscription 5€/mois ou tip one-shot) | JWT user | non |
+| `create-portal-session` | Crée une session Stripe Billing Portal (cancel, payment method, invoices) | JWT user | non |
 | `stripe-webhook` | Reçoit les events Stripe (subscription, payment_intent) et écrit dans `members` / `tips` / `contributor_balance` | signature Stripe | non |
 | `compute-monthly-payout` | Snapshot du mois clos : calcule pool et parts par article, crédite les balances | service_role | **oui** (pg_cron 1er du mois 3h) |
 | `request-payout` | Demande de virement Stripe Connect Transfer (si balance ≥ 20 € + KYC) | JWT user | non |
@@ -45,6 +46,10 @@ Les variables `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` s
 4. **Stripe Connect** (Phase 7, pour les payouts)
    - Settings → Connect → Activate Connect platform
    - Choisir Express → activer Transfers capability
+5. **Customer Portal** (v0.22.0, pour la gestion d'abonnement par l'user)
+   - Settings → Billing → Customer portal → **Activate test link**
+   - Activer les fonctionnalités à autoriser : annulation, mise à jour de la méthode de paiement, historique des factures
+   - Pas de variable d'env à set : `create-portal-session` n'utilise que `STRIPE_SECRET_KEY` + `SITE_URL`
 
 ## Déploiement
 
@@ -54,8 +59,9 @@ npm i -g supabase
 supabase login
 supabase link --project-ref <project-ref>
 
-# Déployer les 5 fonctions
+# Déployer les 6 fonctions
 supabase functions deploy create-checkout-session
+supabase functions deploy create-portal-session
 supabase functions deploy stripe-webhook --no-verify-jwt
 supabase functions deploy compute-monthly-payout --no-verify-jwt
 supabase functions deploy request-payout

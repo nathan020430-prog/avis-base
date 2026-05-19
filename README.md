@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.22.0** — Finance — Customer Portal Stripe : nouvelle Edge Function `create-portal-session` + section "Mon adhésion" sur `/mon-financement` (statut, prochain renouvellement, bouton "Gérer mon abonnement" via Stripe Billing Portal) + historique des tips reçus en tant que contributeur, agrégé par mois.
 - **v0.21.1** — Polish RGPD : bandeau cookies/RGPD informatif (sticky-bottom dismissible) + page Changelog publique (modale `#changelog` accessible depuis footer / À propos / hash deep-link). Footer enrichi à 5 liens (À propos · Stats · Changelog · Charte éditoriale · Charte de modération).
 - **v0.21.0** — Polish pre-launch : modération clips dans le dashboard mod (ouverture parent article/comment) + audit SEO (NewsArticle JSON-LD par article + meta `article:*`) + onboarding nouveau user (tour guidé 5 étapes + suggestions follow) + audit perf (preconnect Supabase/CDN, dns-prefetch YouTube/Cloudflare, `defer` sur Supabase JS, color-scheme).
 - **v0.20.0** — Transparence & Identité : page **/a-propos** (manifeste, différenciateurs, équipe, liens) + page **/stats** publiques (compteurs articles/contributeurs/sources/commentaires/basitude moyenne + stats modération + top 10 contributeurs). RPCs `get_public_stats()` / `get_public_top_contributors()` ouvertes à `anon`.
@@ -116,4 +117,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.21.1
+© Avis Basé · Beta · v0.22.0

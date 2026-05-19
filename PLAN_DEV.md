@@ -78,7 +78,8 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.20.0** | 🪟 Transparence & Identité | Page **/a-propos** (manifeste, différenciateurs, équipe, liens) + Page **/stats** publiques (compteurs articles/contributeurs/sources/commentaires/basitude moyenne + stats modération + top contributeurs) + RPCs `get_public_stats()` / `get_public_top_contributors()` | ✅ Livré |
 | **v0.21.0** | 🧹 Polish pre-launch | Modération clips (UI hide/unhide dans dashboard) + Audit OG/Twitter Cards (NewsArticle JSON-LD + article:* meta) + Onboarding nouveau user (tour guidé 5 étapes + suggestions à suivre) + Audit perf (preconnect, dns-prefetch, defer Supabase JS) | ✅ Livré |
 | **v0.21.1** | 🪟 Polish RGPD | Bandeau cookies informatif (sticky-bottom dismissible, lien vers /confidentialite.html) + Page Changelog publique (modale `#changelog` reliée depuis footer + /a-propos) | ✅ Livré |
-| **v0.22.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
+| **v0.22.0** | 💰 Finance — Customer Portal | Nouvelle Edge Function `create-portal-session` (Stripe Billing Portal) + section "Mon adhésion Avis Basé+" sur `/mon-financement` (statut, prochain renouvellement, bouton "Gérer mon abonnement") + historique des tips reçus en tant que contributeur, agrégé par mois | ✅ Livré |
+| **v0.23.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
 ---
@@ -720,6 +721,48 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 💰 v0.22.0 — Finance : Customer Portal Stripe ✅
+
+> **Livré le 2026-05-19.** Le contributeur peut maintenant **gérer son abonnement Avis Basé+** (annuler, mettre à jour sa CB, voir ses factures) directement depuis `/mon-financement`, sans passer par un mail ou un support.
+
+**Livré :**
+
+### Edge Function
+- Nouvelle fonction `create-portal-session` : crée une session Stripe Billing Portal pour le user authentifié (cherche son `stripe_customer_id` dans `members`, retourne l'URL Stripe à utiliser pour redirect).
+- Gestion d'erreur dédiée si le Customer Portal n'est pas activé côté Stripe Dashboard (hint clair dans la réponse).
+- `return_url` pointe sur `/#mon-financement` pour que l'user revienne directement sur son dashboard.
+- Documenté dans `supabase/functions/README.md` (tableau + setup Stripe).
+
+### Frontend `/mon-financement`
+- Nouvelle section **"💛 Mon adhésion Avis Basé+"** entre le hero et les cards :
+  - Statut affiché en chip coloré : Active / Annulation programmée / Impayé / Annulée / Inactive
+  - Date de prochain renouvellement, ou date de fin si annulé
+  - Bouton **"⚙️ Gérer mon abonnement"** → ouvre le Stripe Customer Portal
+  - Si pas membre : CTA "Devenir membre +" qui ouvre `/devenir-membre`
+  - Si abonnement annulé : CTA "Redevenir membre"
+- Nouvelle sous-section **"🎁 Tips reçus en tant que contributeur"** :
+  - Affichée uniquement si le user a reçu au moins un tip
+  - Total cumulé + nombre de dons
+  - Agrégation par mois (12 derniers mois max)
+  - Note : "crédités sur ta cagnotte au prochain calcul mensuel"
+- Fetch additionnel dans `MonFin.loadFromSupabase()` :
+  - `members` (full row : status, customer_id, period_end, cancel_at_period_end, started_at)
+  - `tips` filtrés sur `target_user_id = moi` OU `target_article_id IN mes articles publiés`, avec dédup et aggregation par mois
+
+### Setup Stripe à faire en prod (avant activation)
+1. **Activer Customer Portal** : Stripe Dashboard → Settings → Billing → Customer portal → Activate. Pas de variable d'env supplémentaire à set, juste cliquer.
+2. **Déployer la nouvelle Edge Function** : `supabase functions deploy create-portal-session`
+3. Tester avec un compte d'essai en mode test Stripe.
+
+### ✅ Critères de validation
+- [x] Si je suis membre actif, la section "Mon adhésion" affiche mon statut + prochaine échéance
+- [x] Le bouton "Gérer mon abonnement" appelle l'Edge Function et redirige vers Stripe Portal
+- [x] Si pas membre, la section montre un CTA discret vers /devenir-membre
+- [x] L'historique des tips reçus apparaît uniquement si j'en ai reçu, agrégé par mois
+- [x] L'Edge Function gère le cas "Customer Portal non activé" avec un message clair
 
 ---
 
