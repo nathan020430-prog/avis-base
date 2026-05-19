@@ -6,6 +6,12 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.22.1] — Finance — Top tippers publics
+- Nouvelle RPC publique `get_public_top_tippers(p_limit, p_days)` : top des donateurs sur les N derniers jours, agrégés par username + somme + nombre + dernier tip. Filtre strict `tips.status='succeeded'` AND `display_consent=true`.
+- Nouvelle section **"Top donateurs — 30 derniers jours"** sur `/financement`, entre le Mur des soutiens et les Articles rémunérés. Liste numérotée, 1er rang en couleur accent, empty state explicite si personne n'a opt-in.
+- Section masquée si la migration n'est pas appliquée (silencieux, pas d'erreur visible).
+- Confirmation : la page `/financement` est désormais 100 % alimentée par les vraies données live (les vues `public_economy_current`, `public_donor_wall`, `public_article_leaderboard`, `public_monthly_archive` étaient déjà branchées depuis v0.17.0).
+
 ## [v0.22.0] — Finance — Customer Portal Stripe + tips reçus
 - Nouvelle Edge Function **`create-portal-session`** : crée une session Stripe Billing Portal pour le user authentifié et retourne l'URL. Le portail Stripe permet à l'user d'annuler son abonnement Avis Basé+, mettre à jour sa méthode de paiement, consulter ses factures.
 - Nouvelle section **"💛 Mon adhésion Avis Basé+"** sur `/mon-financement` :

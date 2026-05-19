@@ -5042,6 +5042,20 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 .fin-top__score{font-family:var(--fb);font-size:13px;color:var(--ink-muted);text-align:right;font-feature-settings:"tnum"}
 .fin-top__share{font-family:var(--fd);font-weight:500;font-size:16px;color:var(--accent);text-align:right;font-feature-settings:"tnum"}
 
+/* v0.22.1 — Top tippers */
+.fin-tippers{list-style:none;padding:0;margin:0;counter-reset:fintippers;display:flex;flex-direction:column;gap:0}
+.fin-tippers__item{display:grid;grid-template-columns:48px 1fr 120px 100px;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--rule,#D9CFB7);counter-increment:fintippers}
+.fin-tippers__item::before{content:counter(fintippers);font-family:var(--fd);font-weight:500;font-size:24px;color:var(--ink-light);font-feature-settings:"tnum"}
+.fin-tippers__item:first-child::before{color:var(--accent);font-weight:600}
+.fin-tippers__name{font-family:var(--ff);font-weight:500;font-size:16px;color:var(--ink);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fin-tippers__count{font-family:var(--fb);font-size:13px;color:var(--ink-muted);font-feature-settings:"tnum"}
+.fin-tippers__amount{font-family:var(--fd);font-weight:500;font-size:18px;color:var(--accent);text-align:right;font-feature-settings:"tnum"}
+@media (max-width:768px){
+  .fin-tippers__item{grid-template-columns:32px 1fr auto;gap:10px}
+  .fin-tippers__count{display:none}
+  .fin-tippers__amount{font-size:15px}
+}
+
 /* §6 INFRA COSTS */
 .fin-costs{width:100%;border-collapse:collapse;font-family:var(--fb);font-size:14px}
 .fin-costs th,.fin-costs td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--rule,#D9CFB7)}
@@ -5977,6 +5991,13 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
     <h2 class="fin-section__title">Mur des soutiens</h2>
     <p class="fin-section__sub">Seuls les membres et donateurs qui ont coché « afficher mon nom » apparaissent ici. Anonyme par défaut.</p>
     <div class="fin-supporters" id="finSupporters"></div>
+  </section>
+
+  <!-- §4b TOP TIPPERS (v0.22.1) -->
+  <section class="fin-section" id="finTopTippersSection" style="display:none">
+    <h2 class="fin-section__title">Top donateurs — 30 derniers jours</h2>
+    <p class="fin-section__sub">Donateurs les plus généreux qui ont accepté d'afficher leur nom. Ceux qui restent anonymes (par défaut) sont tout aussi appréciés 🙏</p>
+    <ol class="fin-tippers" id="finTopTippers"></ol>
   </section>
 
   <!-- §5 TOP ARTICLES -->
@@ -13524,6 +13545,51 @@ const Financement = {
 
     // Charts (only render once Chart.js is loaded)
     this.renderCharts();
+
+    // v0.22.1 — Top tippers (charge en arriere-plan si pas deja fait)
+    if (this._dataIsReal && !this._tippersLoaded) {
+      this._tippersLoaded = true;
+      this.loadTopTippers();
+    }
+  },
+
+  // v0.22.1 — Charge et affiche le top des donateurs (30 derniers jours)
+  async loadTopTippers() {
+    if (!supa) return;
+    const section = document.getElementById('finTopTippersSection');
+    const list = document.getElementById('finTopTippers');
+    if (!section || !list) return;
+    try {
+      const { data, error } = await supa.rpc('get_public_top_tippers', { p_limit: 10, p_days: 30 });
+      if (error) {
+        const msg = String(error.message || '');
+        if (msg.includes('does not exist')) {
+          // migration v0.22.1 pas appliquee : on masque silencieusement
+          section.style.display = 'none';
+          return;
+        }
+        console.debug('[Financement] top tippers error', msg);
+        section.style.display = 'none';
+        return;
+      }
+      const tippers = data || [];
+      if (tippers.length === 0) {
+        section.style.display = 'block';
+        list.innerHTML = `<p style="font-family:var(--fb);font-size:13px;color:var(--ink-muted);font-style:italic;padding:12px 0">Aucun donateur opt-in sur les 30 derniers jours. Ils apparaîtront ici dès qu'un don sera fait avec l'option « afficher mon nom » cochée.</p>`;
+        return;
+      }
+      section.style.display = 'block';
+      list.innerHTML = tippers.map(t => `
+        <li class="fin-tippers__item">
+          <div class="fin-tippers__name">@${(typeof escapeHtml === 'function') ? escapeHtml(t.username) : t.username}</div>
+          <span class="fin-tippers__count">${(t.tip_count || 0)} don${(t.tip_count || 0) > 1 ? 's' : ''}</span>
+          <span class="fin-tippers__amount">${this.fmtCents(t.total_cents)}</span>
+        </li>
+      `).join('');
+    } catch (e) {
+      console.debug('[Financement] top tippers fetch failed', e?.message || e);
+      section.style.display = 'none';
+    }
   },
   _renderSoftLaunchBanner(M) {
     const heroSection = document.querySelector('#financementView .fin-hero');

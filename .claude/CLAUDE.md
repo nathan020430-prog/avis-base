@@ -13,7 +13,7 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.22.0 (Finance — Stripe Customer Portal + tips reçus) — 2026-05-19
+## Version actuelle — v0.22.1 (Finance — Top tippers publics) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
@@ -24,11 +24,11 @@
 - v0.20.0 → Transparence & Identité (/a-propos + /stats + RPCs publiques)
 - v0.21.0 → Polish pre-launch (mod clips dashboard + SEO JSON-LD + onboarding + perf preconnect)
 - v0.21.1 → Polish RGPD + Changelog public (bandeau cookies + modale changelog)
-- **v0.22.0 → Finance — Customer Portal Stripe** :
-  - Nouvelle Edge Function `create-portal-session` (Stripe Billing Portal)
-  - Section "Mon adhésion Avis Basé+" sur `/mon-financement` avec statut + bouton "Gérer mon abonnement"
-  - Historique des tips reçus en tant que contributeur, agrégé par mois (sous la section adhésion)
-  - À déployer après merge : `supabase functions deploy create-portal-session` + activer Customer Portal dans le Dashboard Stripe
+- v0.22.0 → Finance — Customer Portal Stripe (Edge Function + section adhésion + tips reçus)
+- **v0.22.1 → Finance — Top tippers publics** :
+  - RPC `get_public_top_tippers(limit, days)` filtrée sur display_consent=true
+  - Nouvelle section "Top donateurs — 30 derniers jours" sur /financement, entre Mur des soutiens et Articles rémunérés
+  - Confirmation : /financement est 100 % live data (les autres vues étaient déjà branchées depuis v0.17.0)
 
 Tags sur origin : `v0.16.0-prep`, `v0.16.1`, `v0.17.0`, `v0.17.0-ui-and-sql`, `v0.18.0`
 
@@ -41,6 +41,7 @@ Le code est mergé mais les migrations doivent être exécutées manuellement da
 5. `v0.19.0-moderation-migration.sql` — étend `reports` + tables `moderation_actions` & `peer_reviews` + colonnes `moderation_state`/`reports_count` sur `articles`/`clips` + RPCs `submit_report`/`submit_peer_review`/`mod_apply_action`/`get_moderation_queue`/`get_peer_review_queue`/`get_user_moderation_summary`. Tant que la migration n'est pas appliquée, le frontend retombe sur l'INSERT direct dans `reports` (compat v0.18 préservée). (✅ appliquée 2026-05-19)
 6. `v0.19.1-moderation-notifs.sql` — étend `notifications.type` avec `content_hidden`/`content_restored` + trigger `notify_on_moderation_change` sur articles et clips. Sans cette migration, les notifs de masquage ne se déclencheront pas (mais aucune erreur côté front).
 7. `v0.20.0-stats-migration.sql` — RPCs publiques `get_public_stats()` + `get_public_top_contributors()` pour la page `/stats`. Sans cette migration, la page affiche "Migration non appliquée" au lieu de crasher.
+8. `v0.22.1-top-tippers-migration.sql` — RPC publique `get_public_top_tippers(limit, days)` pour la section "Top donateurs" sur `/financement`. Sans elle, la section est masquée silencieusement.
 
 Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
 
