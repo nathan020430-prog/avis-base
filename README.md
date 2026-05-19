@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.27.0** — Refonte UX des DM : 3 onglets liste (Tous / Non lus / Archivés avec compteurs), bulles regroupées par auteur + temps (avatar inline, queue tail sur la dernière du groupe), citation d'un message ("Répondre"), emoji picker (32 emojis), drag & drop fichier sur le thread, typing bar dédiée (au lieu du header), date sticky, drawer élargi à 480px desktop, polish dark mode. Pas de migration SQL.
 - **v0.26.3** — Service Worker offline : bump cache `v0.26.3`, nouvelle page `/offline.html` stylisée, bandeau status online/offline automatique, manifest nettoyé.
 - **v0.26.2** — Search amélioré : historique des 8 dernières recherches en localStorage, dropdown au focus, suggestions groupées 📰 Articles + 📎 Sources avec navigation clavier.
 - **v0.26.1** — Stats financières enrichies : RPCs `get_public_finance_summary()` + `get_public_finance_history(n)` + section "Transparence financière" sur `/stats` avec 3 cards + mini-chart 12 mois.
@@ -133,4 +134,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.26.3
+© Avis Basé · Beta · v0.27.0

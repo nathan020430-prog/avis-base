@@ -4817,7 +4817,284 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   .dm-conv-empty{padding:48px 24px 32px}
   /* Touch targets 44×44 (Apple HIG / Material Design) sur mobile */
   .dm-drawer__close,.dm-drawer__back,.dm-thread-menu{width:44px;height:44px}
-  .dm-compose__attach,.dm-compose__send{width:44px;height:44px}
+  .dm-compose__attach,.dm-compose__send,.dm-compose__emoji{width:44px;height:44px}
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DM v0.27.0 — Refonte UX : tabs, regroupement bulles, reply, emoji, polish
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── Tabs liste : Tous / Non lus / Archivés ─── */
+.dm-tabs{
+  display:flex;gap:2px;padding:0 18px;
+  border-bottom:1px solid var(--rule);background:var(--bg);
+  flex-shrink:0;position:relative
+}
+.dm-tab{
+  flex:1;padding:11px 8px 13px;
+  background:transparent;border:none;cursor:pointer;
+  font-family:var(--fs);font-size:0.82rem;font-weight:500;
+  color:var(--ink-muted);letter-spacing:-0.005em;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  position:relative;transition:color 0.18s ease
+}
+.dm-tab:hover{color:var(--ink)}
+.dm-tab--active{color:var(--ink);font-weight:600}
+.dm-tab--active::after{
+  content:'';position:absolute;left:14px;right:14px;bottom:-1px;height:2px;
+  background:var(--ink);border-radius:1px;
+  animation:dm-tab-slide 0.22s cubic-bezier(0.32,0.72,0,1)
+}
+@keyframes dm-tab-slide{from{transform:scaleX(0.4);opacity:0}to{transform:scaleX(1);opacity:1}}
+.dm-tab__count{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:18px;height:18px;padding:0 6px;
+  background:var(--surface);border:1px solid var(--rule);
+  border-radius:9px;
+  font-size:0.66rem;font-weight:700;font-variant-numeric:tabular-nums;
+  color:var(--ink-muted);letter-spacing:0
+}
+.dm-tab--active .dm-tab__count{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.dm-tab__count--accent{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
+.dm-tab--active .dm-tab__count--accent{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
+.dm-tab__count--zero{opacity:0.5}
+
+/* ─── Conv item : badge unread chiffré (en plus du dot existant) ─── */
+.dm-conv-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:20px;height:20px;padding:0 6px;
+  background:var(--accent);color:#FDFAF3;
+  border-radius:10px;font-size:0.7rem;font-weight:700;
+  font-variant-numeric:tabular-nums;letter-spacing:0;
+  margin-left:auto;flex-shrink:0;
+  box-shadow:0 2px 6px rgba(140,28,19,0.25)
+}
+.dm-conv-row2{display:flex;align-items:center;gap:8px}
+.dm-conv-row2 .dm-conv-preview{flex:1;min-width:0}
+.dm-conv-item__pin{
+  position:absolute;top:6px;right:8px;
+  width:14px;height:14px;color:var(--accent);opacity:0.85;
+  pointer-events:none
+}
+
+/* ─── Bulles : regroupement par auteur via classes explicites ─── */
+/* Override des règles :has() (peu fiables) par classes deterministes */
+.dm-msg--group-start .dm-msg__bubble{} /* premier d'un groupe : tous radius normaux */
+.dm-msg--group-mid .dm-msg__bubble,
+.dm-msg--group-end .dm-msg__bubble{} /* géré ci-dessous */
+
+/* Mine — coin queue en bas-droite seulement sur le dernier du groupe */
+.dm-msg--mine.dm-msg--group-start .dm-msg__bubble{border-bottom-right-radius:6px;border-top-right-radius:18px}
+.dm-msg--mine.dm-msg--group-mid .dm-msg__bubble{border-top-right-radius:6px;border-bottom-right-radius:6px}
+.dm-msg--mine.dm-msg--group-end .dm-msg__bubble{border-top-right-radius:6px;border-bottom-right-radius:6px}
+.dm-msg--mine.dm-msg--group-solo .dm-msg__bubble{border-bottom-right-radius:6px}
+
+/* Theirs — symétrique côté gauche */
+.dm-msg--theirs.dm-msg--group-start .dm-msg__bubble{border-bottom-left-radius:6px;border-top-left-radius:18px}
+.dm-msg--theirs.dm-msg--group-mid .dm-msg__bubble{border-top-left-radius:6px;border-bottom-left-radius:6px}
+.dm-msg--theirs.dm-msg--group-end .dm-msg__bubble{border-top-left-radius:6px;border-bottom-left-radius:6px}
+.dm-msg--theirs.dm-msg--group-solo .dm-msg__bubble{border-bottom-left-radius:6px}
+
+/* Spacing dans un groupe : très serré entre messages liés, généreux entre groupes */
+.dm-msg--group-mid,.dm-msg--group-end{margin-top:2px !important}
+.dm-msg--group-start,.dm-msg--group-solo{margin-top:14px !important}
+
+/* Avatar inline à gauche de la 1ère bulle "theirs" du groupe (gain de contexte visuel) */
+.dm-msg--theirs{position:relative;padding-left:42px}
+.dm-msg--theirs .dm-msg__avatar{
+  position:absolute;left:0;bottom:0;
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff);font-size:0.78rem;font-weight:500;
+  border:1px solid var(--rule);overflow:hidden;flex-shrink:0;
+  background:linear-gradient(135deg,#E8DCC4,#C9B89A);color:#5A4A30
+}
+.dm-msg--theirs .dm-msg__avatar img{width:100%;height:100%;object-fit:cover}
+[data-theme="dark"] .dm-msg--theirs .dm-msg__avatar{background:linear-gradient(135deg,#3A2D1F,#5C4630);color:#E8DCC4}
+/* L'avatar n'apparaît que sur la dernière bulle d'un groupe (visuellement la plus basse) */
+.dm-msg--theirs:not(.dm-msg--group-end):not(.dm-msg--group-solo) .dm-msg__avatar{visibility:hidden}
+
+/* Timestamp inline : seulement sur le dernier du groupe (sinon caché) */
+.dm-msg:not(.dm-msg--group-end):not(.dm-msg--group-solo) .dm-msg__time{display:none}
+
+/* Date sticky : reste en haut quand on scrolle */
+.dm-msg__time-sep{
+  position:sticky;top:0;z-index:2;
+  margin:18px 0 10px;
+  background:linear-gradient(180deg,var(--bg) 60%,transparent);
+  padding:6px 0
+}
+[data-theme="dark"] .dm-msg__time-sep{background:linear-gradient(180deg,var(--bg) 60%,transparent)}
+.dm-msg__time-sep span{
+  display:inline-block;padding:3px 12px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:12px;
+  font-size:0.68rem;color:var(--ink-muted);font-weight:500;
+  text-transform:uppercase;letter-spacing:0.1em
+}
+.dm-msg__time-sep::before,.dm-msg__time-sep::after{display:none}
+
+/* ─── Bulle citée (reply) ─── */
+.dm-msg__quote{
+  margin:0 0 4px;padding:6px 10px;
+  border-left:3px solid var(--accent);
+  background:var(--surface);
+  border-radius:8px;
+  font-size:0.78rem;color:var(--ink-muted);
+  max-width:100%;cursor:pointer;
+  transition:background 0.15s ease
+}
+.dm-msg__quote:hover{background:var(--surface-alt)}
+.dm-msg__quote-author{
+  font-weight:600;color:var(--accent);font-size:0.72rem;
+  text-transform:none;letter-spacing:0;margin-bottom:2px
+}
+.dm-msg__quote-text{
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.4
+}
+.dm-msg--mine .dm-msg__quote{border-left-color:#FDFAF3;background:rgba(255,255,255,0.15)}
+.dm-msg--mine .dm-msg__quote-author{color:#FDFAF3;opacity:0.85}
+.dm-msg--mine .dm-msg__quote-text{color:#FDFAF3;opacity:0.75}
+
+/* ─── Bouton "Répondre" dans la hover toolbar (ajout) ─── */
+.dm-msg__action-btn[data-msg-reply]:hover{background:var(--surface);color:var(--accent)}
+
+/* ─── Typing bar (avant le compose, sticky bas) ─── */
+.dm-typing-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 18px;
+  font-family:var(--fs);font-size:0.76rem;color:var(--ink-muted);
+  font-style:italic;
+  background:var(--bg);border-top:1px solid var(--rule);
+  flex-shrink:0;
+  animation:dm-typing-bar-in 0.18s ease-out
+}
+@keyframes dm-typing-bar-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.dm-typing-bar__dots{display:inline-flex;gap:3px;align-items:flex-end;height:14px}
+.dm-typing-bar__dots i{
+  display:block;width:5px;height:5px;border-radius:50%;
+  background:var(--ink-muted);
+  animation:dm-typing-bounce 1.2s ease-in-out infinite
+}
+.dm-typing-bar__dots i:nth-child(2){animation-delay:0.15s}
+.dm-typing-bar__dots i:nth-child(3){animation-delay:0.3s}
+@keyframes dm-typing-bounce{0%,80%,100%{transform:translateY(0);opacity:0.4}40%{transform:translateY(-4px);opacity:1}}
+
+/* ─── Reply preview (sticky au-dessus du compose) ─── */
+.dm-reply-preview{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 14px;
+  background:var(--surface);border-top:1px solid var(--rule);
+  flex-shrink:0;
+  animation:dm-reply-in 0.2s cubic-bezier(0.32,0.72,0,1)
+}
+@keyframes dm-reply-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.dm-reply-preview__bar{
+  width:3px;align-self:stretch;background:var(--accent);border-radius:2px;flex-shrink:0
+}
+.dm-reply-preview__body{flex:1;min-width:0}
+.dm-reply-preview__label{
+  font-size:0.7rem;color:var(--ink-muted);
+  letter-spacing:0.02em;margin-bottom:1px
+}
+.dm-reply-preview__label strong{color:var(--accent);font-weight:600}
+.dm-reply-preview__text{
+  font-size:0.83rem;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.dm-reply-preview__close{
+  width:28px;height:28px;border-radius:50%;
+  background:transparent;border:1px solid transparent;
+  color:var(--ink-muted);cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.18s ease
+}
+.dm-reply-preview__close:hover{background:var(--bg);border-color:var(--rule);color:var(--ink)}
+
+/* ─── Compose : ajout du bouton emoji ─── */
+.dm-compose__emoji{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--ink-muted);flex-shrink:0;
+  background:transparent;border:1px solid transparent;
+  transition:all 0.2s ease
+}
+.dm-compose__emoji:hover,.dm-compose__emoji[aria-expanded="true"]{
+  background:var(--surface);border-color:var(--rule);color:var(--ink)
+}
+.dm-compose__emoji[aria-expanded="true"]{color:var(--accent)}
+
+/* ─── Emoji picker (popover bottom-left) ─── */
+.dm-emoji-picker{
+  position:absolute;bottom:64px;left:14px;right:14px;
+  max-width:340px;
+  background:var(--bg);border:1px solid var(--rule);
+  border-radius:14px;padding:10px;
+  box-shadow:0 16px 40px -8px rgba(26,17,8,0.3);
+  z-index:11;
+  animation:dm-emoji-in 0.2s cubic-bezier(0.32,0.72,0,1)
+}
+@keyframes dm-emoji-in{from{opacity:0;transform:translateY(8px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.dm-emoji-picker__grid{
+  display:grid;grid-template-columns:repeat(8,1fr);gap:2px
+}
+.dm-emoji-picker__item{
+  width:34px;height:34px;border-radius:8px;
+  background:transparent;border:none;cursor:pointer;
+  font-size:1.2rem;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.12s ease,transform 0.12s ease
+}
+.dm-emoji-picker__item:hover{background:var(--surface);transform:scale(1.15)}
+.dm-emoji-picker__item:active{transform:scale(0.95)}
+
+/* ─── Dropzone overlay (drag file over thread) ─── */
+.dm-dropzone{
+  position:absolute;inset:0;
+  background:rgba(26,17,8,0.55);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;
+  z-index:6;pointer-events:none;
+  border:2px dashed var(--accent);border-radius:0
+}
+[data-theme="dark"] .dm-dropzone{background:rgba(0,0,0,0.65)}
+.dm-dropzone.visible{display:flex;animation:dm-dropzone-pulse 1.4s ease-in-out infinite}
+@keyframes dm-dropzone-pulse{0%,100%{opacity:1}50%{opacity:0.88}}
+.dm-dropzone__inner{
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  padding:24px 30px;border-radius:14px;
+  background:var(--bg);border:1px solid var(--rule);
+  color:var(--accent);font-family:var(--ff);font-size:1.1rem;
+  letter-spacing:-0.005em;
+  box-shadow:0 12px 32px rgba(26,17,8,0.25)
+}
+.dm-dropzone__inner svg{color:var(--accent);opacity:0.85}
+
+/* ─── Drawer panel : élargir 440 → 480px desktop ─── */
+@media(min-width:769px){
+  .dm-drawer__panel{width:min(480px,100vw)}
+}
+
+/* ─── Polish bulles : ombre plus subtile, fond légèrement décalé en dark ─── */
+.dm-msg--mine .dm-msg__bubble{
+  box-shadow:0 1px 3px rgba(140,28,19,0.15),0 0 0 1px rgba(255,255,255,0.04) inset
+}
+.dm-msg--theirs .dm-msg__bubble{
+  box-shadow:0 1px 3px rgba(26,17,8,0.06)
+}
+[data-theme="dark"] .dm-msg--theirs .dm-msg__bubble{box-shadow:0 1px 3px rgba(0,0,0,0.25)}
+
+/* ─── Polish dark mode messages : fond très légèrement chaud ─── */
+[data-theme="dark"] .dm-messages{
+  background:radial-gradient(ellipse at top,rgba(140,28,19,0.04),var(--bg) 60%)
+}
+
+/* ─── Mobile : ajustements emoji picker + safe-area ─── */
+@media(max-width:768px){
+  .dm-emoji-picker{left:8px;right:8px;bottom:calc(60px + env(safe-area-inset-bottom,0px));max-width:none}
+  .dm-msg--theirs{padding-left:38px}
+  .dm-msg--theirs .dm-msg__avatar{width:28px;height:28px;font-size:0.72rem}
+  .dm-tabs{padding:0 12px}
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -8379,6 +8656,18 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
         <div class="dm-search">
           <input type="search" id="dmSearchInput" placeholder="Rechercher une conversation…" autocomplete="off"/>
         </div>
+        <!-- v0.27.0 — Tabs liste : Tous / Non lus / Archivés -->
+        <div class="dm-tabs" role="tablist" aria-label="Filtrer les conversations">
+          <button class="dm-tab dm-tab--active" data-dm-tab="all" role="tab" aria-selected="true">
+            Tous <span class="dm-tab__count" id="dmTabCountAll">0</span>
+          </button>
+          <button class="dm-tab" data-dm-tab="unread" role="tab" aria-selected="false">
+            Non lus <span class="dm-tab__count dm-tab__count--accent" id="dmTabCountUnread">0</span>
+          </button>
+          <button class="dm-tab" data-dm-tab="archived" role="tab" aria-selected="false">
+            Archivés <span class="dm-tab__count" id="dmTabCountArchived">0</span>
+          </button>
+        </div>
         <div class="dm-conv-list" id="dmConvList">
           <div class="dm-conv-empty" id="dmConvEmpty">
             <div class="dm-empty-illu">
@@ -8427,10 +8716,35 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
           </div>
         </div>
 
-        <div class="dm-messages-wrap">
+        <div class="dm-messages-wrap" id="dmMessagesWrap">
           <div class="dm-messages" id="dmMessages"></div>
+          <!-- v0.27.0 — Overlay drag & drop fichier -->
+          <div class="dm-dropzone" id="dmDropzone" aria-hidden="true">
+            <div class="dm-dropzone__inner">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <div>Lâche ton fichier ici</div>
+            </div>
+          </div>
           <button class="dm-scroll-bottom" id="dmScrollBottom" aria-label="Aller au plus récent" style="display:none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+
+        <!-- v0.27.0 — Indicateur "X écrit…" avec dots animés (sticky bas du thread) -->
+        <div class="dm-typing-bar" id="dmTypingBar" style="display:none" aria-hidden="true">
+          <span class="dm-typing-bar__dots"><i></i><i></i><i></i></span>
+          <span class="dm-typing-bar__text" id="dmTypingBarText">écrit…</span>
+        </div>
+
+        <!-- v0.27.0 — Preview du message cité (Répondre) -->
+        <div class="dm-reply-preview" id="dmReplyPreview" style="display:none">
+          <div class="dm-reply-preview__bar"></div>
+          <div class="dm-reply-preview__body">
+            <div class="dm-reply-preview__label">Réponse à <strong id="dmReplyPreviewName">—</strong></div>
+            <div class="dm-reply-preview__text" id="dmReplyPreviewText">—</div>
+          </div>
+          <button type="button" class="dm-reply-preview__close" id="dmReplyPreviewClose" aria-label="Annuler la citation">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
 
@@ -8452,14 +8766,22 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
 
         <form class="dm-compose" id="dmComposeForm">
           <input type="file" id="dmAttachInput" accept="image/*,application/pdf,text/plain" hidden/>
-          <button type="button" class="dm-compose__attach" id="dmAttachBtn" aria-label="Joindre un fichier">
+          <button type="button" class="dm-compose__attach" id="dmAttachBtn" aria-label="Joindre un fichier" title="Joindre un fichier">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <!-- v0.27.0 — Bouton emoji picker -->
+          <button type="button" class="dm-compose__emoji" id="dmEmojiBtn" aria-label="Insérer un emoji" title="Insérer un emoji" aria-expanded="false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
           </button>
           <textarea class="dm-compose__textarea" id="dmComposeText" placeholder="Écris un message…" rows="1" maxlength="4000"></textarea>
           <button type="submit" class="dm-compose__send" id="dmSendBtn" aria-label="Envoyer" disabled>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </form>
+        <!-- v0.27.0 — Emoji picker (popover) -->
+        <div class="dm-emoji-picker" id="dmEmojiPicker" role="dialog" aria-label="Choisir un emoji" style="display:none">
+          <div class="dm-emoji-picker__grid" id="dmEmojiPickerGrid"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -20590,29 +20912,41 @@ const DM = (() => {
     }
   }
 
+  // v0.27.0 — onglet actif pour filtrer la liste (all / unread / archived)
+  let activeListTab = 'all';
+
+  function updateTabCounts() {
+    const total = conversations.length;
+    const unread = conversations.filter(c => (c.unread_count || 0) > 0).length;
+    const archived = conversations.filter(c => c.is_archived).length;
+    const setCount = (id, n) => {
+      const el = $(id); if (!el) return;
+      el.textContent = n > 99 ? '99+' : String(n);
+      el.classList.toggle('dm-tab__count--zero', n === 0);
+    };
+    setCount('dmTabCountAll', total);
+    setCount('dmTabCountUnread', unread);
+    setCount('dmTabCountArchived', archived);
+  }
+
   function renderConversationList() {
     const list = $('dmConvList');
     if (!list) { console.warn('[DM render] dmConvList introuvable'); return; }
     let empty = $('dmConvEmpty');
     const search = ($('dmSearchInput')?.value || '').trim().toLowerCase();
 
-    // NOUVEAU : on affiche TOUTES les conversations, archivées incluses.
-    // L'archivage est visuel (opacité) mais ne masque plus.
-    const visible = conversations.slice();
+    // v0.27.0 — Filtre par onglet actif
+    let visible = conversations.slice();
+    if (activeListTab === 'unread')   visible = visible.filter(c => (c.unread_count || 0) > 0);
+    else if (activeListTab === 'archived') visible = visible.filter(c => c.is_archived);
+    else /* all */                    visible = visible.filter(c => !c.is_archived || (c.unread_count || 0) > 0);
+
     const filtered = search
       ? visible.filter(c => (c.other_username || '').toLowerCase().includes(search)
         || (c.last_message_preview || '').toLowerCase().includes(search))
       : visible;
 
-    console.log('[DM render]', {
-      total: conversations.length,
-      visible: visible.length,
-      filtered: filtered.length,
-      archived: conversations.filter(c => c.is_archived).length,
-      listEl: !!list,
-      listVisible: list.offsetWidth > 0 && list.offsetHeight > 0,
-      listInDom: document.body.contains(list)
-    });
+    updateTabCounts();
 
     if (!filtered.length) {
       // Recrée l'empty state s'il a été supprimé du DOM
@@ -20648,6 +20982,7 @@ const DM = (() => {
     list.innerHTML = filtered.map(c => {
       const unread = c.unread_count > 0;
       const archived = c.is_archived;
+      const badge = unread ? `<span class="dm-conv-badge" aria-label="${c.unread_count} non lus">${c.unread_count > 99 ? '99+' : c.unread_count}</span>` : '';
       return `
         <div class="dm-conv-item${unread ? ' unread' : ''}${archived ? ' archived' : ''}" data-conv-id="${c.conversation_id}" data-other-id="${c.other_user_id}" title="${archived ? 'Conversation archivée — réapparue car nouveau message' : ''}">
           <div class="dm-conv-avatar" style="${avatarStyle({ id: c.other_user_id, username: c.other_username })}">${avatarHtml({ username: c.other_username, avatar_url: c.other_avatar_url })}</div>
@@ -20656,9 +20991,11 @@ const DM = (() => {
               <span class="dm-conv-name">${escapeHtmlDM(c.other_username || 'Utilisateur')}${archived ? ' <span class="dm-conv-archived-tag">archivée</span>' : ''}</span>
               <span class="dm-conv-time">${formatTime(c.last_message_at)}</span>
             </div>
-            <div class="dm-conv-preview">${escapeHtmlDM(c.last_message_preview || '— Démarrer la conversation —')}</div>
+            <div class="dm-conv-row2">
+              <span class="dm-conv-preview">${escapeHtmlDM(c.last_message_preview || '— Démarrer la conversation —')}</span>
+              ${badge}
+            </div>
           </div>
-          ${unread ? '<div class="dm-conv-unread-dot" aria-label="Non lu"></div>' : ''}
         </div>
       `;
     }).join('');
@@ -20730,6 +21067,10 @@ const DM = (() => {
     currentConvId = null;
     currentOther = null;
     currentMessages = [];
+    // v0.27.0 — Cleanup UI ephemere du thread
+    cancelReply();
+    hideTypingBar();
+    toggleEmojiPicker(false);
   }
 
   function renderThreadHeader() {
@@ -20771,6 +21112,25 @@ const DM = (() => {
     `).join('');
   }
 
+  // v0.27.0 — Détection automatique de citation dans le content (parse "> @user: ...\n\nbody")
+  function parseQuoteFromContent(content) {
+    if (!content) return null;
+    const m = content.match(/^> @([^:\n]+):\s*([^\n]+)\n\n([\s\S]+)$/);
+    if (!m) return null;
+    return { quoteAuthor: m[1].trim(), quoteText: m[2].trim(), body: m[3].trim() };
+  }
+
+  // v0.27.0 — Decide group classes based on prev/next message authorship + time gap
+  function classifyGroup(curr, prev, next) {
+    const GAP_MS = 3 * 60 * 1000; // 3 minutes
+    const samePrev = prev && prev.sender_id === curr.sender_id && (new Date(curr.created_at) - new Date(prev.created_at)) < GAP_MS && new Date(prev.created_at).toDateString() === new Date(curr.created_at).toDateString();
+    const sameNext = next && next.sender_id === curr.sender_id && (new Date(next.created_at) - new Date(curr.created_at)) < GAP_MS && new Date(next.created_at).toDateString() === new Date(curr.created_at).toDateString();
+    if (samePrev && sameNext) return 'group-mid';
+    if (samePrev && !sameNext) return 'group-end';
+    if (!samePrev && sameNext) return 'group-start';
+    return 'group-solo';
+  }
+
   function renderMessages() {
     const box = $('dmMessages');
     if (!box) return;
@@ -20789,10 +21149,10 @@ const DM = (() => {
     const otherReadAt = currentOther?._otherLastReadAt || null;
     const myReadAt = currentMyLastReadAt;
 
-    currentMessages.forEach((m) => {
+    currentMessages.forEach((m, i) => {
       const day = new Date(m.created_at).toDateString();
       if (day !== prevDay) {
-        html += `<div class="dm-msg__time-sep">${formatDateSep(m.created_at)}</div>`;
+        html += `<div class="dm-msg__time-sep"><span>${formatDateSep(m.created_at)}</span></div>`;
         prevDay = day;
       }
 
@@ -20804,6 +21164,11 @@ const DM = (() => {
 
       const mine = m.sender_id === currentUser.id;
       const read = mine && otherReadAt && new Date(m.created_at) <= new Date(otherReadAt);
+      const prev = currentMessages[i - 1];
+      const next = currentMessages[i + 1];
+      const groupCls = classifyGroup(m, prev, next);
+      const showAvatar = !mine && (groupCls === 'group-end' || groupCls === 'group-solo');
+
       let attachHtml = '';
       if (m.attachment_url && m.attachment_type === 'image') {
         attachHtml = `<a class="dm-msg__attach" href="${escapeHtmlDM(m.attachment_url)}" target="_blank" rel="noopener"><img src="${escapeHtmlDM(m.attachment_url)}" alt="${escapeHtmlDM(m.attachment_name || 'image')}"/></a>`;
@@ -20811,17 +21176,33 @@ const DM = (() => {
         attachHtml = `<a class="dm-msg__attach-file" href="${escapeHtmlDM(m.attachment_url)}" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>${escapeHtmlDM(m.attachment_name || 'Fichier')}</span></a>`;
       }
 
-      // Hover actions (desktop only via CSS)
+      // v0.27.0 — Parse citation éventuelle dans le content
+      const q = parseQuoteFromContent(m.content);
+      const bodyText = q ? q.body : (m.content || '');
+      const quoteHtml = q ? `
+        <div class="dm-msg__quote" data-msg-quote-jump="${escapeHtmlDM(q.quoteAuthor)}">
+          <div class="dm-msg__quote-author">@${escapeHtmlDM(q.quoteAuthor)}</div>
+          <div class="dm-msg__quote-text">${escapeHtmlDM(q.quoteText)}</div>
+        </div>` : '';
+
+      const avatarHtml2 = showAvatar
+        ? `<div class="dm-msg__avatar" style="${avatarStyle(currentOther)}">${avatarHtml(currentOther)}</div>`
+        : (!mine ? `<div class="dm-msg__avatar" aria-hidden="true" style="${avatarStyle(currentOther)}">${avatarHtml(currentOther)}</div>` : '');
+
+      // Hover actions (desktop only via CSS) — v0.27.0 : + bouton Répondre
       const actionsHtml = `
         <div class="dm-msg__actions">
+          <button class="dm-msg__action-btn" data-msg-reply="${m.id}" title="Répondre" aria-label="Répondre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button>
           ${m.content ? `<button class="dm-msg__action-btn" data-msg-copy="${m.id}" title="Copier le texte" aria-label="Copier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>` : ''}
           ${!mine ? `<button class="dm-msg__action-btn danger" data-msg-report="${m.id}" title="Signaler ce message" aria-label="Signaler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></button>` : ''}
           ${mine ? `<button class="dm-msg__action-btn danger" data-msg-delete="${m.id}" title="Supprimer ce message" aria-label="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>` : ''}
         </div>`;
 
       html += `
-        <div class="dm-msg dm-msg--${mine ? 'mine' : 'theirs'}${read ? ' read' : ''}" data-msg-id="${m.id}">
-          ${m.content ? `<div class="dm-msg__bubble">${escapeHtmlDM(m.content)}</div>` : ''}
+        <div class="dm-msg dm-msg--${mine ? 'mine' : 'theirs'} dm-msg--${groupCls}${read ? ' read' : ''}" data-msg-id="${m.id}">
+          ${avatarHtml2}
+          ${quoteHtml}
+          ${bodyText ? `<div class="dm-msg__bubble">${escapeHtmlDM(bodyText)}</div>` : ''}
           ${attachHtml}
           <div class="dm-msg__time">
             ${new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
@@ -20834,6 +21215,16 @@ const DM = (() => {
         </div>`;
     });
     box.innerHTML = html;
+
+    // v0.27.0 — Bind reply buttons
+    box.querySelectorAll('[data-msg-reply]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.msgReply;
+        const msg = currentMessages.find(m => m.id === id);
+        if (msg) startReply(msg);
+      });
+    });
 
     // Wire up hover actions
     box.querySelectorAll('[data-msg-copy]').forEach(btn => {
@@ -20952,12 +21343,11 @@ const DM = (() => {
       }, (payload) => {
         const p = payload.new;
         if (p.user_id === currentUser.id) return;
+        // v0.27.0 — Typing visible dans la bar dédiée (plus que dans le header)
         if (p.is_typing && p.typing_at && (Date.now() - new Date(p.typing_at).getTime()) < 8000) {
-          $('dmThreadStatus').textContent = 'en train d\'écrire…';
-          $('dmThreadStatus').classList.add('typing');
+          showTypingBar(currentOther?.username);
         } else {
-          $('dmThreadStatus').textContent = '';
-          $('dmThreadStatus').classList.remove('typing');
+          hideTypingBar();
         }
         if (p.last_read_at) {
           if (currentOther) currentOther._otherLastReadAt = p.last_read_at;
@@ -21201,6 +21591,141 @@ const DM = (() => {
     }
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // v0.27.0 — Reply state (citation d'un message)
+  // ═══════════════════════════════════════════════════════════
+  let replyTarget = null; // { id, sender_id, sender_username, content }
+
+  function startReply(msg) {
+    const author = (msg.sender_id === currentUser.id ? 'moi' : (currentOther?.username || 'lui'));
+    replyTarget = {
+      id: msg.id,
+      sender_id: msg.sender_id,
+      sender_username: author,
+      content: (parseQuoteFromContent(msg.content)?.body || msg.content || '[pièce jointe]').slice(0, 200)
+    };
+    const box = $('dmReplyPreview');
+    $('dmReplyPreviewName').textContent = '@' + author;
+    $('dmReplyPreviewText').textContent = replyTarget.content;
+    box.style.display = 'flex';
+    $('dmComposeText')?.focus();
+  }
+  function cancelReply() {
+    replyTarget = null;
+    const box = $('dmReplyPreview');
+    if (box) box.style.display = 'none';
+  }
+  function buildContentWithQuote(text) {
+    if (!replyTarget) return text;
+    return `> @${replyTarget.sender_username}: ${replyTarget.content.replace(/\n+/g, ' ').slice(0, 160)}\n\n${text}`;
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // v0.27.0 — Emoji picker (32 emojis populaires, insère dans le textarea)
+  // ═══════════════════════════════════════════════════════════
+  const EMOJIS = [
+    '😀','😂','🥲','😍','😘','😎','🤔','😴',
+    '😅','😭','😡','🥺','😱','🤩','😬','🙃',
+    '👍','👎','👏','🙏','💪','🔥','❤️','💔',
+    '✨','🎉','💯','✅','❌','⚠️','💡','📌'
+  ];
+  function renderEmojiGrid() {
+    const grid = $('dmEmojiPickerGrid');
+    if (!grid || grid.childElementCount) return;
+    grid.innerHTML = EMOJIS.map(e => `<button type="button" class="dm-emoji-picker__item" data-emoji="${e}">${e}</button>`).join('');
+    grid.querySelectorAll('[data-emoji]').forEach(btn => {
+      btn.addEventListener('click', () => insertEmoji(btn.dataset.emoji));
+    });
+  }
+  function insertEmoji(emoji) {
+    const ta = $('dmComposeText');
+    if (!ta) return;
+    const start = ta.selectionStart || 0;
+    const end = ta.selectionEnd || 0;
+    ta.value = ta.value.slice(0, start) + emoji + ta.value.slice(end);
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = start + emoji.length;
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  function toggleEmojiPicker(force) {
+    const picker = $('dmEmojiPicker');
+    const btn = $('dmEmojiBtn');
+    if (!picker || !btn) return;
+    const willOpen = typeof force === 'boolean' ? force : picker.style.display === 'none';
+    if (willOpen) renderEmojiGrid();
+    picker.style.display = willOpen ? 'block' : 'none';
+    btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // v0.27.0 — Drag & drop fichier sur le thread
+  // ═══════════════════════════════════════════════════════════
+  let dragCounter = 0;
+  function bindDropzone() {
+    const wrap = $('dmMessagesWrap');
+    const zone = $('dmDropzone');
+    if (!wrap || !zone) return;
+    wrap.addEventListener('dragenter', (e) => {
+      if (!e.dataTransfer || !Array.from(e.dataTransfer.types || []).includes('Files')) return;
+      e.preventDefault();
+      dragCounter++;
+      zone.classList.add('visible');
+    });
+    wrap.addEventListener('dragover', (e) => {
+      if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+      }
+    });
+    wrap.addEventListener('dragleave', () => {
+      dragCounter = Math.max(0, dragCounter - 1);
+      if (dragCounter === 0) zone.classList.remove('visible');
+    });
+    wrap.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dragCounter = 0;
+      zone.classList.remove('visible');
+      const f = e.dataTransfer?.files?.[0];
+      if (!f) return;
+      if (f.size > 10485760) { showToastDM('Fichier trop lourd (max 10 MB).', true); return; }
+      setAttachmentPreview(f);
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // v0.27.0 — Tabs liste (all / unread / archived)
+  // ═══════════════════════════════════════════════════════════
+  function bindListTabs() {
+    document.querySelectorAll('.dm-tab[data-dm-tab]').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.dmTab;
+        if (target === activeListTab) return;
+        activeListTab = target;
+        document.querySelectorAll('.dm-tab').forEach(t => {
+          const on = t.dataset.dmTab === target;
+          t.classList.toggle('dm-tab--active', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        renderConversationList();
+      });
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // v0.27.0 — Typing bar (sticky bottom, plus visible que le header text)
+  // ═══════════════════════════════════════════════════════════
+  function showTypingBar(username) {
+    const bar = $('dmTypingBar');
+    const txt = $('dmTypingBarText');
+    if (!bar || !txt) return;
+    txt.textContent = `${username || 'L\'autre'} écrit…`;
+    bar.style.display = 'flex';
+  }
+  function hideTypingBar() {
+    const bar = $('dmTypingBar');
+    if (bar) bar.style.display = 'none';
+  }
+
   function init() {
     $('navInboxBtn')?.addEventListener('click', openDrawer);
     $('minibarInboxBtn')?.addEventListener('click', openDrawer);
@@ -21208,6 +21733,28 @@ const DM = (() => {
     $('dmBackdrop')?.addEventListener('click', closeDrawer);
     $('dmBackBtn')?.addEventListener('click', () => { showList(); leaveCurrentThread(); });
     $('dmSearchInput')?.addEventListener('input', renderConversationList);
+
+    // v0.27.0 — Tabs liste
+    bindListTabs();
+
+    // v0.27.0 — Reply preview close
+    $('dmReplyPreviewClose')?.addEventListener('click', cancelReply);
+
+    // v0.27.0 — Emoji picker
+    $('dmEmojiBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleEmojiPicker();
+    });
+    document.addEventListener('click', (e) => {
+      const picker = $('dmEmojiPicker');
+      const btn = $('dmEmojiBtn');
+      if (!picker || picker.style.display === 'none') return;
+      if (picker.contains(e.target) || (btn && btn.contains(e.target))) return;
+      toggleEmojiPicker(false);
+    });
+
+    // v0.27.0 — Drag & drop fichier
+    bindDropzone();
 
     const ta = $('dmComposeText');
     // Compteur de caractères discret (apparaît à partir de 3000 / max 4000)
@@ -21250,8 +21797,10 @@ const DM = (() => {
     });
     $('dmComposeForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const text = $('dmComposeText').value.trim();
-      if (!text && !pendingAttachment) return;
+      const rawText = $('dmComposeText').value.trim();
+      if (!rawText && !pendingAttachment) return;
+      // v0.27.0 — Si on est en mode "Répondre", on préfixe le content avec la citation
+      const text = rawText ? buildContentWithQuote(rawText) : rawText;
       $('dmSendBtn').disabled = true;
       let attach = null;
       if (pendingAttachment) {
@@ -21263,6 +21812,8 @@ const DM = (() => {
         $('dmComposeText').value = '';
         ta.style.height = 'auto';
         clearAttachmentPreview();
+        cancelReply(); // v0.27.0 — clear reply state après envoi
+        toggleEmojiPicker(false); // v0.27.0 — ferme emoji picker
         setTyping(false);
         $('dmComposeCounter')?.classList.remove('visible', 'warning');
       }
