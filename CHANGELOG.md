@@ -6,6 +6,14 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.23.2] — Reprise de lecture mémorisée par article
+- Module `ReadResume` qui mémorise la **position de scroll** (en %) par slug d'article dans `localStorage.avb_reading_positions_v1`
+- À la réouverture d'un article : banner discret **"🔖 Tu en étais à X %. Reprendre ?"** au-dessus du contenu
+- 2 boutons : `Recommencer` (purge l'entrée et recommence du début) et `Reprendre →` (scroll smooth à la bonne position)
+- Save debounced (600ms après l'arrêt du scroll) pour éviter de spammer localStorage
+- Ignore les positions extrêmes : < 5% (juste ouvert) et > 95% (quasi fini, pas la peine de mémoriser)
+- Cleanup automatique des entrées > 30 jours, plafond de 100 entrées (les plus récentes gardées)
+
 ## [v0.23.1] — Citation partageable depuis l'article
 - Sélectionner du texte dans la page article fait apparaître un **tooltip flottant** avec 3 actions :
   - 🐦 **Twitter** — ouvre intent/tweet avec `« citation »\n— @auteur, sur Avis Basé\n[url] via @avis_base.nth`
