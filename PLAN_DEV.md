@@ -83,6 +83,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.23.0** | 📖 UX lecture | Préférences typo (3 tailles + serif/sans-serif, persistance localStorage) + temps de lecture restant dynamique (badge flottant top-right) + 3 articles suggérés en fin d'article (algorithme : même thème + likes + reads, exclusion des articles déjà lus en session) | ✅ Livré |
 | **v0.23.1** | 📣 Citation partageable | Sélection texte dans un article → tooltip flottant avec Twitter / Copier / Partage natif. Format auto : « citation » — auteur + lien article + via @avis_base.nth | ✅ Livré |
 | **v0.23.2** | 🔖 Reprise de lecture | Mémorisation de la position de scroll par article dans localStorage (debounced, cleanup 30j, max 100 entrées). Banner discret "Reprendre à X %" à la réouverture avec choix Reprendre / Recommencer | ✅ Livré |
+| **v0.23.3** | 🔗 Auto-link sources `[N]` | Les références numériques `[1]`, `[2]` dans le corps d'article deviennent des liens cliquables qui smooth-scroll vers la source citée correspondante, avec flash visuel sur la cible | ✅ Livré |
 | **v0.23.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -725,6 +726,26 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 🔗 v0.23.3 — Auto-link sources [N] ✅
+
+> **Livré le 2026-05-19.** Aligne Avis Basé sur les conventions de Wikipédia : les références numériques dans le corps deviennent des liens vers la source citée. Cœur du « média qui source tout ».
+
+**Livré :**
+- `renderArticleMarkdown` étendu d'une passe post-footnotes qui matche `\[(\d+)\]` (avec garde anti-match dans `var[0]`)
+- Transformation : `[1]` → `<a href="#cited-1" class="cite-ref" data-cite="1">[1]</a>`
+- Chaque source citée a maintenant un `id="cited-N"` correspondant
+- Click handler dans `renderArticlePage` : smooth scroll dans le modal body + flash visuel `cite-target-flash` sur la cible (1.6s)
+- Style discret : couleur accent, hover background léger, taille légèrement réduite (0.86em)
+
+### ✅ Critères de validation
+- [x] Un article qui contient `[1]` dans son texte affiche la référence en bleu accent
+- [x] Clic sur la référence → scroll smooth vers la source dans la section "Sources citées"
+- [x] La source cible "flash" pendant 1.7s pour attirer le regard
+- [x] Pas de regression sur les footnotes `[^N]` (système préexistant)
+- [x] Pas de matching erroné sur des constructs JS comme `var[0]`
 
 ---
 

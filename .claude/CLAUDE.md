@@ -13,7 +13,7 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.23.2 (Reprise de lecture mémorisée par article) — 2026-05-19
+## Version actuelle — v0.23.3 (Auto-link sources [N] dans l'article) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
@@ -28,10 +28,12 @@
 - v0.22.1 → Finance — Top tippers publics (RPC + section /financement)
 - v0.23.0 → UX lecture améliorée (prefs typo + temps restant + articles suggérés)
 - v0.23.1 → Citation partageable (sélection texte article → tooltip Twitter/Copier/Partager)
-- **v0.23.2 → Reprise de lecture** :
-  - Module ReadResume : sauvegarde la position de scroll (en %) par slug, debounced, cleanup 30j, max 100 entrées
-  - Banner "🔖 Tu en étais à X % — Reprendre ?" au-dessus de l'article
-  - 2 actions : Reprendre (scroll smooth) ou Recommencer (purge l'entrée)
+- v0.23.2 → Reprise de lecture (ReadResume module + banner reprendre)
+- **v0.23.3 → Auto-link sources [N]** :
+  - Les références `[1]`, `[2]` dans le corps d'article deviennent des liens vers `#cited-N`
+  - Smooth scroll dans le modal body au clic + flash visuel 1.7s sur la source cible
+  - Style discret accent + hover, intégré dans `renderArticleMarkdown`
+  - Convention alignée sur Wikipédia, cœur du « média qui source tout »
 
 Tags sur origin : `v0.16.0-prep`, `v0.16.1`, `v0.17.0`, `v0.17.0-ui-and-sql`, `v0.18.0`
 

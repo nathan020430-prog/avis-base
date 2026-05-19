@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.23.3** — Auto-link sources `[N]` : les références numériques dans le corps d'article deviennent des liens cliquables qui smooth-scroll vers la source citée, avec flash visuel.
 - **v0.23.2** — Reprise de lecture : la position de scroll est mémorisée par article dans localStorage. À la réouverture, banner "Reprendre à X %" avec choix Reprendre / Recommencer. Cleanup auto 30j + max 100 entrées.
 - **v0.23.1** — Citation partageable : sélectionner du texte dans un article fait apparaître un tooltip "Twitter / Copier / Partager", avec attribution auteur + lien article. Format Twitter : `« citation » — @auteur via @avis_base.nth`.
 - **v0.23.0** — UX lecture : préférences typographiques (3 tailles + Serif/Sans-serif, persistance localStorage) + temps de lecture restant dynamique + 3 articles suggérés en fin d'article (même thème + likes + reads, exclusion des articles déjà lus en session).
@@ -122,4 +123,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.23.2
+© Avis Basé · Beta · v0.23.3

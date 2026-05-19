@@ -3396,6 +3396,27 @@ body.read-prefs--size-l .article-page__body{font-size:1.19rem;line-height:1.75}
 body.read-prefs--font-sans .article-page__body{font-family:'Manrope',system-ui,sans-serif}
 body.read-prefs--font-serif .article-page__body{font-family:'Fraunces','Georgia',serif}
 
+/* v0.23.3 — Auto-links [N] vers les sources citées */
+.cite-ref{
+  display:inline-block;
+  color:var(--accent);font-weight:600;font-feature-settings:"tnum";
+  text-decoration:none;
+  padding:0 2px;border-radius:2px;
+  font-size:0.86em;
+  vertical-align:baseline;
+  transition:background .12s;
+}
+.cite-ref:hover{background:var(--accent-soft,rgba(184,58,45,.1));text-decoration:underline}
+.cite-ref:visited{color:var(--accent)}
+/* Highlight visuel quand le user vient juste de cliquer sur une référence */
+.article-page__cited-item.cite-target-flash{
+  animation:cite-flash 1.6s ease-out;
+}
+@keyframes cite-flash{
+  0%,30%{background:var(--accent-soft,rgba(184,58,45,.15));border-color:var(--accent)}
+  100%{background:transparent;border-color:var(--rule)}
+}
+
 /* v0.23.2 — Banner "Reprendre la lecture" */
 .resume-banner{
   display:flex;align-items:center;gap:12px;
@@ -9428,6 +9449,12 @@ function renderArticleMarkdown(md) {
     if (!footnotes[key]) return m;
     return `<sup class="fn-ref"><a href="#fn-${key}" id="fnref-${key}">${Object.keys(footnotes).indexOf(key) + 1}</a></sup>`;
   });
+  // v0.23.3 — Auto-link [N] vers les sources citées (#cited-N)
+  // Match [1], [12] etc. SI pas precede par un caractere alpha (pour eviter
+  // les cas comme "var[0]"). Apres les regex de liens markdown deja appliquees.
+  html = html.replace(/(^|[^a-zA-Z0-9_])\[(\d+)\](?!\()/g,
+    (m, prefix, num) => `${prefix}<a href="#cited-${num}" class="cite-ref" data-cite="${num}">[${num}]</a>`
+  );
   // Headers
   html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
   html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
@@ -10229,7 +10256,7 @@ function renderArticlePage(a) {
     const items = a.citedSources.map((s, i) => {
       const favicon = s.favicon || getFavicon(s.url);
       const favIcon = favicon ? `<img src="${escapeHtml(favicon)}" class="article-page__cited-favicon" alt="" onerror="this.style.display='none'"/>` : '';
-      return `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" class="article-page__cited-item">
+      return `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" class="article-page__cited-item" id="cited-${i + 1}">
         <span class="article-page__cited-num">[${i + 1}]</span>
         ${favIcon}
         <div class="article-page__cited-body">
@@ -10324,6 +10351,29 @@ function renderArticlePage(a) {
         if (scroller) scroller.scrollTop = 0;
         openArticlePage(slug);
       }
+    });
+  });
+
+  // v0.23.3 — Wire clicks sur les références [N] dans le corps de l'article
+  body.querySelectorAll('a.cite-ref[data-cite]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const num = link.dataset.cite;
+      const target = document.getElementById('cited-' + num);
+      if (!target) return;
+      // Smooth scroll dans le modal body
+      const scroller = document.querySelector('#articlePageModal .modal__body');
+      if (scroller) {
+        const rect = target.getBoundingClientRect();
+        const scrollerRect = scroller.getBoundingClientRect();
+        scroller.scrollBy({ top: rect.top - scrollerRect.top - 80, behavior: 'smooth' });
+      } else {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      // Flash visuel
+      document.querySelectorAll('.cite-target-flash').forEach(el => el.classList.remove('cite-target-flash'));
+      target.classList.add('cite-target-flash');
+      setTimeout(() => target.classList.remove('cite-target-flash'), 1700);
     });
   });
 
