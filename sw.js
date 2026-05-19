@@ -2,10 +2,10 @@
 // Strategy: network-first for HTML (so updates apply instantly like big social apps),
 // cache-first for static assets, no caching for Supabase API calls.
 //
-// v0.28.0 — Bump VERSION pour buster les caches a chaque release importante.
-//           Refonte profils createurs (cover, stats cards, mutual followers, sticky CTA).
+// v0.29.0 — Bump VERSION pour buster les caches a chaque release importante.
+//           Feed personnalise (interets + auteurs suivis) + onboarding interets.
 
-const VERSION = 'v0.28.0';
+const VERSION = 'v0.29.0';
 const SHELL_CACHE = `avis-shell-${VERSION}`;
 const STATIC_CACHE = `avis-static-${VERSION}`;
 

@@ -13,7 +13,7 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.28.0 (Profils créateurs magnétiques) — 2026-05-19
+## Version actuelle — v0.29.0 (Feed personnalisé + onboarding intérêts) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
@@ -60,6 +60,7 @@ Le code est mergé mais les migrations doivent être exécutées manuellement da
 11. `v0.26.1-public-finance-stats-migration.sql` — RPCs publiques `get_public_finance_summary()` + `get_public_finance_history(n)` pour la section "Transparence financière" sur `/stats`. Sans elle, la section est masquée silencieusement.
 12. `v0.26.4-fix-stats-rpc.sql` — **HOTFIX** : la RPC `get_public_stats()` (v0.20.0) plantait en prod (`column reports.validated does not exist`) → page `/stats` cassée. Cette migration recrée la RPC avec un handler `undefined_column` qui retombe gracieusement sur "tous les `resolved` comptent" si la colonne manque. À appliquer après v0.26.1.
 13. `v0.28.0-mutual-followers.sql` — RPC publique `get_mutual_followers(p_target_id, p_limit)` qui retourne les profils suivis à la fois par moi et par la cible (preuve sociale "Suivi par @x, @y et N autres que tu suis" sur la page profil). Sans elle, la section mutual followers est masquée silencieusement.
+14. `v0.29.0-user-interests.sql` — table `user_interests` + 3 RPCs (`set_user_interests`, `get_user_interests`, `get_suggested_authors_by_interest`). Permet à l'utilisateur de choisir 3+ sujets favoris à l'onboarding, alimente le feed "Pour toi" et les suggestions d'auteurs. Sans elle, l'étape onboarding "Choisis tes sujets" enregistre rien et le feed "Pour toi" retombe sur le filtre par auteurs suivis uniquement.
 
 Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
 

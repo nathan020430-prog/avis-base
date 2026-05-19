@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.29.0** — Feed personnalisé : nouvelle étape onboarding "Choisis tes sujets" (chips multi-select min 3, max 10), nouveau mode de feed "Pour toi" (sidebar) qui filtre par sujets aimés + auteurs suivis avec scoring (auteur ×3, sujet ×2, fraîcheur ×0-1), module `UserInterests` qui charge les intérêts à l'auth. Migration `v0.29.0-user-interests.sql` (table `user_interests` + RPCs `set/get_user_interests` + `get_suggested_authors_by_interest`).
 - **v0.28.0** — Profils créateurs magnétiques : cover band 200px avec dégradé éditorial animé, avatar agrandi 136px qui chevauche le cover, 4 stats cards visuelles (Articles / Lectures / Abonnés / Basitude) avec format compact `1.2k`/`3M`, section "Suivi par @x, @y et N autres que tu suis" (preuve sociale via RPC `get_mutual_followers`), sticky CTA bar qui apparaît au scroll avec avatar + bouton Suivre + Message, grid articles 4:3 avec image qui zoome en hover, animations staggered. Migration `v0.28.0-mutual-followers.sql`.
 - **v0.27.0** — Refonte UX des DM : 3 onglets liste (Tous / Non lus / Archivés avec compteurs), bulles regroupées par auteur + temps (avatar inline, queue tail sur la dernière du groupe), citation d'un message ("Répondre"), emoji picker (32 emojis), drag & drop fichier sur le thread, typing bar dédiée (au lieu du header), date sticky, drawer élargi à 480px desktop, polish dark mode. Pas de migration SQL.
 - **v0.26.3** — Service Worker offline : bump cache `v0.26.3`, nouvelle page `/offline.html` stylisée, bandeau status online/offline automatique, manifest nettoyé.
@@ -135,4 +136,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.28.0
+© Avis Basé · Beta · v0.29.0
