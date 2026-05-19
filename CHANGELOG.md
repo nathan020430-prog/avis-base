@@ -6,6 +6,21 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.27.0] — Refonte UX des DM
+- **Liste de conversations** : 3 onglets (Tous / Non lus / Archivés) avec compteurs vivants, badge `unread_count` chiffré sur chaque conversation (au lieu d'un simple dot).
+- **Thread** :
+  - Regroupement des messages consécutifs du même auteur (< 3 min entre eux) : `group-start` / `group-mid` / `group-end` / `group-solo` pour radius asymétrique (queue tail uniquement sur le dernier du groupe), timestamp affiché seulement à la fin du groupe.
+  - Avatar inline 32px (28px mobile) à gauche du dernier message du groupe côté "theirs" — gain de contexte visuel.
+  - Date sticky avec pastille (au lieu d'une ligne horizontale).
+  - Animation d'entrée plus fluide.
+- **Citation** : bouton "Répondre" dans la hover toolbar de chaque message → preview dans une barre dédiée au-dessus du compose (avec ✕ pour annuler), serialisée en `> @user: …\n\nbody` dans le content envoyé. Parsée au render pour afficher un bloc cité visuellement.
+- **Emoji picker** : bouton dans la compose, popover 32 emojis grid 8×4, insère à la position du caret.
+- **Drag & drop fichier** : overlay dashed `Lâche ton fichier ici` apparaît quand on drag un fichier sur le thread, déclenche `setAttachmentPreview` au drop.
+- **Typing bar dédiée** : indicateur "X écrit…" avec dots animés bottom du thread (au lieu d'un texte dans le header).
+- **Drawer plus large** : 480px desktop (au lieu de 440px).
+- **Dark mode** : fond messages avec gradient chaud subtil.
+- Pas de migration SQL.
+
 ## [v0.26.3] — Service Worker offline + PWA polish
 - `sw.js` : VERSION bumpée à `v0.26.3` → les anciens caches sont automatiquement nettoyés à l'activation. Ajout de `/offline.html` dans le pré-cache shell.
 - Nouvelle page **`/offline.html`** stylisée Avis Basé : message "Pas de connexion", bouton "Réessayer", status pulsant qui passe au vert dès que `navigator.onLine` repasse à true, auto-reload après 1 s de connexion rétablie.

@@ -13,7 +13,7 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.26.3 (PWA polish + SW offline) — 2026-05-19
+## Version actuelle — v0.27.0 (Refonte UX des DM) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
