@@ -13,7 +13,7 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.24.0 (Liste d'attente pré-lancement) — 2026-05-19
+## Version actuelle — v0.25.0 (Éditeur de clips refondu) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
@@ -30,12 +30,15 @@
 - v0.23.1 → Citation partageable (sélection texte article → tooltip Twitter/Copier/Partager)
 - v0.23.2 → Reprise de lecture (ReadResume module + banner reprendre)
 - v0.23.3 → Auto-link sources `[N]` dans le corps d'article (Wikipedia-like)
-- **v0.24.0 → Liste d'attente pré-lancement** :
-  - Table `waitlist` (email unique CI, kind launch/beta, source, ip_hash)
-  - RPC `submit_waitlist(email, kind, source, name)` ouverte à anon, idempotente
-  - Modale frontend accessible via attribut `data-waitlist-open="launch|beta"` depuis la home + /a-propos
-  - Vue admin `waitlist_summary` (agrégat par kind)
-  - Migration : `v0.24.0-waitlist-migration.sql` (à appliquer après v0.22.1)
+- v0.24.0 → Liste d'attente pré-lancement (table waitlist + RPC + modale form)
+- **v0.25.0 → Éditeur de clips refondu** (pas de SQL) :
+  - Layout 2-col avec preview format téléphone 9:16 (toggle 16:9) + overlay live hook + 1er sous-titre + footer
+  - 8 templates de hook prêts à l'emploi avec placeholders auto-sélectionnés
+  - Suggestions de hashtags selon `theme_slug` de l'article parent
+  - Mode "Collage rapide" pour générer N sous-titres équidistants en collant un texte multi-ligne
+  - Indicateur multi-plateforme TikTok/Twitter/Instagram en temps réel (chars + couleurs)
+  - Hint contextuel sur la durée du clip
+  - Prochain chantier : v0.25.1 — Assistant de publication multi-plateforme (TikTok/Twitter/Instagram)
 
 Tags sur origin : `v0.16.0-prep`, `v0.16.1`, `v0.17.0`, `v0.17.0-ui-and-sql`, `v0.18.0`
 

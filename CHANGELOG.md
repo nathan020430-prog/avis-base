@@ -6,6 +6,16 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.25.0] — Éditeur de clips refondu (preview live + templates + bulk subs)
+- **Layout 2 colonnes** sur l'éditeur de clips : preview à gauche (sticky desktop), form à droite. Stack vertical sur mobile.
+- **Preview format téléphone** : frame stylisée 9:16 par défaut (avec toggle 16:9 paysage), overlay live affichant le **hook** en haut, le **1er sous-titre** au milieu, et `@avis_base.nth · 15s` en bas. Placeholder élégant tant que les timestamps ne sont pas renseignés.
+- **8 templates de hook** prêts à l'emploi accessibles via bouton `✨ Templates` à côté du label hook. Au clic, le `{placeholder}` est auto-sélectionné pour qu'on l'écrase directement.
+- **Suggestions de hashtags par thème** : chips dashed cliquables qui se mettent à jour selon `theme_slug` de l'article parent (politique → `politique #actu #democratie #france`, sciences → `sciences #recherche #decouverte #tech`, etc.) + 2 base (`avisbase`, `sourcer`).
+- **Mode "Collage rapide" pour les sous-titres** : toggle Timeline/Bulk. En mode Bulk, on colle un texte ligne par ligne, le bouton "Appliquer" auto-découpe en N segments équidistants sur la durée du clip. Switch automatique en mode Timeline après application pour permettre des ajustements fins.
+- **Indicateur multi-plateforme du hook** : trois pills colorés `TikTok 100 ✓ · Twitter 240 ✓ · Instagram 125 ✓` qui se colorent en vert/orange/rouge selon distance à l'optimum.
+- **Hint contextuel sur la durée** : "✓ Excellente durée pour TikTok / Reels / Twitter (15-60 s)" ou warnings selon la durée choisie.
+- Pas de migration SQL : la table `clips` reste inchangée, c'est une refonte UI uniquement.
+
 ## [v0.24.0] — Liste d'attente pré-lancement
 - Nouvelle **table `waitlist`** : email (unique case-insensitive), kind (`launch` ou `beta`), source, name, user_id, ip_hash, timestamps
 - Nouvelle **RPC publique `submit_waitlist(email, kind, source, name)`** ouverte à `anon` :

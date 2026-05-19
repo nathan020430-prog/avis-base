@@ -2409,9 +2409,159 @@ body.admin .card__admin{display:flex}
   font-family:'SF Mono',Menlo,monospace;white-space:nowrap;
 }
 .timestamp-duration.warn{background:var(--warn-soft);color:var(--warn)}
-.clip-preview-wrap{margin-top:11px;border-radius:2px;overflow:hidden;background:#000;aspect-ratio:16/9;position:relative}
-.clip-preview-wrap iframe{width:100%;height:100%;border:0}
-.clip-preview-hint{margin-top:6px;font-size:0.76rem;color:var(--ink-muted);font-style:italic}
+/* v0.25.0 — Clip editor refondu : grid 2-col avec preview type mobile */
+.clip-editor-grid{display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start}
+.clip-editor-preview{position:sticky;top:0;display:flex;flex-direction:column;gap:10px}
+.clip-editor-fields{min-width:0}
+.clip-preview-phone{
+  position:relative;width:100%;
+  background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 100%);
+  border-radius:18px;padding:8px;
+  box-shadow:0 6px 22px rgba(0,0,0,.22),inset 0 0 0 1px rgba(255,255,255,.06);
+  margin:0 auto;
+  transition:aspect-ratio .25s ease;
+}
+.clip-preview-phone[data-ratio="vertical"]{max-width:260px}
+.clip-preview-phone[data-ratio="horizontal"]{max-width:100%}
+.clip-preview-phone__inner{
+  position:relative;width:100%;border-radius:12px;overflow:hidden;background:#000;
+  aspect-ratio:9/16;
+}
+.clip-preview-phone[data-ratio="horizontal"] .clip-preview-phone__inner{aspect-ratio:16/9}
+.clip-preview-phone__video{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000}
+.clip-preview-phone__video iframe{width:100%;height:100%;border:0;display:block}
+/* Pour TikTok-feel : on stretch l'iframe en 9:16 (le YouTube reste 16:9 letterbox, c'est OK) */
+.clip-preview-phone[data-ratio="vertical"] .clip-preview-phone__video iframe{
+  width:200%;height:200%;
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:auto;
+}
+.clip-preview-phone[data-ratio="horizontal"] .clip-preview-phone__video iframe{
+  width:100%;height:100%;transform:none;position:static;
+}
+.clip-preview-phone__placeholder{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  color:rgba(255,255,255,.7);font-family:var(--fb);font-size:11.5px;text-align:center;padding:18px;line-height:1.4;
+}
+.clip-preview-phone__placeholder-icon{font-size:36px;opacity:.6}
+.clip-preview-phone__overlay{
+  position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;
+  padding:14px 12px 12px;pointer-events:none;color:#fff;
+  background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 50%,rgba(0,0,0,.55) 100%);
+}
+.clip-preview-phone__hook{
+  font-family:var(--ff);font-weight:700;font-size:14px;line-height:1.25;
+  text-shadow:0 1px 3px rgba(0,0,0,.6);
+  max-height:5em;overflow:hidden;
+}
+.clip-preview-phone__hook:empty::after{
+  content:'Le hook s\'affichera ici ↓';opacity:.45;font-weight:500;font-size:12px;font-style:italic;
+}
+.clip-preview-phone__subtitle{
+  align-self:center;text-align:center;
+  font-family:var(--fb);font-weight:600;font-size:13px;line-height:1.3;
+  padding:5px 9px;background:rgba(0,0,0,.55);border-radius:3px;
+  max-width:90%;text-shadow:0 1px 2px rgba(0,0,0,.5);
+  margin-bottom:auto;margin-top:auto;
+}
+.clip-preview-phone__subtitle:empty{display:none}
+.clip-preview-phone__footer{
+  display:flex;align-items:center;gap:6px;font-family:var(--fb);font-size:10.5px;font-weight:600;
+  text-shadow:0 1px 2px rgba(0,0,0,.6);opacity:.92;
+}
+.clip-preview-phone__dot{opacity:.6}
+.clip-preview-controls{display:flex;gap:6px;justify-content:center}
+.clip-preview-control{
+  flex:1;padding:7px 10px;background:var(--paper-2,rgba(0,0,0,.03));border:1px solid var(--rule);
+  font-family:var(--fb);font-size:11.5px;font-weight:600;color:var(--ink);cursor:pointer;border-radius:3px;
+  transition:background .12s,border-color .12s,color .12s;
+}
+.clip-preview-control:hover{background:var(--paper-2,rgba(0,0,0,.06))}
+.clip-preview-control[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.clip-preview-hint{margin:0;font-size:11px;color:var(--ink-muted);font-style:italic;line-height:1.4;text-align:center}
+
+/* v0.25.0 — Indicateur durée + warnings */
+.clip-duration-hint{
+  margin-top:4px;font-family:var(--fb);font-size:11.5px;color:var(--ink-muted);font-style:italic;line-height:1.4;
+}
+.clip-duration-hint.is-warning{color:#7A5800}
+.clip-duration-hint.is-error{color:#B83A2D}
+
+/* v0.25.0 — Templates de hook */
+.clip-templates-btn{
+  margin-left:auto;font-family:var(--fb);font-size:10.5px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--accent);
+  background:none;border:1px solid var(--accent);border-radius:999px;padding:3px 10px;cursor:pointer;
+  transition:background .12s;
+}
+.clip-templates-btn:hover{background:var(--accent-soft,rgba(184,58,45,.08))}
+.clip-templates-btn[aria-expanded="true"]{background:var(--accent);color:#FDFAF3}
+.clip-templates-panel{
+  display:flex;flex-direction:column;gap:5px;
+  margin-bottom:10px;padding:10px;
+  background:var(--paper-2,rgba(0,0,0,.03));border:1px solid var(--rule);border-radius:3px;
+  max-height:220px;overflow-y:auto;
+}
+.clip-template-item{
+  text-align:left;padding:7px 10px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  font-family:var(--fb);font-size:12.5px;color:var(--ink);cursor:pointer;line-height:1.4;
+  transition:border-color .12s,background .12s;
+}
+.clip-template-item:hover{border-color:var(--accent);background:var(--accent-soft,rgba(184,58,45,.06))}
+
+/* v0.25.0 — Indicateur multi-plateforme */
+.clip-platform-fit{
+  display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;
+  font-family:var(--fb);font-size:11px;
+}
+.clip-platform-fit__item{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 7px;border-radius:999px;background:var(--paper-2,rgba(0,0,0,.04));border:1px solid var(--rule);
+  font-feature-settings:"tnum";
+}
+.clip-platform-fit__item--ok{color:#1F4025;background:#E0F0E5;border-color:#5C8A6E}
+.clip-platform-fit__item--warn{color:#7A5800;background:#FFF4D8;border-color:#E0B65A}
+.clip-platform-fit__item--over{color:#7A2D1A;background:#FBF1ED;border-color:#E5B8A8}
+[data-theme="dark"] .clip-platform-fit__item--ok{color:#9DD4A8;background:#1F4025;border-color:#5C8A6E}
+[data-theme="dark"] .clip-platform-fit__item--warn{color:#F5D58C;background:#3D2E12;border-color:#7A5A24}
+[data-theme="dark"] .clip-platform-fit__item--over{color:#F5A3A3;background:#3A2017;border-color:#7A3F2D}
+
+/* v0.25.0 — Sous-titres : toggle mode */
+.clip-subs-mode{margin-left:auto;display:flex;gap:0;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.clip-subs-mode__btn{
+  padding:4px 10px;background:var(--surface);border:none;
+  font-family:var(--fb);font-size:10.5px;font-weight:600;color:var(--ink-muted);cursor:pointer;
+  transition:background .12s,color .12s;
+}
+.clip-subs-mode__btn:hover{color:var(--ink)}
+.clip-subs-mode__btn--active{background:var(--ink);color:var(--bg)}
+.clip-bulk-textarea{
+  width:100%;min-height:140px;padding:10px 12px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  font-family:var(--fb);font-size:13px;color:var(--ink);line-height:1.55;resize:vertical;box-sizing:border-box;
+}
+.clip-bulk-textarea:focus{outline:none;border-color:var(--accent)}
+.clip-bulk-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px}
+.clip-bulk-hint{font-family:var(--fb);font-size:11.5px;color:var(--ink-muted);font-feature-settings:"tnum"}
+
+/* v0.25.0 — Suggestions hashtags */
+.clip-hashtag-suggestions{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.clip-hashtag-suggestion{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;background:var(--paper-2,rgba(0,0,0,.04));border:1px dashed var(--rule);border-radius:999px;
+  font-family:var(--fb);font-size:11.5px;color:var(--ink);cursor:pointer;
+  transition:background .12s,border-color .12s,color .12s;
+}
+.clip-hashtag-suggestion:hover{background:var(--accent-soft,rgba(184,58,45,.08));border-color:var(--accent);border-style:solid;color:var(--accent)}
+.clip-hashtag-suggestion::before{content:'+';font-weight:600;opacity:.65}
+
+@media (max-width:840px){
+  .clip-editor-grid{grid-template-columns:1fr;gap:14px}
+  .clip-editor-preview{position:static}
+  .clip-preview-phone[data-ratio="vertical"]{max-width:200px}
+}
 .hook-input{
   width:100%;padding:11px 13px;background:var(--surface);
   border:1px solid var(--rule);border-radius:2px;
@@ -7276,10 +7426,10 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
   </div>
 </div>
 
-<!-- ═══ CLIP EDITOR MODAL ═══ -->
+<!-- ═══ CLIP EDITOR MODAL (refondu v0.25.0) ═══ -->
 <div class="modal" id="clipEditorModal">
   <div class="modal__backdrop" data-close></div>
-  <div class="modal__box modal__box--lg">
+  <div class="modal__box modal__box--xl">
     <div class="modal__head">
       <div>
         <h2 class="modal__title" id="clipEditorTitle">✂️ Proposer un clip TikTok</h2>
@@ -7289,45 +7439,101 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
     </div>
     <div class="modal__body">
 
-      <div class="clip-editor-section">
-        <div class="clip-editor-section__title">🎬 Vidéo source <span id="clipSourceTitle" style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--text)"></span></div>
-        <div class="timestamps-row">
-          <div class="timestamp-input">
-            <label for="clipStart">Début (mm:ss)</label>
-            <input type="text" id="clipStart" placeholder="00:00" value="00:00"/>
+      <div class="clip-editor-grid">
+
+        <!-- ─── COLONNE GAUCHE : Preview type mobile 9:16 ─── -->
+        <aside class="clip-editor-preview" aria-label="Aperçu du clip">
+          <div class="clip-preview-phone" data-ratio="vertical" id="clipPreviewPhone">
+            <div class="clip-preview-phone__inner">
+              <div class="clip-preview-phone__video" id="clipPreviewWrap" style="display:none">
+                <iframe id="clipPreviewFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              </div>
+              <div class="clip-preview-phone__placeholder" id="clipPreviewPlaceholder">
+                <span class="clip-preview-phone__placeholder-icon">🎬</span>
+                <span>Renseigne les timestamps pour voir l'aperçu.</span>
+              </div>
+              <div class="clip-preview-phone__overlay">
+                <div class="clip-preview-phone__hook" id="clipPreviewHook"></div>
+                <div class="clip-preview-phone__subtitle" id="clipPreviewSubtitle"></div>
+                <div class="clip-preview-phone__footer">
+                  <span class="clip-preview-phone__author" id="clipPreviewAuthor">@avis_base.nth</span>
+                  <span class="clip-preview-phone__dot">·</span>
+                  <span class="clip-preview-phone__duration" id="clipPreviewDuration">15s</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="timestamp-input">
-            <label for="clipEnd">Fin (mm:ss)</label>
-            <input type="text" id="clipEnd" placeholder="00:15" value="00:15"/>
+          <div class="clip-preview-controls">
+            <button type="button" class="clip-preview-control" data-preview-ratio="vertical" aria-pressed="true">9:16 TikTok/Reels</button>
+            <button type="button" class="clip-preview-control" data-preview-ratio="horizontal" aria-pressed="false">16:9 Paysage</button>
           </div>
-          <div class="timestamp-duration" id="clipDuration">15s</div>
+          <p class="clip-preview-hint">L'aperçu YouTube ouvre au timestamp de début. Le hook et le premier sous-titre s'affichent en overlay comme dans l'app cible.</p>
+        </aside>
+
+        <!-- ─── COLONNE DROITE : Form ─── -->
+        <div class="clip-editor-fields">
+
+          <div class="clip-editor-section">
+            <div class="clip-editor-section__title">🎬 Vidéo source <span id="clipSourceTitle" style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--text)"></span></div>
+            <div class="timestamps-row">
+              <div class="timestamp-input">
+                <label for="clipStart">Début (mm:ss)</label>
+                <input type="text" id="clipStart" placeholder="00:00" value="00:00"/>
+              </div>
+              <div class="timestamp-input">
+                <label for="clipEnd">Fin (mm:ss)</label>
+                <input type="text" id="clipEnd" placeholder="00:15" value="00:15"/>
+              </div>
+              <div class="timestamp-duration" id="clipDuration">15s</div>
+            </div>
+            <div class="clip-duration-hint" id="clipDurationHint"></div>
+          </div>
+
+          <div class="clip-editor-section">
+            <div class="clip-editor-section__title">
+              🎯 Hook
+              <span style="font-weight:400;text-transform:none;letter-spacing:0">— accroche qui donne envie de cliquer</span>
+              <button type="button" class="clip-templates-btn" id="clipHookTemplatesBtn" aria-haspopup="true" aria-expanded="false">✨ Templates</button>
+            </div>
+            <div class="clip-templates-panel" id="clipHookTemplatesPanel" style="display:none" role="listbox" aria-label="Templates de hook"></div>
+            <textarea id="clipHook" class="hook-input" placeholder="Ex: Le chiffre que personne ne veut vous montrer sur les retraites 👇" maxlength="200"></textarea>
+            <div class="hook-counter" id="clipHookCounter">0 / 200</div>
+            <div class="clip-platform-fit" id="clipPlatformFit"></div>
+          </div>
+
+          <div class="clip-editor-section">
+            <div class="clip-editor-section__title">
+              📄 Sous-titres
+              <span style="font-weight:400;text-transform:none;letter-spacing:0">— ligne par ligne, timings relatifs au clip</span>
+              <div class="clip-subs-mode" role="tablist" aria-label="Mode d'édition des sous-titres">
+                <button type="button" class="clip-subs-mode__btn clip-subs-mode__btn--active" data-subs-mode="timeline" role="tab" aria-selected="true">Timeline</button>
+                <button type="button" class="clip-subs-mode__btn" data-subs-mode="bulk" role="tab" aria-selected="false">Collage rapide</button>
+              </div>
+            </div>
+            <div id="clipSubsTimelineMode">
+              <div id="clipSubtitlesList"></div>
+              <button class="subtitle-add-btn" id="clipAddSubtitleBtn">+ Ajouter une ligne de sous-titre</button>
+              <div style="margin-top:10px;font-size:0.76rem;color:var(--text-muted);font-style:italic">Les timings démarrent à 0s (début du clip), pas à la vraie timestamp de la vidéo source.</div>
+            </div>
+            <div id="clipSubsBulkMode" style="display:none">
+              <textarea id="clipBulkSubtitles" class="clip-bulk-textarea" placeholder="Colle ton texte ligne par ligne. Chaque ligne devient un sous-titre. Le clip est découpé équitablement sur la durée totale."></textarea>
+              <div class="clip-bulk-actions">
+                <span class="clip-bulk-hint" id="clipBulkHint">0 ligne</span>
+                <button type="button" class="btn btn--primary btn--sm" id="clipBulkApplyBtn">Appliquer les sous-titres</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="clip-editor-section">
+            <div class="clip-editor-section__title">🏷️ Hashtags <span style="font-weight:400;text-transform:none;letter-spacing:0">— 10 max</span></div>
+            <div class="clip-hashtag-suggestions" id="clipHashtagSuggestions"></div>
+            <div class="hashtag-input-wrap" id="clipHashtagsWrap">
+              <input type="text" id="clipHashtagInput" placeholder="Tape un hashtag + Entrée (ex: retraites)"/>
+            </div>
+          </div>
+
         </div>
-        <div class="clip-preview-wrap" id="clipPreviewWrap" style="display:none">
-          <iframe id="clipPreviewFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-        <div class="clip-preview-hint">💡 Le preview YouTube s'ouvre au timestamp de début. Tu peux laisser tourner pour vérifier la découpe.</div>
       </div>
-
-      <div class="clip-editor-section">
-        <div class="clip-editor-section__title">🎯 Hook TikTok <span style="font-weight:400;text-transform:none;letter-spacing:0">— accroche qui donne envie de cliquer</span></div>
-        <textarea id="clipHook" class="hook-input" placeholder="Ex: Le chiffre que personne ne veut vous montrer sur les retraites 👇 [Article complet sur avis-base.fr]" maxlength="200"></textarea>
-        <div class="hook-counter" id="clipHookCounter">0 / 200</div>
-      </div>
-
-      <div class="clip-editor-section">
-        <div class="clip-editor-section__title">📄 Sous-titres chronologiques <span style="font-weight:400;text-transform:none;letter-spacing:0">— ligne par ligne, avec timing relatif au clip</span></div>
-        <div id="clipSubtitlesList"></div>
-        <button class="subtitle-add-btn" id="clipAddSubtitleBtn">+ Ajouter une ligne de sous-titre</button>
-        <div style="margin-top:10px;font-size:0.76rem;color:var(--text-muted);font-style:italic">💡 Les timings démarrent à 0s (début du clip), pas à la vraie timestamp de la vidéo source.</div>
-      </div>
-
-      <div class="clip-editor-section">
-        <div class="clip-editor-section__title">🏷️ Hashtags</div>
-        <div class="hashtag-input-wrap" id="clipHashtagsWrap">
-          <input type="text" id="clipHashtagInput" placeholder="Tape un hashtag + Entrée (ex: retraites)"/>
-        </div>
-      </div>
-
     </div>
     <div class="modal__foot">
       <button class="btn btn--ghost btn--sm" data-close>Annuler</button>
@@ -16941,12 +17147,246 @@ function renderClipEditor() {
   document.getElementById('clipEnd').value = secondsToMMSS(clipEditorState.videoEnd);
   updateClipDuration();
   updateClipPreview();
+  updateDurationHint();
 
   document.getElementById('clipHook').value = clipEditorState.hook;
   updateHookCounter();
 
   renderSubtitles();
   renderHashtags();
+
+  // v0.25.0 — Rendus additionnels
+  renderHookTemplates();
+  renderHashtagSuggestions();
+  updatePreviewOverlay();
+  setPreviewRatio(_currentPreviewRatio);
+  // Reset le mode des sous-titres en timeline par défaut
+  setSubsMode('timeline');
+  const bulk = document.getElementById('clipBulkSubtitles');
+  if (bulk) bulk.value = '';
+  updateBulkHint();
+}
+
+// ═════════════════════════════════════════════════════════════
+// v0.25.0 — Éditeur de clips amélioré : helpers
+// ═════════════════════════════════════════════════════════════
+
+// Templates de hook (8 modèles prêts à l'emploi)
+const CLIP_HOOK_TEMPLATES = [
+  '🤯 Le saviez-vous ? {sujet}',
+  '🚨 Ce qu\'on ne te dit pas sur {sujet}',
+  '📊 {nombre} % des gens ignorent que…',
+  '⚡ En 30s : ce qu\'il faut comprendre sur {sujet}',
+  '🧠 Vrai ou faux ? {affirmation}',
+  '🎯 Voici pourquoi {sujet} change tout',
+  '💡 3 choses à savoir sur {sujet}',
+  '👀 Personne n\'en parle, mais {fait clé}'
+];
+
+// Mapping theme_slug → suggestions de hashtags
+const CLIP_THEME_HASHTAGS = {
+  politique:       ['politique','actu','democratie','france'],
+  economie:        ['economie','finance','argent','inflation'],
+  societe:         ['societe','social','debat','france'],
+  international:   ['international','geopolitique','monde','actu'],
+  ecologie:        ['ecologie','climat','environnement','planete'],
+  sciences:        ['sciences','recherche','decouverte','tech'],
+  culture:         ['culture','art','histoire','patrimoine'],
+  sport:           ['sport','competition','athletes'],
+  tech:            ['tech','innovation','numerique','ia'],
+  sante:           ['sante','medecine','bienetre','prevention'],
+  education:       ['education','ecole','jeunesse','apprendre'],
+  medias:          ['medias','desinformation','sources','factcheck'],
+  autre:           ['avisbase','source','factcheck','reflexion']
+};
+const CLIP_BASE_HASHTAGS = ['avisbase','sourcer'];
+
+// Limites optimales par plateforme (caption / hook)
+const CLIP_PLATFORM_LIMITS = [
+  { key: 'tiktok',    label: 'TikTok',    optimal: 100, max: 150 },
+  { key: 'twitter',   label: 'Twitter/X', optimal: 240, max: 280 },
+  { key: 'instagram', label: 'Instagram', optimal: 125, max: 2200 }
+];
+
+let _currentPreviewRatio = 'vertical';
+
+function updateDurationHint() {
+  const el = document.getElementById('clipDurationHint');
+  if (!el) return;
+  const dur = clipEditorState.videoEnd - clipEditorState.videoStart;
+  el.classList.remove('is-warning','is-error');
+  if (dur < 1) {
+    el.textContent = '⚠️ Durée trop courte. Vise 15 à 90 secondes pour un clip viral.';
+    el.classList.add('is-error');
+  } else if (dur < 10) {
+    el.textContent = '⚡ Très court ! 15–60 s sont les durées les plus performantes sur TikTok/Reels.';
+    el.classList.add('is-warning');
+  } else if (dur <= 60) {
+    el.textContent = '✓ Excellente durée pour TikTok / Reels / Twitter (15-60 s).';
+  } else if (dur <= 90) {
+    el.textContent = '✓ Bonne durée pour LinkedIn / Instagram. Un poil long pour Twitter.';
+  } else if (dur <= 180) {
+    el.textContent = '⚠️ Format long : OK pour YouTube Shorts (≤180 s) mais coupé sur Twitter et trop long pour les autres.';
+    el.classList.add('is-warning');
+  } else {
+    el.textContent = '❌ Durée trop longue (3 min max). Réduis pour rester dans les formats clips.';
+    el.classList.add('is-error');
+  }
+}
+
+function updatePreviewOverlay() {
+  const hookEl = document.getElementById('clipPreviewHook');
+  const subEl  = document.getElementById('clipPreviewSubtitle');
+  const durEl  = document.getElementById('clipPreviewDuration');
+  if (hookEl) hookEl.textContent = clipEditorState.hook || '';
+  if (subEl) {
+    const firstWithText = (clipEditorState.subtitles || []).find(s => s.text && s.text.trim());
+    subEl.textContent = firstWithText ? firstWithText.text.trim() : '';
+  }
+  if (durEl) {
+    const d = Math.max(0, clipEditorState.videoEnd - clipEditorState.videoStart);
+    durEl.textContent = d + 's';
+  }
+  // Update placeholder visibility
+  const ph = document.getElementById('clipPreviewPlaceholder');
+  const wrap = document.getElementById('clipPreviewWrap');
+  if (ph && wrap) {
+    ph.style.display = wrap.style.display === 'block' ? 'none' : 'flex';
+  }
+}
+
+function updatePlatformFit() {
+  const el = document.getElementById('clipPlatformFit');
+  if (!el) return;
+  const len = (clipEditorState.hook || '').length;
+  el.innerHTML = CLIP_PLATFORM_LIMITS.map(p => {
+    let cls = 'clip-platform-fit__item--ok';
+    let icon = '✓';
+    if (len > p.max) { cls = 'clip-platform-fit__item--over'; icon = '✕'; }
+    else if (len > p.optimal) { cls = 'clip-platform-fit__item--warn'; icon = '⚠'; }
+    return `<span class="clip-platform-fit__item ${cls}">${icon} ${p.label} ${len}/${p.optimal}</span>`;
+  }).join('');
+}
+
+function renderHookTemplates() {
+  const panel = document.getElementById('clipHookTemplatesPanel');
+  if (!panel) return;
+  panel.innerHTML = CLIP_HOOK_TEMPLATES.map(tpl =>
+    `<button type="button" class="clip-template-item" data-tpl="${escapeHtml(tpl)}">${escapeHtml(tpl)}</button>`
+  ).join('');
+  panel.querySelectorAll('[data-tpl]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tpl = btn.dataset.tpl;
+      clipEditorState.hook = tpl;
+      document.getElementById('clipHook').value = tpl;
+      updateHookCounter();
+      updatePreviewOverlay();
+      toggleHookTemplatesPanel(false);
+      // Focus the hook for immediate editing of placeholders
+      const hookEl = document.getElementById('clipHook');
+      hookEl?.focus();
+      // Sélectionne automatiquement la première {placeholder} pour qu'elle soit remplacée
+      const m = tpl.match(/\{[^}]+\}/);
+      if (m) {
+        const idx = tpl.indexOf(m[0]);
+        hookEl?.setSelectionRange(idx, idx + m[0].length);
+      }
+    });
+  });
+}
+
+function toggleHookTemplatesPanel(force) {
+  const panel = document.getElementById('clipHookTemplatesPanel');
+  const btn = document.getElementById('clipHookTemplatesBtn');
+  if (!panel || !btn) return;
+  const isOpen = panel.style.display === 'flex';
+  const next = (typeof force === 'boolean') ? force : !isOpen;
+  panel.style.display = next ? 'flex' : 'none';
+  btn.setAttribute('aria-expanded', next ? 'true' : 'false');
+}
+
+function renderHashtagSuggestions() {
+  const wrap = document.getElementById('clipHashtagSuggestions');
+  if (!wrap) return;
+  const article = articles.find(a => a.id === clipEditorState.articleId);
+  const theme = article?.themeSlug || 'autre';
+  const themeTags = CLIP_THEME_HASHTAGS[theme] || CLIP_THEME_HASHTAGS.autre;
+  const suggestions = [...new Set([...CLIP_BASE_HASHTAGS, ...themeTags])]
+    .filter(t => !clipEditorState.hashtags.includes(t))
+    .slice(0, 8);
+
+  if (suggestions.length === 0) {
+    wrap.innerHTML = `<span style="font-family:var(--fb);font-size:11.5px;color:var(--ink-muted);font-style:italic">Tous les hashtags suggérés sont déjà ajoutés.</span>`;
+    return;
+  }
+  wrap.innerHTML = suggestions.map(t =>
+    `<button type="button" class="clip-hashtag-suggestion" data-add-tag="${escapeHtml(t)}">#${escapeHtml(t)}</button>`
+  ).join('');
+  wrap.querySelectorAll('[data-add-tag]').forEach(b => {
+    b.addEventListener('click', () => {
+      addHashtag(b.dataset.addTag);
+      renderHashtagSuggestions();
+    });
+  });
+}
+
+function setSubsMode(mode) {
+  document.querySelectorAll('[data-subs-mode]').forEach(btn => {
+    const isActive = btn.dataset.subsMode === mode;
+    btn.classList.toggle('clip-subs-mode__btn--active', isActive);
+    btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+  });
+  document.getElementById('clipSubsTimelineMode').style.display = mode === 'timeline' ? '' : 'none';
+  document.getElementById('clipSubsBulkMode').style.display = mode === 'bulk' ? '' : 'none';
+}
+
+function updateBulkHint() {
+  const ta = document.getElementById('clipBulkSubtitles');
+  const hint = document.getElementById('clipBulkHint');
+  if (!ta || !hint) return;
+  const lines = ta.value.split('\n').map(l => l.trim()).filter(Boolean);
+  const dur = clipEditorState.videoEnd - clipEditorState.videoStart;
+  if (lines.length === 0) {
+    hint.textContent = '0 ligne';
+  } else if (dur <= 0) {
+    hint.textContent = lines.length + ' ligne' + (lines.length > 1 ? 's' : '') + ' (durée invalide)';
+  } else {
+    const per = (dur / lines.length).toFixed(1);
+    hint.textContent = lines.length + ' ligne' + (lines.length > 1 ? 's' : '') + ' · ~' + per + 's chacune';
+  }
+}
+
+function applyBulkSubtitles() {
+  const ta = document.getElementById('clipBulkSubtitles');
+  if (!ta) return;
+  const lines = ta.value.split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length === 0) { showToast('Colle au moins une ligne', true); return; }
+  const dur = clipEditorState.videoEnd - clipEditorState.videoStart;
+  if (dur <= 0) { showToast('Durée invalide — ajuste les timestamps d\'abord', true); return; }
+  const per = dur / lines.length;
+  clipEditorState.subtitles = lines.map((text, i) => ({
+    start: Math.round(i * per),
+    end:   Math.round((i + 1) * per),
+    text:  text
+  }));
+  // Cap end of last to clip duration
+  if (clipEditorState.subtitles.length > 0) {
+    clipEditorState.subtitles[clipEditorState.subtitles.length - 1].end = dur;
+  }
+  setSubsMode('timeline');
+  renderSubtitles();
+  updatePreviewOverlay();
+  showToast(`${lines.length} sous-titre${lines.length > 1 ? 's' : ''} générés ✓`);
+}
+
+function setPreviewRatio(ratio) {
+  if (!['vertical','horizontal'].includes(ratio)) ratio = 'vertical';
+  _currentPreviewRatio = ratio;
+  const phone = document.getElementById('clipPreviewPhone');
+  if (phone) phone.setAttribute('data-ratio', ratio);
+  document.querySelectorAll('[data-preview-ratio]').forEach(b => {
+    b.setAttribute('aria-pressed', b.dataset.previewRatio === ratio ? 'true' : 'false');
+  });
 }
 
 function updateClipDuration() {
@@ -16968,6 +17408,9 @@ function updateClipPreview() {
   } else {
     wrap.style.display = 'none';
   }
+  // v0.25.0 — Sync placeholder + duration overlay
+  if (typeof updatePreviewOverlay === 'function') updatePreviewOverlay();
+  if (typeof updateDurationHint === 'function') updateDurationHint();
 }
 
 function updateHookCounter() {
@@ -16975,6 +17418,9 @@ function updateHookCounter() {
   const len = clipEditorState.hook.length;
   el.textContent = `${len} / 200`;
   el.classList.toggle('warn', len > 180);
+  // v0.25.0 — Met à jour les indicateurs plateformes + overlay
+  if (typeof updatePlatformFit === 'function') updatePlatformFit();
+  if (typeof updatePreviewOverlay === 'function') updatePreviewOverlay();
 }
 
 function renderSubtitles() {
@@ -17010,6 +17456,8 @@ function renderSubtitles() {
     inp.addEventListener('input', e => {
       const i = parseInt(inp.dataset.subText);
       clipEditorState.subtitles[i].text = e.target.value;
+      // v0.25.0 — Refresh preview overlay (premier sous-titre)
+      if (typeof updatePreviewOverlay === 'function') updatePreviewOverlay();
     });
   });
   container.querySelectorAll('[data-sub-remove]').forEach(btn => {
@@ -17042,6 +17490,7 @@ function renderHashtags() {
     chip.querySelector('[data-tag-remove]').addEventListener('click', () => {
       clipEditorState.hashtags.splice(i, 1);
       renderHashtags();
+      if (typeof renderHashtagSuggestions === 'function') renderHashtagSuggestions();
     });
     wrap.insertBefore(chip, input);
   });
@@ -17054,6 +17503,8 @@ function addHashtag(tag) {
   if (clipEditorState.hashtags.length >= 10) { showToast('10 hashtags maximum', true); return; }
   clipEditorState.hashtags.push(clean);
   renderHashtags();
+  // v0.25.0 — Met à jour les suggestions (cache les tags déjà ajoutés)
+  if (typeof renderHashtagSuggestions === 'function') renderHashtagSuggestions();
 }
 
 async function saveClip(status) {
@@ -18864,6 +19315,26 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('saveClipDraftBtn')?.addEventListener('click', () => saveClip('draft'));
   document.getElementById('submitClipBtn')?.addEventListener('click', () => saveClip('review'));
+
+  // v0.25.0 — Nouveaux contrôles éditeur clip
+  document.getElementById('clipHookTemplatesBtn')?.addEventListener('click', () => toggleHookTemplatesPanel());
+  document.addEventListener('click', e => {
+    // Click outside du panel templates → ferme
+    const panel = document.getElementById('clipHookTemplatesPanel');
+    if (!panel || panel.style.display !== 'flex') return;
+    if (e.target.closest('#clipHookTemplatesPanel') || e.target.closest('#clipHookTemplatesBtn')) return;
+    toggleHookTemplatesPanel(false);
+  });
+  // Toggle modes sous-titres
+  document.querySelectorAll('[data-subs-mode]').forEach(b => {
+    b.addEventListener('click', () => setSubsMode(b.dataset.subsMode));
+  });
+  document.getElementById('clipBulkSubtitles')?.addEventListener('input', updateBulkHint);
+  document.getElementById('clipBulkApplyBtn')?.addEventListener('click', applyBulkSubtitles);
+  // Toggle preview ratio
+  document.querySelectorAll('[data-preview-ratio]').forEach(b => {
+    b.addEventListener('click', () => setPreviewRatio(b.dataset.previewRatio));
+  });
 
   // ─ Close modals ─
   document.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', () => {
