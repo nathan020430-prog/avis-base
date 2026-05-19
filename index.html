@@ -5373,41 +5373,57 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch
 }
 
-/* Cover band (background ornement) */
+/* Cover band (background ornement) — v0.28.0 : plus grande, plus magnetique */
 .public-profile__cover{
-  height:120px;
-  background:linear-gradient(135deg,var(--surface-alt) 0%,var(--surface) 50%,var(--accent-soft) 100%);
+  height:200px;
+  background:linear-gradient(135deg,var(--accent-soft) 0%,var(--surface-alt) 50%,var(--surface) 100%);
   position:relative;
-  border-bottom:1px solid var(--rule)
+  border-bottom:1px solid var(--rule);
+  overflow:hidden
+}
+.public-profile__cover::before{
+  content:'';position:absolute;top:-20%;right:-10%;width:60%;height:140%;
+  background:radial-gradient(ellipse at center, rgba(140,28,19,0.18) 0%, transparent 60%);
+  pointer-events:none;
+  animation:profile-cover-drift 12s ease-in-out infinite alternate
 }
 .public-profile__cover::after{
   content:'';position:absolute;inset:0;
-  background-image:radial-gradient(circle at 30% 50%, rgba(140,28,19,0.05) 0%, transparent 50%);
+  background-image:
+    radial-gradient(circle at 25% 30%, rgba(140,28,19,0.08) 0%, transparent 35%),
+    radial-gradient(circle at 75% 65%, rgba(140,28,19,0.06) 0%, transparent 40%);
   pointer-events:none
 }
+@keyframes profile-cover-drift{
+  from{transform:translate(0,0) scale(1)}
+  to{transform:translate(-8%,4%) scale(1.05)}
+}
+[data-theme="dark"] .public-profile__cover{
+  background:linear-gradient(135deg,rgba(140,28,19,0.15) 0%,var(--surface-alt) 50%,var(--bg) 100%)
+}
 
-/* Header section */
+/* Header section — v0.28.0 : avatar plus grand qui chevauche le cover */
 .public-profile__header{
   padding:0 32px 24px;
   position:relative;
-  margin-top:-46px
+  margin-top:-68px
 }
 .public-profile__top{
   display:flex;align-items:flex-start;
   gap:24px;margin-bottom:14px
 }
 .public-profile__avatar{
-  width:120px;height:120px;border-radius:50%;
+  width:136px;height:136px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--ff);font-size:2.6rem;font-weight:500;
-  border:4px solid var(--bg);
+  font-family:var(--ff);font-size:2.9rem;font-weight:500;
+  border:5px solid var(--bg);
   flex-shrink:0;overflow:hidden;
-  box-shadow:0 4px 16px rgba(26,17,8,0.12)
+  box-shadow:0 6px 22px rgba(26,17,8,0.18),0 0 0 1px rgba(26,17,8,0.06)
 }
 .public-profile__avatar img{width:100%;height:100%;object-fit:cover}
 .public-profile__id-block{
   flex:1;min-width:0;
-  padding-top:54px
+  padding-top:70px
 }
 .public-profile__username-row{
   display:flex;align-items:center;gap:10px;flex-wrap:wrap;
@@ -5430,7 +5446,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 .public-profile__actions{
   display:flex;align-items:center;gap:8px;flex-wrap:wrap;
   margin-left:auto;
-  padding-top:54px
+  padding-top:70px
 }
 .public-profile__btn{
   display:inline-flex;align-items:center;gap:6px;
@@ -5469,26 +5485,110 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 .public-profile__meta svg{width:14px;height:14px}
 .public-profile__joined{display:inline-flex;align-items:center;gap:5px;font-style:italic}
 
-/* Stats row (Instagram style) */
+/* Stats row — v0.28.0 : cards visuelles avec icones (TikTok/Insta style) */
 .public-profile__stats{
-  display:flex;gap:32px;flex-wrap:wrap;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;
   padding:18px 32px;
   background:var(--surface);
   border-top:1px solid var(--rule);
   border-bottom:1px solid var(--rule)
 }
 .public-profile__stat{
-  display:flex;flex-direction:column;align-items:flex-start;
-  cursor:default
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;padding:14px 10px;
+  background:var(--bg);border:1px solid var(--rule);border-radius:14px;
+  cursor:default;text-align:center;
+  transition:transform 0.18s cubic-bezier(0.32,0.72,0,1),border-color 0.18s ease,box-shadow 0.18s ease;
+  position:relative;overflow:hidden
 }
+.public-profile__stat::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 0%,rgba(140,28,19,0.04) 100%);
+  opacity:0;transition:opacity 0.18s ease;pointer-events:none
+}
+.public-profile__stat:hover{
+  transform:translateY(-2px);
+  border-color:var(--accent);
+  box-shadow:0 6px 16px -8px rgba(140,28,19,0.25)
+}
+.public-profile__stat:hover::before{opacity:1}
 .public-profile__stat-num{
-  font-family:var(--ff);font-size:1.4rem;font-weight:500;
-  color:var(--ink);letter-spacing:-0.01em;line-height:1
+  font-family:var(--ff);font-size:1.65rem;font-weight:500;
+  color:var(--ink);letter-spacing:-0.015em;line-height:1;
+  position:relative;z-index:1
 }
 .public-profile__stat-label{
-  font-size:0.72rem;color:var(--ink-muted);
-  text-transform:uppercase;letter-spacing:0.08em;
-  margin-top:4px;font-weight:600
+  font-size:0.66rem;color:var(--ink-muted);
+  text-transform:uppercase;letter-spacing:0.1em;
+  font-weight:700;position:relative;z-index:1
+}
+
+/* Mutual followers — v0.28.0 : "Suivi par @x, @y et 12 autres que tu suis" */
+.public-profile__mutuals{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 32px;
+  background:var(--bg);border-top:1px solid var(--rule);
+  font-size:0.84rem;color:var(--ink-muted);
+  line-height:1.5;
+  animation:profile-mutuals-in 0.32s cubic-bezier(0.32,0.72,0,1)
+}
+@keyframes profile-mutuals-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.public-profile__mutuals-avatars{
+  display:inline-flex;flex-shrink:0
+}
+.public-profile__mutuals-avatars > *{
+  width:26px;height:26px;border-radius:50%;
+  border:2px solid var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff);font-size:0.62rem;font-weight:600;color:#5A4A30;
+  background:linear-gradient(135deg,#E8DCC4,#C9B89A);
+  overflow:hidden
+}
+.public-profile__mutuals-avatars > *:not(:first-child){margin-left:-9px}
+.public-profile__mutuals-avatars > * img{width:100%;height:100%;object-fit:cover}
+[data-theme="dark"] .public-profile__mutuals-avatars > *{
+  background:linear-gradient(135deg,#3A2D1F,#5C4630);color:#E8DCC4
+}
+.public-profile__mutuals-text strong{color:var(--ink);font-weight:600}
+.public-profile__mutuals-text a{color:var(--accent);font-weight:600;text-decoration:none;cursor:pointer}
+.public-profile__mutuals-text a:hover{text-decoration:underline;text-underline-offset:2px}
+
+/* Sticky CTA bar — v0.28.0 : apparait apres scroll du header */
+.public-profile__sticky-cta{
+  position:absolute;top:0;left:0;right:0;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:11px 18px;
+  background:rgba(253,250,243,0.95);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--rule);
+  z-index:6;
+  transform:translateY(-100%);transition:transform 0.28s cubic-bezier(0.32,0.72,0,1);
+  pointer-events:none
+}
+[data-theme="dark"] .public-profile__sticky-cta{background:rgba(21,17,11,0.95)}
+.public-profile__sticky-cta.visible{transform:translateY(0);pointer-events:auto}
+.public-profile__sticky-cta-info{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.public-profile__sticky-cta-avatar{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff);font-size:0.82rem;font-weight:500;color:#5A4A30;
+  background:linear-gradient(135deg,#E8DCC4,#C9B89A);
+  border:1px solid var(--rule)
+}
+.public-profile__sticky-cta-avatar img{width:100%;height:100%;object-fit:cover}
+[data-theme="dark"] .public-profile__sticky-cta-avatar{
+  background:linear-gradient(135deg,#3A2D1F,#5C4630);color:#E8DCC4
+}
+.public-profile__sticky-cta-name{
+  font-family:var(--ff);font-size:1rem;font-weight:500;color:var(--ink);
+  letter-spacing:-0.005em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.public-profile__sticky-cta-actions{
+  display:flex;align-items:center;gap:6px;flex-shrink:0
+}
+.public-profile__sticky-cta-actions .public-profile__btn{
+  padding:6px 16px;font-size:0.82rem
 }
 
 /* Tabs */
@@ -5512,31 +5612,41 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   font-size:0.85rem;text-transform:none;letter-spacing:0
 }
 
-/* Articles grid */
+/* Articles grid — v0.28.0 : image dominante, hover qui revele les meta */
 .public-profile__articles{
   padding:24px 32px 40px;
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px
 }
 .public-profile__article{
   display:flex;flex-direction:column;
   background:var(--surface);
   border:1px solid var(--rule);border-radius:var(--rl);
   overflow:hidden;cursor:pointer;
-  transition:all 0.22s cubic-bezier(0.32,0.72,0,1);
-  position:relative
+  transition:transform 0.22s cubic-bezier(0.32,0.72,0,1),border-color 0.22s ease,box-shadow 0.22s ease;
+  position:relative;
+  animation:profile-article-in 0.32s cubic-bezier(0.32,0.72,0,1) backwards
 }
+.public-profile__article:nth-child(1){animation-delay:0.04s}
+.public-profile__article:nth-child(2){animation-delay:0.08s}
+.public-profile__article:nth-child(3){animation-delay:0.12s}
+.public-profile__article:nth-child(4){animation-delay:0.16s}
+.public-profile__article:nth-child(5){animation-delay:0.2s}
+.public-profile__article:nth-child(6){animation-delay:0.24s}
+@keyframes profile-article-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .public-profile__article:hover{
-  transform:translateY(-2px);
-  border-color:var(--ink);
-  box-shadow:0 8px 24px -8px rgba(26,17,8,0.18)
+  transform:translateY(-3px);
+  border-color:var(--accent);
+  box-shadow:0 12px 28px -10px rgba(26,17,8,0.22)
 }
 .public-profile__article-thumb{
-  aspect-ratio:16/10;
+  aspect-ratio:4/3;
   background:var(--surface-alt);
   overflow:hidden;
   border-bottom:1px solid var(--rule);
   position:relative
 }
+.public-profile__article-thumb img{transition:transform 0.55s cubic-bezier(0.32,0.72,0,1)}
+.public-profile__article:hover .public-profile__article-thumb img{transform:scale(1.04)}
 .public-profile__article-thumb img{
   width:100%;height:100%;object-fit:cover;display:block
 }
@@ -8837,6 +8947,11 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
           <!-- v0.18.0 Phase 3 — Breakdown du score crédibilité -->
           <div id="publicProfileCredBreakdown" style="display:none"></div>
         </div>
+        <!-- v0.28.0 — Preuve sociale "Suivi par @x, @y et N autres" -->
+        <div class="public-profile__mutuals" id="publicProfileMutuals" style="display:none">
+          <div class="public-profile__mutuals-avatars" id="publicProfileMutualsAvatars"></div>
+          <div class="public-profile__mutuals-text" id="publicProfileMutualsText"></div>
+        </div>
         <div class="public-profile__stats" id="publicProfileStats"></div>
         <div class="public-profile__tabs" id="publicProfileTabs">
           <button class="public-profile__tab public-profile__tab--active" data-profile-tab="articles">
@@ -8845,6 +8960,14 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
         </div>
         <div class="public-profile__articles" id="publicProfileArticles"></div>
       </div>
+    </div>
+    <!-- v0.28.0 — Sticky CTA bar : apparait quand on scrolle au-dela du header -->
+    <div class="public-profile__sticky-cta" id="publicProfileStickyCta" style="display:none">
+      <div class="public-profile__sticky-cta-info">
+        <div class="public-profile__sticky-cta-avatar" id="publicProfileStickyAvatar"></div>
+        <div class="public-profile__sticky-cta-name" id="publicProfileStickyName">—</div>
+      </div>
+      <div class="public-profile__sticky-cta-actions" id="publicProfileStickyActions"></div>
     </div>
   </div>
 </div>
@@ -14396,7 +14519,22 @@ async function openPublicProfile(idOrUsername) {
       }
     } catch(e) { /* table follows manquante = on ignore */ }
 
-    renderPublicProfile(profile, userArticles, { followersCount, followingCount, iFollow });
+    // v0.28.0 — Mutual followers (preuve sociale "Suivi par @x, @y et N autres")
+    let mutuals = null;
+    try {
+      if (currentUser && currentUser.id !== profile.id) {
+        const { data: mdata } = await supa.rpc('get_mutual_followers', { p_target_id: profile.id, p_limit: 3 });
+        if (mdata && (mdata.total || 0) > 0) mutuals = mdata;
+      }
+    } catch(e) { /* RPC manquante = on ignore silencieusement */ }
+
+    // v0.28.0 — Lectures cumulees (somme des reads de ses articles publies)
+    let totalReads = 0;
+    try {
+      totalReads = userArticles.reduce((s, a) => s + (a.status === 'published' ? (a.reads || 0) : 0), 0);
+    } catch(e){}
+
+    renderPublicProfile(profile, userArticles, { followersCount, followingCount, iFollow, mutuals, totalReads });
   } catch (e) {
     console.error('[openPublicProfile] error:', e);
     showToast('Erreur : ' + (e?.message || e), true);
@@ -14409,6 +14547,71 @@ function closePublicProfile() {
   if (!bd) return;
   bd.style.display = 'none';
   document.body.style.overflow = '';
+  // v0.28.0 — Reset sticky CTA
+  const sticky = document.getElementById('publicProfileStickyCta');
+  if (sticky) sticky.classList.remove('visible');
+}
+
+// v0.28.0 — Sticky CTA bar : apparait quand on scrolle au-dela du header avatar
+function bindStickyCta(profile, stats) {
+  const scroller = document.getElementById('publicProfileScroll');
+  const sticky = document.getElementById('publicProfileStickyCta');
+  if (!scroller || !sticky) return;
+
+  // Remplir le contenu de la sticky bar
+  const isMe = currentUser && currentUser.id === profile.id;
+  const initials = (profile.username || '?').slice(0, 2).toUpperCase();
+  const avatarEl = document.getElementById('publicProfileStickyAvatar');
+  if (profile.avatar_url) {
+    avatarEl.innerHTML = `<img src="${escapeHtml(profile.avatar_url)}" alt=""/>`;
+  } else {
+    avatarEl.textContent = initials;
+  }
+  document.getElementById('publicProfileStickyName').textContent = '@' + (profile.username || 'utilisateur');
+
+  const actionsEl = document.getElementById('publicProfileStickyActions');
+  if (isMe) {
+    actionsEl.innerHTML = `<button class="public-profile__btn" id="publicProfileStickyEditBtn">Modifier</button>`;
+    document.getElementById('publicProfileStickyEditBtn')?.addEventListener('click', () => { closePublicProfile(); openProfileEditor(); });
+  } else if (currentUser) {
+    actionsEl.innerHTML = `
+      <button class="public-profile__btn ${stats.iFollow ? 'public-profile__btn--active' : 'public-profile__btn--primary'}" id="publicProfileStickyFollowBtn">
+        ${stats.iFollow ? '✓ Suivi' : '+ Suivre'}
+      </button>
+      <button class="public-profile__btn" id="publicProfileStickyMsgBtn" aria-label="Message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </button>`;
+    document.getElementById('publicProfileStickyFollowBtn')?.addEventListener('click', async () => {
+      if (typeof Follow !== 'undefined' && Follow.toggle) {
+        await Follow.toggle(profile.id);
+        openPublicProfile(profile.id);
+      }
+    });
+    document.getElementById('publicProfileStickyMsgBtn')?.addEventListener('click', () => {
+      closePublicProfile();
+      if (window.openDM) window.openDM(profile.id);
+    });
+  } else {
+    actionsEl.innerHTML = `<button class="public-profile__btn public-profile__btn--primary" id="publicProfileStickyLoginBtn">Se connecter</button>`;
+    document.getElementById('publicProfileStickyLoginBtn')?.addEventListener('click', () => {
+      closePublicProfile();
+      setTimeout(() => { if (typeof openAuthModal === 'function') openAuthModal('login'); }, 100);
+    });
+  }
+
+  // Le seuil = quand l'avatar disparait sous le top du scroller
+  // Cover = 200px, l'avatar chevauche -68px → seuil ≈ 200 - 30 = 170px
+  const STICKY_THRESHOLD = 170;
+  const onScroll = () => {
+    if (scroller.scrollTop > STICKY_THRESHOLD) sticky.classList.add('visible');
+    else sticky.classList.remove('visible');
+  };
+  scroller.removeEventListener('scroll', scroller._stickyHandler || (() => {}));
+  scroller._stickyHandler = onScroll;
+  scroller.addEventListener('scroll', onScroll, { passive: true });
+  // Reset au render
+  scroller.scrollTop = 0;
+  sticky.classList.remove('visible');
 }
 
 function renderPublicProfile(profile, userArticles, stats) {
@@ -14531,26 +14734,57 @@ function renderPublicProfile(profile, userArticles, stats) {
     });
   }
 
-  // Stats
+  // Stats — v0.28.0 : 4 cards visuelles + format compact pour les gros chiffres
   const articlesCount = userArticles.filter(a => a.status === 'published').length;
+  const fmtK = (n) => n >= 1000000 ? (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'
+                  : n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k'
+                  : String(n);
   document.getElementById('publicProfileStats').innerHTML = `
     <div class="public-profile__stat">
       <span class="public-profile__stat-num">${articlesCount}</span>
       <span class="public-profile__stat-label">Article${articlesCount > 1 ? 's' : ''}</span>
     </div>
     <div class="public-profile__stat">
-      <span class="public-profile__stat-num">${profile.credibility_score || 0}<span style="font-size:0.7em;color:var(--ink-muted)">%</span></span>
-      <span class="public-profile__stat-label">Basitude</span>
+      <span class="public-profile__stat-num">${fmtK(stats.totalReads || 0)}</span>
+      <span class="public-profile__stat-label">Lecture${(stats.totalReads || 0) > 1 ? 's' : ''}</span>
     </div>
     <div class="public-profile__stat">
-      <span class="public-profile__stat-num">${stats.followersCount}</span>
+      <span class="public-profile__stat-num">${fmtK(stats.followersCount)}</span>
       <span class="public-profile__stat-label">Abonné${stats.followersCount > 1 ? 's' : ''}</span>
     </div>
     <div class="public-profile__stat">
-      <span class="public-profile__stat-num">${stats.followingCount}</span>
-      <span class="public-profile__stat-label">Abonnement${stats.followingCount > 1 ? 's' : ''}</span>
+      <span class="public-profile__stat-num">${profile.credibility_score || 0}<span style="font-size:0.6em;color:var(--ink-muted);margin-left:1px">%</span></span>
+      <span class="public-profile__stat-label">Basitude</span>
     </div>
   `;
+
+  // v0.28.0 — Mutual followers (preuve sociale)
+  const mutualsBox = document.getElementById('publicProfileMutuals');
+  if (stats.mutuals && stats.mutuals.total > 0 && Array.isArray(stats.mutuals.mutuals) && stats.mutuals.mutuals.length > 0) {
+    const list = stats.mutuals.mutuals;
+    const total = stats.mutuals.total;
+    const avatarsHtml = list.map(u => {
+      const initials = (u.username || '?').slice(0, 2).toUpperCase();
+      if (u.avatar_url) return `<span title="@${escapeHtml(u.username)}"><img src="${escapeHtml(u.avatar_url)}" alt="@${escapeHtml(u.username)}"/></span>`;
+      return `<span title="@${escapeHtml(u.username)}">${escapeHtml(initials)}</span>`;
+    }).join('');
+    const names = list.slice(0, 2).map(u => `<a data-mutual-uid="${u.id}"><strong>@${escapeHtml(u.username)}</strong></a>`).join(', ');
+    const extra = total > list.length
+      ? ` et <strong>${total - list.length} autre${total - list.length > 1 ? 's' : ''}</strong> que tu suis`
+      : (total > 2 ? ` et <strong>${total - 2} autre${total - 2 > 1 ? 's' : ''}</strong> que tu suis` : ' que tu suis');
+    document.getElementById('publicProfileMutualsAvatars').innerHTML = avatarsHtml;
+    document.getElementById('publicProfileMutualsText').innerHTML = `Suivi par ${names}${extra}`;
+    mutualsBox.style.display = 'flex';
+    // Wire les liens vers le profil du mutual
+    mutualsBox.querySelectorAll('[data-mutual-uid]').forEach(a => {
+      a.addEventListener('click', () => openPublicProfile(a.dataset.mutualUid));
+    });
+  } else {
+    mutualsBox.style.display = 'none';
+  }
+
+  // v0.28.0 — Sticky CTA (apparaitre apres scroll header)
+  bindStickyCta(profile, stats);
 
   document.getElementById('publicProfileArticlesCount').textContent = articlesCount;
 

@@ -6,6 +6,16 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.28.0] — Profils créateurs magnétiques
+- **Cover band** 200px (au lieu de 120px) avec dégradé éditorial accent + ornement radial qui dérive lentement (12s animation).
+- **Avatar** agrandi 136px (au lieu de 120px) avec bordure 5px et ombre plus marquée, chevauche le cover à -68px.
+- **Stats cards visuelles** : grid 4 cards (Articles / Lectures / Abonnés / Basitude) avec icônes implicites, hover anim (translateY + border accent + shadow), format compact `1.2k` / `3M` pour les gros chiffres.
+- **Preuve sociale** : nouvelle section "Suivi par @x, @y et N autres que tu suis" sous les stats, 3 avatars qui se chevauchent + liens vers les profils mutuels. Migration `v0.28.0-mutual-followers.sql` (RPC `get_mutual_followers(p_target_id, p_limit)`).
+- **Sticky CTA bar** : barre flottante (avatar + nom + bouton Suivre + bouton Message) qui apparaît dès qu'on scrolle au-delà du header (seuil 170px), backdrop blur, transition slide-down 280ms.
+- **Grid articles** : aspect-ratio 4/3 (au lieu de 16/10) pour image plus dominante, image zoome en hover (scale 1.04), animation staggered à l'apparition (delay progressif 40ms/article), hover qui translateY + border accent.
+- Reset du scroll au render + cleanup sticky bar à la fermeture.
+- Migration SQL à appliquer côté Supabase.
+
 ## [v0.27.0] — Refonte UX des DM
 - **Liste de conversations** : 3 onglets (Tous / Non lus / Archivés) avec compteurs vivants, badge `unread_count` chiffré sur chaque conversation (au lieu d'un simple dot).
 - **Thread** :
