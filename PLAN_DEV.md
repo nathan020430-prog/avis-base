@@ -79,6 +79,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.21.0** | 🧹 Polish pre-launch | Modération clips (UI hide/unhide dans dashboard) + Audit OG/Twitter Cards (NewsArticle JSON-LD + article:* meta) + Onboarding nouveau user (tour guidé 5 étapes + suggestions à suivre) + Audit perf (preconnect, dns-prefetch, defer Supabase JS) | ✅ Livré |
 | **v0.21.1** | 🪟 Polish RGPD | Bandeau cookies informatif (sticky-bottom dismissible, lien vers /confidentialite.html) + Page Changelog publique (modale `#changelog` reliée depuis footer + /a-propos) | ✅ Livré |
 | **v0.22.0** | 💰 Finance — Customer Portal | Nouvelle Edge Function `create-portal-session` (Stripe Billing Portal) + section "Mon adhésion Avis Basé+" sur `/mon-financement` (statut, prochain renouvellement, bouton "Gérer mon abonnement") + historique des tips reçus en tant que contributeur, agrégé par mois | ✅ Livré |
+| **v0.22.1** | 💰 Finance — Top tippers | RPC `get_public_top_tippers(limit, days)` + section "Top donateurs — 30 derniers jours" sur `/financement` (opt-in via `display_consent`). Confirme que `/financement` est désormais 100 % live data (les vues `public_economy_current` / `public_donor_wall` / `public_article_leaderboard` / `public_monthly_archive` étaient déjà branchées depuis v0.17.0) | ✅ Livré |
 | **v0.23.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -721,6 +722,39 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 💰 v0.22.1 — Top tippers publics ✅
+
+> **Livré le 2026-05-19.** Complète la transparence financière : on connaît déjà les top contributeurs (qui produisent), maintenant on affiche aussi les top donateurs (qui soutiennent), opt-in only.
+
+**Livré :**
+
+### SQL (`v0.22.1-top-tippers-migration.sql`)
+- RPC publique `get_public_top_tippers(p_limit, p_days)` qui :
+  - Filtre `tips.status='succeeded'` AND `display_consent=true`
+  - Agrège par `username` : somme cents, nombre de dons, dernier tip
+  - Trie par total décroissant, puis dernier tip
+  - Plage par défaut : 30 derniers jours, limite 10 (max 50 / 365 jours)
+- Ouverte à `anon` + `authenticated`
+
+### Frontend `/financement`
+- Nouvelle section **"Top donateurs — 30 derniers jours"** ajoutée entre le "Mur des soutiens" et "Articles rémunérés ce mois"
+- Affichage en liste numérotée façon `fin-top` : rang + username + nb dons + total
+- 1er rang en couleur accent
+- Hidden tant que les données sont mock (rendu uniquement quand `_dataIsReal === true`)
+- Empty state explicite : "Aucun donateur opt-in sur 30 jours"
+- Si la migration n'est pas appliquée, la section est masquée silencieusement (pas d'erreur visible)
+
+### Confirmation : `/financement` est 100 % live
+La page utilisait déjà les vues `public_economy_current`, `public_donor_wall`, `public_article_leaderboard`, `public_monthly_archive` depuis v0.17.0. Le top tippers complète le tableau — il manquait juste l'aggregation par sender.
+
+### ✅ Critères de validation
+- [x] La page `/financement` affiche les chiffres réels (pool, membres, tips du mois)
+- [x] La section "Top donateurs" apparaît si au moins 1 tip avec display_consent
+- [x] La RPC respecte le filtrage opt-in (jamais de username affiché sans consentement)
+- [x] Fallback gracieux si migration pas appliquée
 
 ---
 

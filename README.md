@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.22.1** — Finance — Top tippers : RPC `get_public_top_tippers(limit, days)` + section "Top donateurs — 30 derniers jours" sur `/financement` (opt-in `display_consent`). La page financement est désormais 100 % alimentée par les vraies vues.
 - **v0.22.0** — Finance — Customer Portal Stripe : nouvelle Edge Function `create-portal-session` + section "Mon adhésion" sur `/mon-financement` (statut, prochain renouvellement, bouton "Gérer mon abonnement" via Stripe Billing Portal) + historique des tips reçus en tant que contributeur, agrégé par mois.
 - **v0.21.1** — Polish RGPD : bandeau cookies/RGPD informatif (sticky-bottom dismissible) + page Changelog publique (modale `#changelog` accessible depuis footer / À propos / hash deep-link). Footer enrichi à 5 liens (À propos · Stats · Changelog · Charte éditoriale · Charte de modération).
 - **v0.21.0** — Polish pre-launch : modération clips dans le dashboard mod (ouverture parent article/comment) + audit SEO (NewsArticle JSON-LD par article + meta `article:*`) + onboarding nouveau user (tour guidé 5 étapes + suggestions follow) + audit perf (preconnect Supabase/CDN, dns-prefetch YouTube/Cloudflare, `defer` sur Supabase JS, color-scheme).
@@ -102,7 +103,8 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 14. `v0.18.1-hotfix-money-races.sql` (V0.18.1 — corrige 3 race conditions sur les flux d'argent + ferme une faille RLS sur `contributor_balance`)
 15. `v0.19.0-moderation-migration.sql` (V0.19.0 — modération avancée : extension `reports` + `moderation_state` sur articles/clips + tables `moderation_actions` & `peer_reviews` + RPCs `submit_report`/`submit_peer_review`/`mod_apply_action`/`get_moderation_queue`/`get_peer_review_queue`)
 16. `v0.19.1-moderation-notifs.sql` (V0.19.1 — étend `notifications.type` (+`content_hidden`, `content_restored`) + trigger `notify_on_moderation_change` sur articles/clips)
-17. **`v0.20.0-stats-migration.sql`** (V0.20.0 — RPCs publiques `get_public_stats()` + `get_public_top_contributors()`, lectures agrégées tolérantes aux migrations partielles) ← **NOUVEAU**
+17. `v0.20.0-stats-migration.sql` (V0.20.0 — RPCs publiques `get_public_stats()` + `get_public_top_contributors()`)
+18. **`v0.22.1-top-tippers-migration.sql`** (V0.22.1 — RPC publique `get_public_top_tippers(limit, days)` filtrée sur display_consent=true) ← **NOUVEAU**
 
 ## Développement local
 
@@ -117,4 +119,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.22.0
+© Avis Basé · Beta · v0.22.1
