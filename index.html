@@ -5422,6 +5422,48 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 }
 
 /* ───────────────────────────────────────────────────────────────
+   v0.21.1 — Page Changelog publique (modale)
+─────────────────────────────────────────────────────────────── */
+.changelog{display:flex;flex-direction:column;gap:18px;margin:14px 0 18px}
+.changelog__entry{padding:14px 16px;background:var(--paper-2,rgba(0,0,0,.02));border-left:3px solid var(--rule);border-radius:0 3px 3px 0}
+.changelog__entry:first-child{border-left-color:var(--accent);background:var(--accent-soft,rgba(184,58,45,.06))}
+.changelog__head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.changelog__version{font-family:var(--fd,var(--ff));font-weight:600;font-size:17px;color:var(--ink);letter-spacing:-.01em;font-feature-settings:"tnum"}
+.changelog__date{font-family:var(--fb);font-size:11.5px;color:var(--ink-muted);font-style:italic;font-feature-settings:"tnum"}
+.changelog__tag{font-family:var(--fb);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 7px;border-radius:2px;margin-left:auto}
+.changelog__tag--feature{background:#E0F0E5;color:#1F4025;border:1px solid #5C8A6E}
+.changelog__tag--polish{background:#FFF4D8;color:#7A5800;border:1px solid #E0B65A}
+.changelog__tag--fix{background:#FBF1ED;color:#7A2D1A;border:1px solid #E5B8A8}
+[data-theme="dark"] .changelog__tag--feature{background:#1F4025;color:#9DD4A8;border-color:#5C8A6E}
+[data-theme="dark"] .changelog__tag--polish{background:#3D2E12;color:#F5D58C;border-color:#7A5A24}
+[data-theme="dark"] .changelog__tag--fix{background:#3A2017;color:#F5A3A3;border-color:#7A3F2D}
+.changelog__list{list-style:disc;padding-left:20px;margin:0;display:flex;flex-direction:column;gap:5px;font-family:var(--fb);font-size:13.5px;color:var(--ink);line-height:1.55}
+.changelog__list code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;padding:1px 5px;background:var(--paper-2,rgba(0,0,0,.05));border-radius:2px}
+
+/* ───────────────────────────────────────────────────────────────
+   v0.21.1 — Bandeau RGPD/cookies (sticky bottom, dismissible)
+─────────────────────────────────────────────────────────────── */
+.rgpd-banner{position:fixed;left:12px;right:12px;bottom:12px;z-index:9000;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:13px 16px;box-shadow:0 6px 20px rgba(0,0,0,.12);max-width:760px;margin:0 auto;animation:rgpd-slide-up .25s ease-out}
+@keyframes rgpd-slide-up{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.rgpd-banner__inner{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.rgpd-banner__icon{font-size:22px;line-height:1;flex-shrink:0}
+.rgpd-banner__text{flex:1;font-family:var(--fb);font-size:12.5px;color:var(--ink);line-height:1.55;margin:0;min-width:240px}
+.rgpd-banner__text strong{font-weight:600}
+.rgpd-banner__text code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;padding:1px 5px;background:var(--paper-2,rgba(0,0,0,.04));border-radius:2px}
+.rgpd-banner__link{color:var(--accent);font-weight:600;text-decoration:none;border-bottom:1px solid var(--accent);margin-left:6px;white-space:nowrap}
+.rgpd-banner__link:hover{opacity:.8}
+.rgpd-banner__btn{flex-shrink:0;padding:8px 16px;background:var(--ink);color:var(--bg);border:none;font-family:var(--fb);font-size:12.5px;font-weight:600;border-radius:3px;cursor:pointer;transition:opacity .15s}
+.rgpd-banner__btn:hover{opacity:.85}
+.rgpd-banner__btn:active{transform:scale(.98)}
+@media (max-width:640px){
+  .rgpd-banner{left:8px;right:8px;bottom:8px;padding:11px 13px}
+  .rgpd-banner__inner{gap:10px}
+  .rgpd-banner__text{font-size:12px;min-width:0}
+  .rgpd-banner__btn{width:100%;padding:9px}
+}
+body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
+
+/* ───────────────────────────────────────────────────────────────
    v0.21.0 — Onboarding nouveau user
 ─────────────────────────────────────────────────────────────── */
 .onboarding-modal{max-width:560px;padding-top:30px}
@@ -5462,6 +5504,18 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 </style>
 </head>
 <body>
+
+<!-- v0.21.1 — Bandeau cookies / RGPD (visible une seule fois) -->
+<aside id="rgpdBanner" class="rgpd-banner" role="region" aria-label="Information cookies" style="display:none">
+  <div class="rgpd-banner__inner">
+    <span class="rgpd-banner__icon" aria-hidden="true">🍪</span>
+    <p class="rgpd-banner__text">
+      Avis Basé utilise des cookies fonctionnels (auth Supabase) et un peu de <code>localStorage</code> pour mémoriser ton thème, ton onboarding et tes brouillons. <strong>Aucun tracker publicitaire, aucune revente.</strong>
+      <a href="/confidentialite.html" class="rgpd-banner__link">Voir la politique de confidentialité →</a>
+    </p>
+    <button class="rgpd-banner__btn" id="rgpdBannerOk" type="button">J'ai compris</button>
+  </div>
+</aside>
 
 <!-- ═══════════════════════════════════════════
      CTA banner — Avis Basé+ (v0.17.1, dismissible)
@@ -6331,7 +6385,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.84-.1z"/></svg>
         @avis_base.nth
       </a>
-      <p class="footer__version">© <span id="yr"></span> · Beta · <a class="footer__charter-link" id="footerAboutLink" href="#a-propos">À propos</a> · <a class="footer__charter-link" id="footerStatsLink" href="#stats">Stats publiques</a> · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a> · <a class="footer__charter-link" id="footerModerationCharterLink" href="#charte-moderation">Charte de modération</a></p>
+      <p class="footer__version">© <span id="yr"></span> · Beta · <a class="footer__charter-link" id="footerAboutLink" href="#a-propos">À propos</a> · <a class="footer__charter-link" id="footerStatsLink" href="#stats">Stats publiques</a> · <a class="footer__charter-link" id="footerChangelogLink" href="#changelog">Changelog</a> · <a class="footer__charter-link" id="footerCharterLink">Charte éditoriale</a> · <a class="footer__charter-link" id="footerModerationCharterLink" href="#charte-moderation">Charte de modération</a></p>
     </div>
   </div>
 </footer>
@@ -7041,6 +7095,132 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   </div>
 </div>
 
+<!-- v0.21.1 — Changelog public -->
+<div class="v8-backdrop" id="changelogBackdrop" style="display:none">
+  <div class="v8-modal charter-modal" role="dialog" aria-modal="true" aria-labelledby="changelogTitle">
+    <button class="v8-modal__close" id="changelogClose" aria-label="Fermer">×</button>
+    <h2 id="changelogTitle">Changelog public</h2>
+    <p class="charter-modal__lead">Toutes les versions livrées depuis le début, en clair. Le détail complet est sur <a href="https://github.com/nathan020430-prog/avis-base/blob/main/CHANGELOG.md" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">GitHub</a>.</p>
+
+    <div class="changelog">
+      <article class="changelog__entry">
+        <header class="changelog__head">
+          <span class="changelog__version">v0.21.1</span>
+          <span class="changelog__date">19 mai 2026</span>
+          <span class="changelog__tag changelog__tag--polish">Polish</span>
+        </header>
+        <ul class="changelog__list">
+          <li>Bandeau RGPD informatif au premier passage (cookies fonctionnels uniquement, pas de tracker pub)</li>
+          <li>Cette page Changelog publique, accessible depuis le footer et la page À propos</li>
+        </ul>
+      </article>
+
+      <article class="changelog__entry">
+        <header class="changelog__head">
+          <span class="changelog__version">v0.21.0</span>
+          <span class="changelog__date">19 mai 2026</span>
+          <span class="changelog__tag changelog__tag--polish">Polish</span>
+        </header>
+        <ul class="changelog__list">
+          <li>Modération des clips dans le dashboard mod (ouverture article parent / commentaire)</li>
+          <li>Audit SEO : meta <code>article:*</code> + JSON-LD <code>NewsArticle</code> par article (citations incluses)</li>
+          <li>Onboarding nouveau user en 5 étapes (Basitude, mobile/desktop, modération, suggestions à suivre)</li>
+          <li>Audit perf : preconnect Supabase/CDN, dns-prefetch YouTube/Cloudflare</li>
+        </ul>
+      </article>
+
+      <article class="changelog__entry">
+        <header class="changelog__head">
+          <span class="changelog__version">v0.20.0</span>
+          <span class="changelog__date">19 mai 2026</span>
+          <span class="changelog__tag changelog__tag--feature">Feature</span>
+        </header>
+        <ul class="changelog__list">
+          <li>Page <a href="#a-propos" data-changelog-link="about" style="color:var(--accent)">À propos</a> publique (manifeste, différenciateurs, équipe, liens)</li>
+          <li>Page <a href="#stats" data-changelog-link="stats" style="color:var(--accent)">Stats publiques</a> avec compteurs live + top contributeurs</li>
+          <li>RPCs <code>get_public_stats()</code> et <code>get_public_top_contributors()</code> ouvertes à tous</li>
+        </ul>
+      </article>
+
+      <article class="changelog__entry">
+        <header class="changelog__head">
+          <span class="changelog__version">v0.19.1</span>
+          <span class="changelog__date">19 mai 2026</span>
+          <span class="changelog__tag changelog__tag--feature">Feature</span>
+        </header>
+        <ul class="changelog__list">
+          <li>Notifications à l'auteur quand son contenu est masqué ou restauré (trigger DB)</li>
+          <li><a href="#charte-moderation" data-changelog-link="modcharter" style="color:var(--accent)">Charte de modération publique</a> détaillant le processus (signalement, masquage auto, peer review, recours)</li>
+        </ul>
+      </article>
+
+      <article class="changelog__entry">
+        <header class="changelog__head">
+          <span class="changelog__version">v0.19.0</span>
+          <span class="changelog__date">19 mai 2026</span>
+          <span class="changelog__tag changelog__tag--feature">Feature</span>
+        </header>
+        <ul class="changelog__list">
+          <li>Signalement enrichi : 8 raisons standardisées en 3 catégories (Éditorial / Comportement / Droits)</li>
+          <li>Masquage automatique à partir de 3 signalements distincts (ou 1 priorité haute)</li>
+          <li>Peer review communautaire : les utilisateurs avec score ≥ 50 votent (quorum 3)</li>
+          <li>Dashboard de modération pour admins ou score ≥ 75, avec journal d'actions</li>
+        </ul>
+      </article>
+
+      <article class="changelog__entry">
+        <header class="changelog__head">
+          <span class="changelog__version">v0.18.1</span>
+          <span class="changelog__date">18 mai 2026</span>
+          <span class="changelog__tag changelog__tag--fix">Fix</span>
+        </header>
+        <ul class="changelog__list">
+          <li>Hotfix race conditions sur les tips et payouts Stripe (crédit atomique, idempotent)</li>
+        </ul>
+      </article>
+
+      <article class="changelog__entry">
+        <header class="changelog__head">
+          <span class="changelog__version">v0.18.0</span>
+          <span class="changelog__date">18 mai 2026</span>
+          <span class="changelog__tag changelog__tag--feature">Feature</span>
+        </header>
+        <ul class="changelog__list">
+          <li>Trust & Identity (3 phases) : captcha + charte + email confirm, certification rémunérable, crédibilité enrichie (badges + breakdown + historique)</li>
+        </ul>
+      </article>
+
+      <article class="changelog__entry">
+        <header class="changelog__head">
+          <span class="changelog__version">v0.17.0</span>
+          <span class="changelog__date">17 mai 2026</span>
+          <span class="changelog__tag changelog__tag--feature">Feature</span>
+        </header>
+        <ul class="changelog__list">
+          <li>Économie collaborative : <a href="#financement" data-changelog-link="financement" style="color:var(--accent)">page Financement</a>, adhésion 5 €/mois Avis Basé+, tips inline sur les articles</li>
+          <li>9 tables + 4 vues + 4 RPCs SQL + 5 Edge Functions Stripe</li>
+        </ul>
+      </article>
+
+      <article class="changelog__entry">
+        <header class="changelog__head">
+          <span class="changelog__version">v0.10–0.16</span>
+          <span class="changelog__date">avril–mai 2026</span>
+          <span class="changelog__tag changelog__tag--feature">Bundle</span>
+        </header>
+        <ul class="changelog__list">
+          <li>v0.16 — Préparation App Store + masquage articles "test" du feed public</li>
+          <li>v0.11 — PWA installable + messagerie privée (DM)</li>
+          <li>v0.10 — Système de follow + fil personnalisé Mon Feed</li>
+          <li>v0.9 — Mobile interactif + design Broadsheet + notifications in-app</li>
+        </ul>
+      </article>
+    </div>
+
+    <p class="charter-modal__footer">Tu veux suivre le projet de plus près ? Le code source est ouvert sur <a href="https://github.com/nathan020430-prog/avis-base" target="_blank" rel="noopener" style="color:var(--accent)">GitHub</a> et le CHANGELOG complet est <a href="https://github.com/nathan020430-prog/avis-base/blob/main/CHANGELOG.md" target="_blank" rel="noopener" style="color:var(--accent)">ici</a>.</p>
+  </div>
+</div>
+
 <!-- v0.21.0 — Onboarding nouveau user (1er login) -->
 <div class="v8-backdrop" id="onboardingBackdrop" style="display:none">
   <div class="v8-modal onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="onbTitle">
@@ -7119,7 +7299,7 @@ body.is-mobile .notif-bell{width:32px;height:32px}
     </ul>
 
     <h3>🗓 Versions</h3>
-    <p>Avis Basé est en <strong>pré-release 0.x.x</strong>. La version <strong>v1.0.0</strong> marquera le lancement public officiel, avec communication massive sur TikTok et la presse. Jusque-là on construit, on itère, on observe — sans bruit. Pour suivre le détail des releases : <a href="https://github.com/nathan020430-prog/avis-base/blob/main/CHANGELOG.md" target="_blank" rel="noopener" style="color:var(--accent)">CHANGELOG public</a>.</p>
+    <p>Avis Basé est en <strong>pré-release 0.x.x</strong>. La version <strong>v1.0.0</strong> marquera le lancement public officiel, avec communication massive sur TikTok et la presse. Jusque-là on construit, on itère, on observe — sans bruit. Pour suivre le détail des releases : <a href="#changelog" id="aboutLinkToChangelog" style="color:var(--accent);font-weight:600">Changelog public en un clic</a> · <a href="https://github.com/nathan020430-prog/avis-base/blob/main/CHANGELOG.md" target="_blank" rel="noopener" style="color:var(--accent)">version complète sur GitHub</a>.</p>
 
     <p class="charter-modal__footer">Une suggestion, une remarque, un bug ? Le projet est jeune et écoute. Écris-nous à <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a> ou ouvre une issue sur GitHub.</p>
   </div>
@@ -11641,6 +11821,24 @@ function closeAboutModal() {
 window.openAboutModal = openAboutModal;
 
 // ═══════════════════════════════════════════════════════════
+// v0.21.1 — Bandeau RGPD/cookies (informatif, dismissible)
+// ═══════════════════════════════════════════════════════════
+const RGPD_STORAGE_KEY = 'avb_rgpd_ack_v1';
+function showRgpdBannerIfNeeded() {
+  try {
+    if (localStorage.getItem(RGPD_STORAGE_KEY)) return;
+  } catch (e) { return; }
+  const el = document.getElementById('rgpdBanner');
+  if (!el) return;
+  el.style.display = 'block';
+}
+function dismissRgpdBanner() {
+  try { localStorage.setItem(RGPD_STORAGE_KEY, '1'); } catch (e) {}
+  const el = document.getElementById('rgpdBanner');
+  if (el) el.style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
 // v0.21.0 — Onboarding nouveau user
 // ═══════════════════════════════════════════════════════════
 const Onboarding = (() => {
@@ -11815,6 +12013,21 @@ const Onboarding = (() => {
   return { maybeShow, start, next, prev, skip, finish, bindHandlers };
 })();
 window.Onboarding = Onboarding;
+
+// v0.21.1 — Changelog public
+function openChangelogModal() {
+  const bd = document.getElementById('changelogBackdrop');
+  if (!bd) return;
+  bd.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeChangelogModal() {
+  const bd = document.getElementById('changelogBackdrop');
+  if (!bd) return;
+  bd.style.display = 'none';
+  document.body.style.overflow = '';
+}
+window.openChangelogModal = openChangelogModal;
 
 // v0.20.0 — Stats publiques
 function openStatsModal() {
@@ -12974,6 +13187,11 @@ function bindV09Handlers() {
     closeAboutModal();
     if (typeof switchView === 'function') switchView('financement');
   });
+  document.getElementById('aboutLinkToChangelog')?.addEventListener('click', e => {
+    e.preventDefault();
+    closeAboutModal();
+    if (typeof openChangelogModal === 'function') openChangelogModal();
+  });
 
   // v0.20.0 — Stats publiques
   document.getElementById('statsClose')?.addEventListener('click', closeStatsModal);
@@ -12983,6 +13201,28 @@ function bindV09Handlers() {
   document.getElementById('footerStatsLink')?.addEventListener('click', e => {
     e.preventDefault();
     openStatsModal();
+  });
+
+  // v0.21.1 — Changelog public
+  document.getElementById('changelogClose')?.addEventListener('click', closeChangelogModal);
+  document.getElementById('changelogBackdrop')?.addEventListener('click', e => {
+    if (e.target.id === 'changelogBackdrop') closeChangelogModal();
+  });
+  document.getElementById('footerChangelogLink')?.addEventListener('click', e => {
+    e.preventDefault();
+    openChangelogModal();
+  });
+  // Liens internes depuis le changelog vers d'autres modales
+  document.querySelectorAll('[data-changelog-link]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = a.dataset.changelogLink;
+      closeChangelogModal();
+      if (target === 'about' && typeof openAboutModal === 'function') openAboutModal();
+      else if (target === 'stats' && typeof openStatsModal === 'function') openStatsModal();
+      else if (target === 'modcharter' && typeof openModerationCharter === 'function') openModerationCharter();
+      else if (target === 'financement' && typeof switchView === 'function') switchView('financement');
+    });
   });
 
   // Profile editor
@@ -13050,7 +13290,7 @@ function bindV09Handlers() {
   // Esc to close v0.9.0 modals
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    ['profileEditBackdrop','favoritesBackdrop','reportContentBackdrop','charterModalBackdrop','moderationCharterBackdrop','aboutBackdrop','statsBackdrop'].forEach(id => {
+    ['profileEditBackdrop','favoritesBackdrop','reportContentBackdrop','charterModalBackdrop','moderationCharterBackdrop','aboutBackdrop','statsBackdrop','changelogBackdrop'].forEach(id => {
       const el = document.getElementById(id);
       if (el && el.style.display === 'flex') el.style.display = 'none';
     });
@@ -15185,15 +15425,18 @@ async function init() {
     else if (h === '#charte-moderation') { if (typeof openModerationCharter === 'function') openModerationCharter(); }
     else if (h === '#a-propos') { if (typeof openAboutModal === 'function') openAboutModal(); }
     else if (h === '#stats') { if (typeof openStatsModal === 'function') openStatsModal(); }
+    else if (h === '#changelog') { if (typeof openChangelogModal === 'function') openChangelogModal(); }
     else if (!h.startsWith('#article/')) switchView('articles');
   });
-  // v0.19.1 + v0.20.0 — Hash initial : ouvrir directement la charte ou la page
+  // v0.19.1 + v0.20.0 + v0.21.1 — Hash initial : ouvrir directement la modale concernee
   if (window.location.hash === '#charte-moderation') {
     if (typeof openModerationCharter === 'function') openModerationCharter();
   } else if (window.location.hash === '#a-propos') {
     if (typeof openAboutModal === 'function') openAboutModal();
   } else if (window.location.hash === '#stats') {
     if (typeof openStatsModal === 'function') openStatsModal();
+  } else if (window.location.hash === '#changelog') {
+    if (typeof openChangelogModal === 'function') openChangelogModal();
   }
 
   if (isAdmin()) {
@@ -16890,6 +17133,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // v0.21.0 — Wiring onboarding
   if (typeof Onboarding !== 'undefined') Onboarding.bindHandlers();
+
+  // v0.21.1 — Bandeau RGPD
+  document.getElementById('rgpdBannerOk')?.addEventListener('click', dismissRgpdBanner);
+  showRgpdBannerIfNeeded();
 
   // ═══ v0.7 NAV MENU ═══
   document.getElementById('navMenuBtn')?.addEventListener('click', e => {
