@@ -6,6 +6,20 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.22.0] — Finance — Customer Portal Stripe + tips reçus
+- Nouvelle Edge Function **`create-portal-session`** : crée une session Stripe Billing Portal pour le user authentifié et retourne l'URL. Le portail Stripe permet à l'user d'annuler son abonnement Avis Basé+, mettre à jour sa méthode de paiement, consulter ses factures.
+- Nouvelle section **"💛 Mon adhésion Avis Basé+"** sur `/mon-financement` :
+  - Statut affiché en chip coloré : Active / Annulation programmée / Impayé / Annulée / Inactive
+  - Date de prochain renouvellement (ou date de fin si annulé)
+  - Bouton **"⚙️ Gérer mon abonnement"** qui ouvre Stripe Portal en redirect
+  - CTA "Devenir membre +" si pas membre, "Redevenir membre" si abonnement annulé
+- Nouvelle sous-section **"🎁 Tips reçus en tant que contributeur"** (affichée si > 0 tips) :
+  - Total cumulé + nombre de dons
+  - Agrégation par mois sur les 12 derniers mois
+  - Note de crédit sur la cagnotte au prochain calcul mensuel
+- Fetch additionnel dans `MonFin.loadFromSupabase()` : la row complète de `members` + les `tips` agrégés (target_user_id OU target_article_id ∈ mes articles)
+- Setup côté Stripe : activer le Customer Portal dans le Dashboard (Settings → Billing → Customer portal → Activate), pas de variable d'env supplémentaire à set. Pas de migration SQL pour cette version.
+
 ## [v0.21.1] — Polish RGPD + Changelog public
 - Bandeau cookies/RGPD informatif sticky-bottom : explique qu'on utilise des cookies fonctionnels (auth Supabase) + localStorage pour le thème, l'onboarding et les brouillons, sans tracker publicitaire. Persistance via `localStorage.avb_rgpd_ack_v1`. Lien vers `/confidentialite.html`.
 - Nouvelle modale **Changelog public** (hash `#changelog`) avec les 9 dernières releases v0.10 → v0.21.1, structurées par version + date + tag (Feature / Polish / Fix / Bundle). Liens internes vers À propos / Stats / Charte de modération / Financement.
