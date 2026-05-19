@@ -6,6 +6,35 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.19.0] — Modération avancée + peer review
+- Signalement enrichi : 8 raisons standardisées (désinformation, source douteuse, hors-sujet, spam, harcèlement, contenu illégal, droit d'auteur, autre) avec marquage automatique de sévérité (low/normal/high)
+- Masquage automatique des contenus problématiques : seuil 3 signalements distincts OU 1 signalement de priorité haute (`hidden_auto`)
+- Peer review communautaire : tout utilisateur avec un score de Basitude ≥ 50 peut voter sur les signalements ; quorum 3 votes décide (validé → contenu masqué + pénalité crédibilité auteur ; invalidé → restauration)
+- Dashboard `/moderation` (modal) : tabs « File mod » (admin OU score ≥75) et « Peer review » (score ≥50)
+- Actions modérateur : hide / unhide / dismiss_reports / resolve_reports avec journal `moderation_actions`
+- Badges visuels « ⚠️ Masqué — revue en cours » sur les cartes article et la page article, visibles uniquement pour l'auteur et les modérateurs
+- SQL : `v0.19.0-moderation-migration.sql` (idempotente, ASCII pur). Tables `moderation_actions` & `peer_reviews`, RPCs `submit_report`, `submit_peer_review`, `mod_apply_action`, `get_moderation_queue`, `get_peer_review_queue`, `get_user_moderation_summary`
+- Compat : tant que la migration n'est pas appliquée, le frontend retombe sur l'INSERT direct dans `reports` (signalement v0.18 fonctionne toujours)
+
+## [v0.18.1] — Hotfix race conditions tips / payouts
+- Crédit de tip atomique + idempotent (RPC `credit_tip_to_contributor`)
+- Réservation de payout sérialisée (RPC `reserve_payout` avec SELECT FOR UPDATE)
+- Suppression de la policy UPDATE trop large sur `contributor_balance`
+- RPCs réservées au `service_role` (Edge Functions Stripe)
+
+## [v0.18.0] — Trust & Identity
+- Phase 1 — Compte renforcé : captcha Turnstile + charte editorial + email confirm + min 8 chars + restriction écriture 7 jours
+- Phase 2 — Certification « Auteur rémunérable » : 4 critères cumulatifs (3 articles + 30 jours + score ≥50 + KYC) avec roadmap personnelle
+- Phase 3 — Crédibilité enrichie : badges multiples (⭐ Vétéran, 📝 Prolifique, ✓ Rémunérable, 💛 Membre+) + breakdown public + historique des scores
+
+## [v0.17.1] — Banner CTA Avis Basé+
+- Banner discret au-dessus du masthead, dismissible
+
+## [v0.17.0] — Économie collaborative
+- Page `/financement`, `/devenir-membre`, dashboard `/mon-financement`
+- Tip jar inline sur les articles publiés
+- SQL : 9 tables + 4 vues + 4 RPCs ; Edge Functions Stripe (Checkout, Webhook, Connect onboarding, request-payout, compute-monthly-payout)
+
 ## [v0.10.0] — Follow + Mon Feed
 - Système de follow / unfollow
 - Vue `user_stats` (followers, following, articles)

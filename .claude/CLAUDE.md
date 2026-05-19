@@ -13,14 +13,18 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.18.0 (Trust & Identity) — taguée 2026-05-18
+## Version actuelle — v0.19.0 (Modération avancée) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
-- **v0.18.0 → Trust & Identity (Phase 1+2+3)** :
-  - Compte renforcé (captcha Turnstile + charte + email confirm + min 8 chars + restriction écriture 7j)
-  - Certification "Auteur rémunérable" (4 critères : 3 articles + 30j + score ≥50 + KYC)
-  - Crédibilité enrichie (badges multiples + breakdown public + historique)
+- v0.18.0 → Trust & Identity (compte renforcé + certification rémunérable + crédibilité enrichie)
+- v0.18.1 → Hotfix race conditions tips/payouts + RLS contributor_balance
+- **v0.19.0 → Modération avancée** :
+  - Signalement enrichi (8 raisons standardisées + 3 niveaux de sévérité)
+  - Masquage auto (3 signalements distincts ou 1 priorité haute → `hidden_auto`)
+  - Peer review communautaire (score ≥50 ; quorum 3 votes pour décider)
+  - Dashboard mod (admin OU score ≥75) avec actions hide / dismiss / resolve
+  - Journal d'actions `moderation_actions` + RLS lecture mod/admin
 
 Tags sur origin : `v0.16.0-prep`, `v0.16.1`, `v0.17.0`, `v0.17.0-ui-and-sql`, `v0.18.0`
 
@@ -30,6 +34,7 @@ Le code est mergé mais les migrations doivent être exécutées manuellement da
 2. `v0.18.0-trust-migration.sql` — `contributor_certifications` + 2 RPCs + vue publique
 3. `v0.18.0-credibility-migration.sql` — `cred_score_history` + 3 RPCs
 4. `v0.18.1-hotfix-money-races.sql` — **CRITIQUE** : corrige 3 race conditions sur les flux d'argent (tips + payouts) + ferme une faille RLS sur `contributor_balance`. À appliquer AVANT tout déploiement Stripe en prod.
+5. `v0.19.0-moderation-migration.sql` — étend `reports` + tables `moderation_actions` & `peer_reviews` + colonnes `moderation_state`/`reports_count` sur `articles`/`clips` + RPCs `submit_report`/`submit_peer_review`/`mod_apply_action`/`get_moderation_queue`/`get_peer_review_queue`/`get_user_moderation_summary`. Tant que la migration n'est pas appliquée, le frontend retombe sur l'INSERT direct dans `reports` (compat v0.18 préservée).
 
 Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
 

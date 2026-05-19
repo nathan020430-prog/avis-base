@@ -73,7 +73,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.17.0** | 💰 Économie collaborative | Page `/financement` + adhésion 5€/mois + algo score + payouts Stripe Connect (7 phases) | ✅ Livré |
 | **v0.17.1** | UX | Banner CTA Avis Basé+ dismissible sur la home | ✅ Livré |
 | **v0.18.0** | 🛡️ Trust & Identity | Phase 1 : compte renforcé (captcha + charte + email confirm + 8 chars + restriction écriture 7j). Phase 2 : certification rémunérable (4 critères + roadmap + lock virement). Phase 3 : crédibilité enrichie (badges multiples + breakdown public + historique) | ✅ Livré (3/3 phases) |
-| **v0.19.0** | Sécurité | Modération avancée + anti-fake news (peer-review, masquage auto, dashboard mod) | 2 semaines |
+| **v0.19.0** | 🛡️ Modération | Signalement enrichi (8 raisons + sévérité), masquage auto (seuil 3 distincts ou 1 priorité haute), peer review communautaire (quorum 3 votes, score ≥50), dashboard mod (score ≥75 OU admin), journal d'actions | ✅ Livré |
 | **v0.20.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -716,6 +716,46 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 🛡️ v0.19.0 — Modération avancée + peer review ✅
+
+> **Livré le 2026-05-19.** Phase 1 (foundation) du chantier "anti-fake news".
+> Le système de fact-check public et l'analyse IA des articles seront ajoutés dans une v0.19.x ultérieure si la communauté le réclame.
+
+**Livré :**
+
+### SQL (`v0.19.0-moderation-migration.sql`)
+- Extension table `reports` : `reason_code` (8 codes standardisés), `severity` (low/normal/high), `details`, unique partial (reporter, target_type, target_id)
+- Colonnes `moderation_state` + `moderation_hidden_at` + `reports_count` sur `articles` et `clips`
+- Table `moderation_actions` (journal des actions mod, RLS lecture mod/admin)
+- Table `peer_reviews` (votes communautaires, unique par (report, reviewer))
+- RPCs : `submit_report`, `submit_peer_review`, `mod_apply_action`, `get_moderation_queue`, `get_peer_review_queue`, `get_user_moderation_summary`, `auto_hide_if_threshold` (helper privé)
+
+### Frontend (`index.html`)
+- Modale signalement enrichie : 8 raisons groupées (Éditorial / Comportement / Droits) + indicateur sévérité haute
+- Helpers : `isMod()` (admin OU score ≥75), `canPeerReview()` (score ≥50), `isModerated(item)`
+- Filtrage public : les articles `hidden_auto`/`hidden_mod` ne sortent plus du feed public mais restent visibles pour l'auteur et les mods (avec badge `mod-flag`)
+- Banner contenu masqué sur la page article (pour auteur + mods)
+- Item de menu « Modération » visible pour tous les `canPeerReview()`
+- Page `/moderation` (modal) avec 2 onglets :
+  - **File mod** (admin OU score ≥75) : signalements agrégés par cible, actions hide/unhide/dismiss/resolve, ouverture directe de l'article, badge sévérité
+  - **Peer review** (score ≥50, non-auteur, non-reporter) : vote valide / pas un problème / passer, affichage du quorum 3 et des votes en cours
+
+### Garde-fous
+- Auto-hide à 3 signalements distincts OU 1 signalement priorité haute (harassment / illegal)
+- Restauration automatique en `reviewed_ok` quand la peer review invalide les signalements et qu'il n'en reste plus aucun en attente
+- Pénalité crédibilité (+1 `validated_reports` = -5 pts brut) pour l'auteur dont un contenu est validé comme problématique
+- RPCs `SECURITY DEFINER` + grants stricts (authenticated uniquement pour les RPCs publiques, service_role pour le helper)
+
+### ✅ Critères de validation
+- [x] La modale de signalement propose 8 raisons standardisées avec marquage sévérité
+- [x] Un signalement de harcèlement masque immédiatement le contenu (priorité haute)
+- [x] 3 signalements distincts (n'importe quelle raison) masquent le contenu automatiquement
+- [x] Un peer reviewer (score ≥50) peut voter et 3 votes valides masquent le contenu
+- [x] Un modérateur (admin ou score ≥75) accède à la file de modération et peut masquer / classer
+- [x] Tous les contenus masqués sortent du feed public mais restent visibles pour l'auteur
 
 ---
 

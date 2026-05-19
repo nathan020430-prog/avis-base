@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.19.0** — Modération avancée : signalement enrichi (8 raisons + 3 niveaux de sévérité), masquage auto (≥3 signalements distincts ou 1 priorité haute), peer review communautaire (score ≥50, quorum 3 votes), dashboard mod (admin ou score ≥75), journal d'actions, RPC `submit_report`/`submit_peer_review`/`mod_apply_action`
 - **v0.18.0** — Trust & Identity : compte renforcé (captcha + charte + email confirm + min 8 chars + restriction écriture 7 jours), certification "Auteur rémunérable" (4 critères cumulatifs avec roadmap personnelle), crédibilité enrichie (badges multiples ⭐📝✓💛 + breakdown public + historique)
 - **v0.17.1** — Banner CTA Avis Basé+ discret au-dessus du masthead (dismissible)
 - **v0.17.0** — Économie collaborative complète :
@@ -92,7 +93,9 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 10. `v0.16.0-migration.sql` (V0.16.0 — user_blocks + account_deletion_requests pour Apple App Store)
 11. `v0.17.0-financement-migration.sql` (V0.17.0 — économie collaborative : 9 tables + 4 vues + 4 RPCs + RLS strict)
 12. `v0.18.0-trust-migration.sql` (V0.18.0 Phase 2 — certification rémunérable : `contributor_certifications` + 2 RPCs + vue publique)
-13. **`v0.18.0-credibility-migration.sql`** (V0.18.0 Phase 3 — `cred_score_history` + 3 RPCs `recompute_user_cred_score`, `get_user_cred_breakdown`, `recompute_all_cred_scores`) ← **NOUVEAU**
+13. `v0.18.0-credibility-migration.sql` (V0.18.0 Phase 3 — `cred_score_history` + 3 RPCs `recompute_user_cred_score`, `get_user_cred_breakdown`, `recompute_all_cred_scores`)
+14. `v0.18.1-hotfix-money-races.sql` (V0.18.1 — corrige 3 race conditions sur les flux d'argent + ferme une faille RLS sur `contributor_balance`)
+15. **`v0.19.0-moderation-migration.sql`** (V0.19.0 — modération avancée : extension `reports` + `moderation_state` sur articles/clips + tables `moderation_actions` & `peer_reviews` + RPCs `submit_report`/`submit_peer_review`/`mod_apply_action`/`get_moderation_queue`/`get_peer_review_queue`) ← **NOUVEAU**
 
 ## Développement local
 
@@ -107,4 +110,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.10.0
+© Avis Basé · Beta · v0.19.0

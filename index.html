@@ -5288,6 +5288,89 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   .fin-top__item{grid-template-columns:32px 1fr 80px;gap:10px}
   .fin-top__share{grid-column:2/-1;text-align:left;color:var(--accent);font-size:14px}
 }
+
+/* ───────────────────────────────────────────────────────────────
+   v0.19.0 — Modération avancée : signalement enrichi, badges
+                                  contenu masqué, dashboard mod
+─────────────────────────────────────────────────────────────── */
+
+/* Modale signalement enrichie */
+.report-content-modal__lead{font-family:var(--fb);font-size:13.5px;color:var(--ink-muted);line-height:1.55;margin:0 0 14px}
+.report-content-modal__reasons{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.report-content-modal__group-label{font-family:var(--fb);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-light);margin-top:10px;margin-bottom:2px}
+.report-content-modal__group-label:first-child{margin-top:0}
+.report-content-modal__reasons label{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--rule);background:var(--surface);cursor:pointer;font-family:var(--fb);font-size:13.5px;color:var(--ink);transition:background .15s ease,border-color .15s ease;border-radius:3px}
+.report-content-modal__reasons label:hover{background:var(--paper-2,rgba(0,0,0,.03));border-color:var(--ink-light)}
+.report-content-modal__reasons label input{accent-color:var(--accent);width:14px;height:14px;flex-shrink:0;margin:0}
+.report-content-modal__reasons label span:first-of-type{flex:1}
+.report-content-modal__reason--high{border-color:#E5B8A8 !important;background:#FBF1ED}
+[data-theme="dark"] .report-content-modal__reason--high{background:#3A2017;border-color:#7A3F2D !important}
+.report-content-modal__severity{font-family:var(--fb);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:2px;background:#B83A2D;color:#FDFAF3;flex-shrink:0}
+.report-content-modal__note{font-family:var(--fb);font-size:11.5px;color:var(--ink-muted);font-style:italic;line-height:1.5;margin:10px 0 14px;padding:9px 12px;background:var(--paper-2,rgba(0,0,0,.02));border-left:2px solid var(--ink-light)}
+.report-content-modal__actions{display:flex;gap:10px;justify-content:flex-end}
+#reportContentDetails{width:100%;padding:10px 12px;border:1px solid var(--rule);background:var(--surface);font-family:var(--fb);font-size:13.5px;color:var(--ink);resize:vertical;min-height:70px;border-radius:3px;line-height:1.5;box-sizing:border-box}
+#reportContentDetails:focus{outline:none;border-color:var(--accent)}
+
+/* Badge "Contenu masqué" sur les cartes article/clip (visible auteur + mods) */
+.mod-flag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#FBF1ED;border:1px solid #E5B8A8;color:#7A2D1A;font-family:var(--fb);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;border-radius:2px}
+.mod-flag--auto{background:#FFF4D8;border-color:#E0B65A;color:#7A5800}
+.mod-flag--mod{background:#FBF1ED;border-color:#E5B8A8;color:#7A2D1A}
+.mod-flag--ok{background:#E0F0E5;border-color:#5C8A6E;color:#1F4025}
+[data-theme="dark"] .mod-flag--auto{background:#3D2E12;border-color:#7A5A24;color:#F5D58C}
+[data-theme="dark"] .mod-flag--mod{background:#3A2017;border-color:#7A3F2D;color:#F5A3A3}
+[data-theme="dark"] .mod-flag--ok{background:#1F4025;border-color:#5C8A6E;color:#9DD4A8}
+.mod-flag__icon{font-size:13px;line-height:1}
+
+/* Carte article/clip masquée (vu par l'auteur) */
+.card--moderated{position:relative;opacity:.65;outline:2px dashed #E5B8A8;outline-offset:-2px}
+.card--moderated::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent 0 9px,rgba(184,58,45,.03) 9px 11px);pointer-events:none;z-index:1}
+
+/* Page /moderation (dashboard mod) — déjà à l'intérieur d'un .modal__body, donc pas de padding extra */
+.mod-page{max-width:980px;margin:0 auto;padding:4px 0 24px}
+.mod-page__hero{padding-bottom:20px;border-bottom:1px solid var(--rule);margin-bottom:22px}
+.mod-page__title{font-family:var(--ff);font-weight:600;font-size:32px;color:var(--ink);margin:0 0 6px;letter-spacing:-.01em}
+.mod-page__lead{font-family:var(--fb);font-size:14px;color:var(--ink-muted);line-height:1.55;margin:0;max-width:640px}
+.mod-tabs-row{display:flex;gap:0;border-bottom:1px solid var(--rule);margin-bottom:22px;overflow-x:auto}
+.mod-tab-pill{padding:11px 16px;border:none;background:none;font-family:var(--fb);font-size:13px;font-weight:500;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;letter-spacing:.01em}
+.mod-tab-pill:hover{color:var(--ink)}
+.mod-tab-pill--active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.mod-tab-pill .count{display:inline-block;margin-left:6px;padding:1px 7px;background:var(--accent);color:#FDFAF3;font-family:var(--fb);font-size:10.5px;font-weight:600;border-radius:999px;line-height:1.4}
+.mod-tab-pill--active .count{background:var(--ink)}
+
+.mod-queue{display:flex;flex-direction:column;gap:14px}
+.mod-queue-item{padding:18px;border:1px solid var(--rule);background:var(--surface);border-radius:3px;display:flex;flex-direction:column;gap:12px;transition:border-color .15s}
+.mod-queue-item:hover{border-color:var(--ink-light)}
+.mod-queue-item--high{border-left:3px solid #B83A2D}
+.mod-queue-item__head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--fb);font-size:12px;color:var(--ink-muted)}
+.mod-queue-item__type{font-family:var(--fb);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;background:var(--accent-soft);color:var(--accent);border-radius:2px}
+.mod-queue-item__preview{font-family:var(--ff);font-size:15.5px;color:var(--ink);line-height:1.5;margin:0;font-weight:500}
+.mod-queue-item__author{font-family:var(--fb);font-size:12px;color:var(--ink-muted)}
+.mod-queue-item__reasons{display:flex;flex-wrap:wrap;gap:6px}
+.mod-queue-item__reason-tag{font-family:var(--fb);font-size:10.5px;font-weight:600;letter-spacing:.04em;padding:3px 8px;border:1px solid var(--rule);background:var(--paper-2,rgba(0,0,0,.02));border-radius:999px;color:var(--ink)}
+.mod-queue-item__reason-tag--high{background:#B83A2D;color:#FDFAF3;border-color:#B83A2D}
+.mod-queue-item__meta{display:flex;gap:14px;font-family:var(--fb);font-size:11.5px;color:var(--ink-muted);font-feature-settings:"tnum"}
+.mod-queue-item__actions{display:flex;flex-wrap:wrap;gap:8px;padding-top:10px;border-top:1px dashed var(--rule)}
+.mod-queue-item__actions .btn--sm{font-size:12px;padding:6px 12px}
+.mod-empty-card{padding:48px 20px;text-align:center;border:1px dashed var(--rule);font-family:var(--fb);color:var(--ink-muted)}
+.mod-empty-card__icon{font-size:32px;margin-bottom:10px}
+
+/* Peer review pane */
+.pr-card{padding:16px;border:1px solid var(--rule);background:var(--surface);border-radius:3px;display:flex;flex-direction:column;gap:10px}
+.pr-card__type{font-family:var(--fb);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.pr-card__preview{font-family:var(--ff);font-size:15px;color:var(--ink);line-height:1.5;margin:0}
+.pr-card__details{font-family:var(--fb);font-size:12.5px;color:var(--ink-muted);font-style:italic;line-height:1.5}
+.pr-card__votes{display:flex;gap:14px;font-family:var(--fb);font-size:12px;color:var(--ink-muted);font-feature-settings:"tnum"}
+.pr-card__votes b{color:var(--ink);font-weight:600}
+.pr-card__actions{display:flex;gap:8px;padding-top:8px;border-top:1px dashed var(--rule)}
+.pr-card__actions .btn{flex:1}
+
+@media (max-width:640px){
+  .mod-page{padding:0 0 24px}
+  .mod-page__title{font-size:26px}
+  .mod-queue-item{padding:14px}
+  .mod-queue-item__actions{flex-direction:column}
+  .mod-queue-item__actions .btn--sm{width:100%}
+}
 </style>
 </head>
 <body>
@@ -5402,6 +5485,13 @@ body.is-mobile .notif-bell{width:32px;height:32px}
           <button class="nav-menu__item" id="navMyFinBtn" style="display:none">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             Mon financement
+          </button>
+
+          <!-- v0.19.0 — Modération (visible si admin OU credibility >= 50) -->
+          <button class="nav-menu__item" id="navModerationBtn" style="display:none">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Modération
+            <span class="nav-menu__item-badge" id="navModBadge" style="display:none">0</span>
           </button>
 
           <!-- Section Admin -->
@@ -6637,6 +6727,30 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   </div>
 </div>
 
+<!-- ═══ v0.19.0 — DASHBOARD MODÉRATION ═══ -->
+<div class="modal" id="moderationModal">
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__box modal__box--xl">
+    <div class="modal__head">
+      <div>
+        <h2 class="modal__title">🛡️ Modération</h2>
+        <div class="modal__title-sub">Signalements communautaires · peer review · actions</div>
+      </div>
+      <button class="modal__close" data-close>×</button>
+    </div>
+    <div class="modal__body" id="moderationContent">
+      <div class="mod-page">
+        <div class="mod-page__hero">
+          <h1 class="mod-page__title" id="modPageTitle">Modération</h1>
+          <p class="mod-page__lead" id="modPageLead">Aide la communauté à fiabiliser le média : examine les signalements, vote sur leur validité, ou retire un contenu qui enfreint la charte.</p>
+        </div>
+        <div class="mod-tabs-row" id="modTabsRow"></div>
+        <div id="modTabContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ CLIP EDITOR MODAL ═══ -->
 <div class="modal" id="clipEditorModal">
   <div class="modal__backdrop" data-close></div>
@@ -6824,23 +6938,32 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   </div>
 </div>
 
-<!-- Signalement de contenu (article / clip / source) -->
+<!-- Signalement de contenu (article / clip / commentaire / profil) -->
 <div class="v8-backdrop" id="reportContentBackdrop" style="display:none">
   <div class="v8-modal report-content-modal" role="dialog" aria-modal="true">
     <button class="v8-modal__close" id="reportContentClose" aria-label="Fermer">×</button>
     <h2>Signaler ce contenu</h2>
-    <p class="report-content-modal__lead">Ton signalement est anonyme pour les autres utilisateurs. Notre équipe de modération va l'examiner.</p>
+    <p class="report-content-modal__lead">Ton signalement est anonyme pour les autres utilisateurs. Il sera examiné par la modération et la communauté.</p>
 
     <div class="report-content-modal__reasons">
+      <div class="report-content-modal__group-label">Éditorial</div>
       <label><input type="radio" name="reportReason" value="misinformation"/> <span>🚫 Désinformation / fait erroné</span></label>
-      <label><input type="radio" name="reportReason" value="harassment"/> <span>😡 Harcèlement / discours haineux</span></label>
-      <label><input type="radio" name="reportReason" value="spam"/> <span>📧 Spam / pub déguisée</span></label>
+      <label><input type="radio" name="reportReason" value="unsourced"/> <span>📎 Source manquante ou douteuse</span></label>
       <label><input type="radio" name="reportReason" value="off_topic"/> <span>🎯 Hors-sujet</span></label>
+
+      <div class="report-content-modal__group-label">Comportement</div>
+      <label><input type="radio" name="reportReason" value="spam"/> <span>📧 Spam / pub déguisée</span></label>
+      <label class="report-content-modal__reason--high"><input type="radio" name="reportReason" value="harassment"/> <span>😡 Harcèlement / discours haineux</span><span class="report-content-modal__severity">priorité haute</span></label>
+      <label class="report-content-modal__reason--high"><input type="radio" name="reportReason" value="illegal"/> <span>⚠️ Contenu illégal (menace, doxxing, mineur)</span><span class="report-content-modal__severity">priorité haute</span></label>
+
+      <div class="report-content-modal__group-label">Droits</div>
       <label><input type="radio" name="reportReason" value="copyright"/> <span>©️ Atteinte au droit d'auteur</span></label>
       <label><input type="radio" name="reportReason" value="other"/> <span>❓ Autre</span></label>
     </div>
 
-    <textarea id="reportContentDetails" placeholder="Précisions (optionnel)" maxlength="500"></textarea>
+    <textarea id="reportContentDetails" placeholder="Précisions (optionnel, 500 max)" maxlength="500"></textarea>
+
+    <p class="report-content-modal__note">À partir de 3 signalements distincts, ou 1 signalement de priorité haute, le contenu est masqué automatiquement le temps d'une revue.</p>
 
     <div class="report-content-modal__actions">
       <button class="btn btn--ghost" id="reportContentCancel">Annuler</button>
@@ -7243,6 +7366,21 @@ function setSyncState(online) { const dot = document.getElementById('syncDot'); 
 
 function isSuperadmin() { return currentProfile && currentProfile.role === 'superadmin'; }
 function isAdmin() { return currentProfile && (currentProfile.role === 'admin' || currentProfile.role === 'superadmin'); }
+// v0.19.0 — Modérateur = admin OU score crédibilité >= 75
+function isMod() {
+  if (isAdmin()) return true;
+  if (!currentProfile) return false;
+  return (currentProfile.credibility_score || currentProfile.credibilityScore || 0) >= 75;
+}
+// v0.19.0 — Peer reviewer (peut voter sur signalements) = score >= 50
+function canPeerReview() {
+  if (!currentProfile) return false;
+  return (currentProfile.credibility_score || currentProfile.credibilityScore || 0) >= 50;
+}
+// v0.19.0 — Est-ce qu'un contenu est masqué par la modération ?
+function isModerated(item) {
+  return item && (item.moderationState === 'hidden_auto' || item.moderationState === 'hidden_mod');
+}
 function isLoggedIn() { return !!currentUser; }
 function roleLabel(r) { return r === 'superadmin' ? 'Super' : r === 'admin' ? 'Admin' : 'Membre'; }
 function roleClass(r) { return r === 'superadmin' ? 'super' : r === 'admin' ? 'admin' : ''; }
@@ -8032,7 +8170,11 @@ function fromDbArticle(r) {
     submittedAt: r.submitted_at, reviewedAt: r.reviewed_at, publishedAt: r.published_at,
     reads: r.reads || 0, fromSourceId: r.from_source_id,
     likesCount: r.likes_count || 0, commentsCount: r.comments_count || 0,
-    authorCredScore: r.author_cred_score || 0
+    authorCredScore: r.author_cred_score || 0,
+    // v0.19.0 — Modération
+    moderationState: r.moderation_state || 'visible',
+    moderationHiddenAt: r.moderation_hidden_at || null,
+    reportsCount: r.reports_count || 0
   };
 }
 
@@ -8135,6 +8277,15 @@ function getFilteredArticles() {
     return false;
   });
 
+  // v0.19.0 — Masquer les articles en modération (hidden_auto / hidden_mod) du public,
+  // mais garder visible pour l'auteur et les mods (avec badge visuel).
+  list = list.filter(a => {
+    if (!isModerated(a)) return true;
+    if (currentUser && a.authorId === currentUser.id) return true;
+    if (isMod()) return true;
+    return false;
+  });
+
   if (feedMode === 'myfeed' && typeof Follow !== 'undefined') {
     const ids = Follow.followingIds;
     list = list.filter(a => ids.has(a.authorId));
@@ -8189,10 +8340,17 @@ function articleCardHtml(a, featured = false) {
   const titleHtml = searchQuery ? highlightText(a.title, searchQuery) : escapeHtml(a.title);
   const subtitleHtml = a.subtitle ? (searchQuery ? highlightText(a.subtitle, searchQuery) : escapeHtml(a.subtitle)) : '';
   const featuredClass = featured ? 'article-card--featured' : '';
+  // v0.19.0 — Badge modération (visible auteur + mods)
+  const moderated = isModerated(a);
+  const modClass = moderated ? 'card--moderated' : '';
+  const modFlag = moderated
+    ? `<span class="mod-flag mod-flag--${a.moderationState === 'hidden_auto' ? 'auto' : 'mod'}" title="${a.moderationState === 'hidden_auto' ? 'Masqué automatiquement après plusieurs signalements' : 'Masqué par un modérateur'}"><span class="mod-flag__icon">⚠️</span>${a.moderationState === 'hidden_auto' ? 'Masqué — revue en cours' : 'Masqué par un mod'}</span>`
+    : '';
 
-  return `<article class="article-card ${featuredClass} ${mineClass}" data-article-slug="${escapeHtml(a.slug)}">
+  return `<article class="article-card ${featuredClass} ${mineClass} ${modClass}" data-article-slug="${escapeHtml(a.slug)}">
     ${adminBtns}
     <div class="article-card__thumb">${duration}${statusBadge}${thumb}</div>
+    ${modFlag ? `<div style="padding:8px 14px 0">${modFlag}</div>` : ''}
     <div class="article-card__body">
       <div class="article-card__meta">
         ${toneLabel ? `<span class="article-card__tone">${escapeHtml(toneLabel)}</span><span class="article-card__meta-sep">·</span>` : ''}
@@ -8781,6 +8939,14 @@ function renderArticlePage(a) {
   if (a.status === 'draft') banner = `<div class="article-banner article-banner--draft"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/></svg><div><strong>📝 Brouillon</strong><p>Visible seulement par toi. Finalise et envoie en relecture.</p></div></div>`;
   else if (a.status === 'review') banner = `<div class="article-banner article-banner--review">🟡 <div><strong>En relecture</strong><p>Un admin va vérifier ton article. Tu seras notifié.</p></div></div>`;
   else if (a.status === 'needs_changes') banner = `<div class="article-banner article-banner--needs">✏️ <div><strong>Modifications demandées</strong><p>${escapeHtml(a.adminNotes || 'Voir le commentaire admin.')}</p></div></div>`;
+
+  // v0.19.0 — Banner modération (auteur + mods)
+  if (isModerated(a)) {
+    const autoMsg  = `Cet article a été masqué automatiquement après plusieurs signalements. La communauté ou un modérateur vont l'examiner. Tu peux le modifier en attendant.`;
+    const modMsg   = `Cet article a été masqué par un modérateur${a.adminNotes ? ' : ' + escapeHtml(a.adminNotes) : '.'}`;
+    const msg = a.moderationState === 'hidden_auto' ? autoMsg : modMsg;
+    banner += `<div class="article-banner article-banner--needs" style="background:#FBF1ED;border-color:#E5B8A8;color:#7A2D1A">⚠️ <div><strong>Contenu masqué — en revue</strong><p>${msg}</p></div></div>`;
+  }
 
   let citedSection = '';
   if (a.citedSources && a.citedSources.length > 0) {
@@ -11587,22 +11753,51 @@ async function submitReportContent() {
   if (!_reportTarget || !currentUser) return;
   const reasonInput = document.querySelector('input[name="reportReason"]:checked');
   if (!reasonInput) { showToast('Choisis une raison', true); return; }
-  const reason = reasonInput.value;
+  const reasonCode = reasonInput.value;
   const details = document.getElementById('reportContentDetails').value.trim();
-  const fullReason = details ? `${reason}: ${details}` : reason;
-  const { error } = await supa.from('reports').insert({
-    reporter_id: currentUser.id,
-    reporter_username: currentProfile?.username || null,
-    target_type: _reportTarget.type,
-    target_id: _reportTarget.id,
-    reason: fullReason
+
+  // v0.19.0 — RPC submit_report (gère masquage auto + idempotence + sévérité)
+  const { data, error } = await supa.rpc('submit_report', {
+    p_target_type: _reportTarget.type,
+    p_target_id:   _reportTarget.id,
+    p_reason_code: reasonCode,
+    p_details:     details || null
   });
+
   if (error) {
-    if (error.code === '23505') { showToast('Tu as déjà signalé ce contenu', true); }
-    else { showToast('Erreur : ' + error.message, true); }
+    // Fallback : si la RPC n'existe pas encore (migration non appliquée),
+    // on retombe sur l'INSERT direct pour ne pas casser l'UX.
+    const msg = String(error.message || '');
+    if (msg.includes('function') && msg.includes('does not exist')) {
+      const fullReason = details ? `${reasonCode}: ${details}` : reasonCode;
+      const { error: insErr } = await supa.from('reports').insert({
+        reporter_id: currentUser.id,
+        reporter_username: currentProfile?.username || null,
+        target_type: _reportTarget.type,
+        target_id: _reportTarget.id,
+        reason: fullReason
+      });
+      if (insErr) {
+        if (insErr.code === '23505') showToast('Tu as déjà signalé ce contenu', true);
+        else showToast('Erreur : ' + insErr.message, true);
+        return;
+      }
+      showToast('Signalement envoyé. Merci 🙏');
+      closeReportContentModal();
+      return;
+    }
+    showToast('Erreur : ' + (error.message || 'inconnue'), true);
     return;
   }
-  showToast('Signalement envoyé. Merci 🙏');
+
+  // data = { report_id, already_reported, moderation_state }
+  if (data && data.already_reported) {
+    showToast('Tu as déjà signalé ce contenu — merci 🙏');
+  } else if (data && data.moderation_state && data.moderation_state !== 'visible') {
+    showToast('Signalement envoyé. Le contenu a été masqué le temps de la revue.');
+  } else {
+    showToast('Signalement envoyé. Merci 🙏');
+  }
   closeReportContentModal();
 }
 
@@ -13423,6 +13618,13 @@ function syncNavMenu() {
   if (contribBtn) contribBtn.style.display = showContrib ? 'flex' : 'none';
   if (myFinBtn) myFinBtn.style.display = showContrib ? 'flex' : 'none';
 
+  // v0.19.0 — Bouton Modération : visible si admin OU credibility_score >= 50 (peer reviewer)
+  const modBtn = document.getElementById('navModerationBtn');
+  if (modBtn) {
+    const eligible = connected && (admin || canPeerReview());
+    modBtn.style.display = eligible ? 'flex' : 'none';
+  }
+
   // Admin section
   const adminLabel = document.getElementById('navSectionAdmin');
   const adminSep = document.getElementById('navSepAdmin');
@@ -14338,7 +14540,11 @@ function fromDbClip(r) {
     publishedAt: r.published_at,
     tiktokViews: r.tiktok_views, tiktokLikes: r.tiktok_likes,
     tiktokComments: r.tiktok_comments, tiktokShares: r.tiktok_shares,
-    createdAt: r.created_at, updatedAt: r.updated_at
+    createdAt: r.created_at, updatedAt: r.updated_at,
+    // v0.19.0 — Modération
+    moderationState: r.moderation_state || 'visible',
+    moderationHiddenAt: r.moderation_hidden_at || null,
+    reportsCount: r.reports_count || 0
   };
 }
 
@@ -15635,6 +15841,254 @@ renderAdminDashboard = function() {
   });
 };
 
+// ═══════════════════════════════════════════════════════════
+// v0.19.0 — MODERATION : dashboard mod + peer review
+// ═══════════════════════════════════════════════════════════
+const Moderation = (() => {
+  // Tabs : 'queue' (mods seulement) | 'peer' (tous les peer reviewers)
+  let activeTab = null;
+  let queueData = [];     // [{ target_type, target_id, reports_count, ... }]
+  let peerData = [];      // [{ report_id, target_type, ... }]
+  let loading = false;
+
+  // Labels par code de raison
+  const REASON_LABELS = {
+    misinformation: 'Désinformation',
+    unsourced:      'Source douteuse',
+    harassment:     'Harcèlement',
+    spam:           'Spam',
+    off_topic:      'Hors-sujet',
+    copyright:      'Droit d\'auteur',
+    illegal:        'Contenu illégal',
+    other:          'Autre'
+  };
+  const TYPE_LABELS = { article: '📰 Article', clip: '✂️ Clip', comment: '💬 Commentaire', profile: '👤 Profil' };
+
+  function userIsMod()    { return isMod(); }
+  function userIsPeer()   { return canPeerReview(); }
+
+  async function open() {
+    if (!currentUser) { openAuthModal('login'); return; }
+    if (!userIsPeer() && !userIsMod()) {
+      showToast('Score de crédibilité insuffisant (50 minimum)', true);
+      return;
+    }
+    activeTab = userIsMod() ? 'queue' : 'peer';
+    queueData = [];
+    peerData = [];
+    openModal('moderationModal');
+    renderHeader();
+    renderTabs();
+    await loadActive();
+  }
+
+  function renderHeader() {
+    const title = document.getElementById('modPageTitle');
+    const lead  = document.getElementById('modPageLead');
+    if (!title || !lead) return;
+    if (userIsMod()) {
+      title.textContent = '🛡️ Modération';
+      lead.textContent  = 'Examine les signalements communautaires. Tu peux retirer un contenu, classer un signalement sans suite, ou laisser la peer review décider.';
+    } else {
+      title.textContent = '🤝 Aide la modération';
+      lead.textContent  = 'Ton score de Basitude te permet de voter sur les signalements en attente. Quorum 3 votes pour décider — valide ou pas un problème.';
+    }
+  }
+
+  function renderTabs() {
+    const row = document.getElementById('modTabsRow');
+    if (!row) return;
+    const tabs = [];
+    if (userIsMod()) tabs.push({ key: 'queue', label: '📋 File mod', count: queueData.length });
+    if (userIsPeer()) tabs.push({ key: 'peer', label: '🗳️ Peer review', count: peerData.length });
+    row.innerHTML = tabs.map(t =>
+      `<button class="mod-tab-pill ${activeTab === t.key ? 'mod-tab-pill--active' : ''}" data-mod-tab="${t.key}">${t.label}${t.count ? ` <span class="count">${t.count}</span>` : ''}</button>`
+    ).join('');
+    row.querySelectorAll('[data-mod-tab]').forEach(b => b.addEventListener('click', () => {
+      activeTab = b.dataset.modTab;
+      renderTabs();
+      loadActive();
+    }));
+  }
+
+  async function loadActive() {
+    const content = document.getElementById('modTabContent');
+    if (!content) return;
+    content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">⏳</div>Chargement…</div>`;
+    if (loading) return;
+    loading = true;
+    try {
+      if (activeTab === 'queue') {
+        const { data, error } = await supa.rpc('get_moderation_queue');
+        if (error) {
+          content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">⚠️</div><strong>Erreur de chargement</strong><div style="margin-top:6px;font-size:12px">${escapeHtml(error.message || 'inconnue')}.<br/>La migration v0.19.0 a-t-elle été appliquée ?</div></div>`;
+          loading = false; return;
+        }
+        queueData = data || [];
+        renderQueue();
+      } else if (activeTab === 'peer') {
+        const { data, error } = await supa.rpc('get_peer_review_queue', { p_limit: 30 });
+        if (error) {
+          content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">⚠️</div><strong>Erreur de chargement</strong><div style="margin-top:6px;font-size:12px">${escapeHtml(error.message || 'inconnue')}.<br/>La migration v0.19.0 a-t-elle été appliquée ?</div></div>`;
+          loading = false; return;
+        }
+        peerData = data || [];
+        renderPeer();
+      }
+      renderTabs();
+    } catch (e) {
+      content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">⚠️</div>Erreur : ${escapeHtml(String(e))}</div>`;
+    } finally {
+      loading = false;
+    }
+  }
+
+  function renderQueue() {
+    const content = document.getElementById('modTabContent');
+    if (!content) return;
+    if (!queueData.length) {
+      content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">✨</div><strong>File vide</strong><div style="margin-top:6px;font-size:13px">Aucun signalement en attente. Bon vent.</div></div>`;
+      return;
+    }
+    content.innerHTML = `<div class="mod-queue">${queueData.map(itemQueueHtml).join('')}</div>`;
+    bindQueueActions();
+  }
+
+  function itemQueueHtml(it) {
+    const highCls = (it.high_severity_count || 0) > 0 ? 'mod-queue-item--high' : '';
+    const reasons = (it.reason_codes || []).map(rc => {
+      const high = rc === 'harassment' || rc === 'illegal';
+      return `<span class="mod-queue-item__reason-tag ${high ? 'mod-queue-item__reason-tag--high' : ''}">${escapeHtml(REASON_LABELS[rc] || rc)}</span>`;
+    }).join('');
+    const stateBadge = it.moderation_state && it.moderation_state !== 'visible'
+      ? `<span class="mod-flag mod-flag--${it.moderation_state === 'hidden_auto' ? 'auto' : 'mod'}">${it.moderation_state === 'hidden_auto' ? 'Masqué auto' : 'Masqué par mod'}</span>`
+      : '';
+    return `<div class="mod-queue-item ${highCls}" data-target-type="${escapeHtml(it.target_type)}" data-target-id="${escapeHtml(it.target_id)}">
+      <div class="mod-queue-item__head">
+        <span class="mod-queue-item__type">${TYPE_LABELS[it.target_type] || it.target_type}</span>
+        <span class="mod-queue-item__author">par <strong>${escapeHtml(it.author_username || '?')}</strong></span>
+        ${stateBadge}
+      </div>
+      <p class="mod-queue-item__preview">${escapeHtml(it.preview || '(aucun aperçu)')}</p>
+      <div class="mod-queue-item__reasons">${reasons}</div>
+      <div class="mod-queue-item__meta">
+        <span>📊 ${it.reports_count} signalement${it.reports_count > 1 ? 's' : ''}</span>
+        ${(it.high_severity_count || 0) > 0 ? `<span style="color:#B83A2D;font-weight:600">⚠️ ${it.high_severity_count} priorité haute</span>` : ''}
+        <span>⏱ ${timeAgo(it.last_reported_at)}</span>
+      </div>
+      <div class="mod-queue-item__actions">
+        ${it.target_type === 'article' ? `<button class="btn btn--ghost btn--sm" data-mod-view="${escapeHtml(it.target_id)}">👁 Ouvrir</button>` : ''}
+        <button class="btn btn--danger btn--sm" data-mod-act="hide">🚫 Masquer</button>
+        <button class="btn btn--success btn--sm" data-mod-act="resolve_reports">✅ Valider signalement (masquer)</button>
+        <button class="btn btn--ghost btn--sm" data-mod-act="dismiss_reports">❌ Classer sans suite</button>
+        ${it.moderation_state === 'hidden_auto' || it.moderation_state === 'hidden_mod' ? `<button class="btn btn--ghost btn--sm" data-mod-act="unhide">↩️ Rendre visible</button>` : ''}
+      </div>
+    </div>`;
+  }
+
+  function bindQueueActions() {
+    document.querySelectorAll('[data-mod-view]').forEach(b => {
+      b.addEventListener('click', () => {
+        const id = b.dataset.modView;
+        const a = articles.find(x => x.id === id);
+        if (!a) { showToast('Article introuvable côté front. Rafraîchis.', true); return; }
+        closeModal('moderationModal');
+        openArticlePage(a.slug);
+      });
+    });
+    document.querySelectorAll('[data-mod-act]').forEach(b => {
+      b.addEventListener('click', async () => {
+        const card = b.closest('[data-target-type]');
+        if (!card) return;
+        const action = b.dataset.modAct;
+        const targetType = card.dataset.targetType;
+        const targetId = card.dataset.targetId;
+        const verbs = {
+          hide:            'Masquer ce contenu ?',
+          unhide:          'Restaurer la visibilité publique ?',
+          resolve_reports: 'Valider les signalements (masquage + pénalité crédibilité auteur) ?',
+          dismiss_reports: 'Classer les signalements sans suite ?'
+        };
+        if (!confirm(verbs[action] || 'Confirmer ?')) return;
+        let reason = null;
+        if (action === 'hide' || action === 'resolve_reports') {
+          reason = prompt('Raison (facultatif, transmise dans le journal de modération) :', '');
+          if (reason === null) return;
+        }
+        const { error } = await supa.rpc('mod_apply_action', {
+          p_target_type: targetType,
+          p_target_id:   targetId,
+          p_action:      action,
+          p_reason:      reason || null,
+          p_related_report_id: null
+        });
+        if (error) { showToast('Erreur : ' + (error.message || 'inconnue'), true); return; }
+        showToast('Action appliquée ✓');
+        await Promise.all([loadActive(), loadArticles(), loadClips()]);
+      });
+    });
+  }
+
+  function renderPeer() {
+    const content = document.getElementById('modTabContent');
+    if (!content) return;
+    if (!peerData.length) {
+      content.innerHTML = `<div class="mod-empty-card"><div class="mod-empty-card__icon">✨</div><strong>Rien à examiner</strong><div style="margin-top:6px;font-size:13px">Aucun signalement à reviewer pour le moment.</div></div>`;
+      return;
+    }
+    content.innerHTML = `<div class="mod-queue">${peerData.map(itemPeerHtml).join('')}</div>`;
+    bindPeerActions();
+  }
+
+  function itemPeerHtml(r) {
+    const high = r.severity === 'high';
+    const v = r.current_votes || { valid: 0, invalid: 0 };
+    return `<div class="mod-queue-item ${high ? 'mod-queue-item--high' : ''}" data-report-id="${escapeHtml(r.report_id)}">
+      <div class="mod-queue-item__head">
+        <span class="mod-queue-item__type">${TYPE_LABELS[r.target_type] || r.target_type}</span>
+        <span class="mod-queue-item__author">par <strong>${escapeHtml(r.author_username || '?')}</strong></span>
+        <span class="mod-queue-item__reason-tag ${high ? 'mod-queue-item__reason-tag--high' : ''}">${escapeHtml(REASON_LABELS[r.reason_code] || r.reason_code)}</span>
+      </div>
+      <p class="mod-queue-item__preview">${escapeHtml(r.preview || '(aucun aperçu)')}</p>
+      ${r.details ? `<p class="pr-card__details">Précisions du reporteur : « ${escapeHtml(r.details)} »</p>` : ''}
+      <div class="pr-card__votes">
+        <span>👍 <b>${v.valid || 0}</b> valides</span>
+        <span>👎 <b>${v.invalid || 0}</b> pas un problème</span>
+        <span>Quorum : 3</span>
+      </div>
+      <div class="mod-queue-item__actions">
+        <button class="btn btn--success btn--sm" data-peer-vote="valid">✅ Valide (problème)</button>
+        <button class="btn btn--ghost btn--sm" data-peer-vote="invalid">❌ Pas un problème</button>
+        <button class="btn btn--ghost btn--sm" data-peer-vote="skip">⏭️ Passer</button>
+      </div>
+    </div>`;
+  }
+
+  function bindPeerActions() {
+    document.querySelectorAll('[data-peer-vote]').forEach(b => {
+      b.addEventListener('click', async () => {
+        const card = b.closest('[data-report-id]');
+        if (!card) return;
+        const verdict = b.dataset.peerVote;
+        const reportId = card.dataset.reportId;
+        const { data, error } = await supa.rpc('submit_peer_review', {
+          p_report_id: reportId,
+          p_verdict:   verdict
+        });
+        if (error) { showToast('Erreur : ' + (error.message || 'inconnue'), true); return; }
+        const dec = data && data.decision;
+        if (dec === 'resolved') showToast('Quorum atteint → contenu masqué.');
+        else if (dec === 'dismissed') showToast('Quorum atteint → signalement classé.');
+        else showToast('Vote enregistré (' + (data?.valid_count || 0) + ' / ' + (data?.invalid_count || 0) + ').');
+        await loadActive();
+      });
+    });
+  }
+
+  return { open, refresh: loadActive };
+})();
+window.Moderation = Moderation;
+
 // ═══ EVENT BINDINGS ═══
 document.addEventListener('DOMContentLoaded', () => {
   // Theme
@@ -15735,6 +16189,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('navAdminDashBtn')?.addEventListener('click', () => {
     closeNavMenu();
     openAdminDashboard();
+  });
+  // v0.19.0 — Dashboard modération
+  document.getElementById('navModerationBtn')?.addEventListener('click', () => {
+    closeNavMenu();
+    if (typeof Moderation !== 'undefined') Moderation.open();
   });
   document.getElementById('navCalendarBtn')?.addEventListener('click', () => {
     closeNavMenu();
