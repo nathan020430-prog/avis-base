@@ -6,6 +6,20 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.30.0] — Web Push notifications
+- **Backend** :
+  - Migration `v0.30.0-push-subscriptions.sql` : table `push_subscriptions(user_id, endpoint, p256dh, auth_key, user_agent, created_at, last_seen_at)` avec unique `(user_id, endpoint)` + RLS user-owned + policy `service_role` pour cleanup
+  - RPCs `subscribe_push(endpoint, p256dh, auth, user_agent)` upsert, `unsubscribe_push(endpoint)`, `has_push_subscription()`, `list_my_push_subscriptions()`
+  - Trigger `notify_push_on_notification` sur `notifications` INSERT : génère le titre/body humain selon `type` (follow, like, comment, reply, article_validated, content_hidden, content_restored), construit l'URL canonique selon `target_type`, fire-and-forget `pg_net.http_post` vers l'Edge Function
+- **Edge Function `send-push-notification`** : reçoit `{ user_id, title, body, url, icon, badge, tag }`, lit toutes les subscriptions du user via service_role, signe chaque envoi avec VAPID (`web-push@3.6.7`), POST sur l'endpoint browser. Si endpoint répond 404/410 (Gone) → supprime la subscription
+- **Service Worker** : handler `push` event → `showNotification(title, options)` avec icon/badge/tag/data.url ; handler `notificationclick` → focus la fenêtre existante et navigate ou `openWindow(url)`
+- **Frontend** :
+  - Module `PushNotif` (subscribe / unsubscribe / toggle / refresh / maybePromptSoft) avec détection support (`'PushManager' in window`) + détection configuration (VAPID_PUBLIC_KEY différent du placeholder)
+  - Bouton "🔔 Notifications" dans le nav menu (visible si supporté + configuré), label dynamique (activées / bloquées / activer)
+  - Prompt soft (banner sticky bottom) qui apparaît après 3 visites distinctes (jours uniques en localStorage)
+  - VAPID_PUBLIC_KEY constant en haut du `<script>` (placeholder `REMPLACE_MOI_VAPID_PUBLIC_KEY` par défaut)
+- **Setup admin requis** : générer VAPID keys (`npx web-push generate-vapid-keys`), remplacer dans `index.html`, set secrets Supabase (VAPID_PUBLIC_KEY / PRIVATE_KEY / SUBJECT), activer extension `pg_net`, set DB secrets (`app.settings.edge_url` + `app.settings.service_role_key`), déployer l'Edge Function
+
 ## [v0.29.0] — Feed personnalisé + onboarding intérêts
 - **Onboarding** : nouvelle étape "🎯 Choisis tes sujets" insérée avant les suggestions de follow. Grille de chips multi-select (1-10 sujets), pré-coche les intérêts existants à la ré-ouverture, sauvegarde via RPC `set_user_interests` au finish.
 - **Mode "Pour toi"** dans la sidebar nav (visible si connecté) : bouton à côté de "Mon Feed". Filtre les articles par intérêts cochés OU auteurs suivis, scoring décroissant : auteur suivi (×3) + sujet aimé (×2) + bonus fraîcheur (×0-1 sur 30j).

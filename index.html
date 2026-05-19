@@ -6517,6 +6517,45 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 }
 body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
 
+/* v0.30.0 — Push prompt banner (soft prompt apres 3 visites) */
+.push-prompt-banner{
+  position:fixed;left:12px;right:12px;bottom:12px;z-index:9050;
+  background:var(--bg);border:1px solid var(--rule);border-radius:14px;
+  padding:13px 16px;box-shadow:0 8px 28px -6px rgba(26,17,8,0.22);
+  max-width:540px;margin:0 auto;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  animation:push-prompt-up 0.35s cubic-bezier(0.32,0.72,0,1)
+}
+@keyframes push-prompt-up{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.push-prompt-banner__icon{font-size:22px;line-height:1;flex-shrink:0}
+.push-prompt-banner__text{
+  flex:1;font-family:var(--fb);font-size:13px;color:var(--ink);
+  line-height:1.5;min-width:200px
+}
+.push-prompt-banner__btn{
+  flex-shrink:0;padding:8px 18px;
+  background:var(--accent);color:#FDFAF3;border:none;
+  border-radius:22px;font-family:var(--fs);font-size:13px;font-weight:600;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(140,28,19,0.25);
+  transition:all 0.18s ease
+}
+.push-prompt-banner__btn:hover{background:var(--accent-dark);box-shadow:0 4px 12px rgba(140,28,19,0.35)}
+.push-prompt-banner__close{
+  width:30px;height:30px;border-radius:50%;
+  background:transparent;border:1px solid var(--rule);
+  cursor:pointer;color:var(--ink-muted);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.18s ease
+}
+.push-prompt-banner__close:hover{background:var(--surface);border-color:var(--ink);color:var(--ink)}
+@media(max-width:640px){
+  .push-prompt-banner{left:8px;right:8px;bottom:8px;padding:11px 13px}
+  .push-prompt-banner__text{font-size:12.5px;min-width:0}
+  .push-prompt-banner__btn{padding:8px 14px;font-size:12.5px}
+}
+body.is-mobile .push-prompt-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
+
 /* ───────────────────────────────────────────────────────────────
    v0.21.0 — Onboarding nouveau user
 ─────────────────────────────────────────────────────────────── */
@@ -6790,6 +6829,10 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
           <button class="nav-menu__item" id="navFavoritesBtn" style="display:none">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
             Mes favoris
+          </button>
+          <button class="nav-menu__item" id="navPushNotifBtn" style="display:none">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span id="navPushNotifLabel">Notifications push</span>
           </button>
           <button class="nav-menu__item" id="navMySubmissionsBtn" style="display:none">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -9008,6 +9051,11 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
 <script>
 const SUPABASE_URL      = 'https://panjgsqwitwduxckgbbq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhbmpnc3F3aXR3ZHV4Y2tnYmJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NTc5NjgsImV4cCI6MjA5MjMzMzk2OH0.8NAwks5ZGHSpON8ECuJWvLMWcoY5xYkanh5u3x4hauE';
+
+// v0.30.0 — VAPID public key pour les Web Push notifications
+// Remplacer par la vraie cle generee par : npx web-push generate-vapid-keys
+// (puis set VAPID_PRIVATE_KEY + VAPID_SUBJECT comme secrets Supabase)
+const VAPID_PUBLIC_KEY = 'REMPLACE_MOI_VAPID_PUBLIC_KEY';
 
 const configOK = SUPABASE_URL !== 'REMPLACE_MOI_URL';
 let supa = null;
@@ -15635,6 +15683,176 @@ const UserInterests = {
 window.UserInterests = UserInterests;
 window.userInterests = [];
 
+// ═══════════════════════════════════════════════════════════
+// v0.30.0 — Module PushNotif (Web Push notifications)
+// ═══════════════════════════════════════════════════════════
+const PushNotif = {
+  supported: false,
+  permission: 'default',
+  subscribed: false,
+
+  isSupported() {
+    return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  },
+
+  isConfigured() {
+    return typeof VAPID_PUBLIC_KEY === 'string'
+      && VAPID_PUBLIC_KEY
+      && !VAPID_PUBLIC_KEY.includes('REMPLACE_MOI');
+  },
+
+  async refresh() {
+    this.supported = this.isSupported();
+    this.permission = this.supported ? Notification.permission : 'denied';
+    if (this.supported && currentUser) {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        this.subscribed = !!sub;
+      } catch { this.subscribed = false; }
+    } else {
+      this.subscribed = false;
+    }
+    return { supported: this.supported, permission: this.permission, subscribed: this.subscribed };
+  },
+
+  _urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    const arr = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+    return arr;
+  },
+
+  async subscribe() {
+    if (!currentUser) { showToast('Connecte-toi pour activer les notifications.', true); return false; }
+    if (!this.isSupported()) { showToast('Ton navigateur ne supporte pas les notifications push.', true); return false; }
+    if (!this.isConfigured()) { showToast('Notifications push pas encore configurées côté serveur.', true); return false; }
+
+    // 1. Demande permission
+    let perm = Notification.permission;
+    if (perm === 'default') perm = await Notification.requestPermission();
+    if (perm !== 'granted') { showToast('Permission refusée.', true); this.permission = perm; return false; }
+    this.permission = 'granted';
+
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      // 2. Subscribe to push manager
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: this._urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        });
+      }
+      // 3. Envoie au backend
+      const json = sub.toJSON();
+      const { error } = await supa.rpc('subscribe_push', {
+        p_endpoint: sub.endpoint,
+        p_p256dh: json.keys?.p256dh,
+        p_auth: json.keys?.auth,
+        p_user_agent: navigator.userAgent.slice(0, 200),
+      });
+      if (error) { console.warn('subscribe_push:', error.message); showToast('Échec de l\'enregistrement : ' + error.message, true); return false; }
+      this.subscribed = true;
+      showToast('Notifications activées 🔔');
+      return true;
+    } catch (e) {
+      console.warn('[push] subscribe failed:', e);
+      showToast('Échec : ' + (e?.message || e), true);
+      return false;
+    }
+  },
+
+  async unsubscribe() {
+    if (!this.isSupported()) return false;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        try { await supa.rpc('unsubscribe_push', { p_endpoint: sub.endpoint }); } catch {}
+        await sub.unsubscribe();
+      }
+      this.subscribed = false;
+      showToast('Notifications désactivées.');
+      return true;
+    } catch (e) {
+      console.warn('[push] unsubscribe failed:', e);
+      return false;
+    }
+  },
+
+  async toggle() {
+    await this.refresh();
+    if (this.subscribed) return this.unsubscribe();
+    return this.subscribe();
+  },
+
+  // Prompt soft : propose d'activer les notifs apres 3 visites distinctes
+  // (compte le jour, pas la session, donc max 1/jour de visite)
+  maybePromptSoft() {
+    if (!this.isSupported() || !currentUser || !this.isConfigured()) return;
+    if (Notification.permission !== 'default') return;
+    try {
+      const key = 'avb_push_visits_v1';
+      const dismissKey = 'avb_push_prompt_dismissed_v1';
+      if (localStorage.getItem(dismissKey)) return;
+      const today = new Date().toISOString().slice(0, 10);
+      const data = JSON.parse(localStorage.getItem(key) || '{"days":[]}');
+      if (!data.days.includes(today)) {
+        data.days.push(today);
+        data.days = data.days.slice(-7); // garde les 7 derniers
+        localStorage.setItem(key, JSON.stringify(data));
+      }
+      if (data.days.length >= 3) {
+        setTimeout(() => this._showPromptBanner(), 2000);
+      }
+    } catch (e) {}
+  },
+
+  _showPromptBanner() {
+    if (Notification.permission !== 'default') return;
+    if (document.getElementById('pushPromptBanner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'pushPromptBanner';
+    banner.className = 'push-prompt-banner';
+    banner.innerHTML = `
+      <span class="push-prompt-banner__icon">🔔</span>
+      <span class="push-prompt-banner__text">Active les notifications pour ne rien manquer des nouveaux articles.</span>
+      <button class="push-prompt-banner__btn" id="pushPromptYes">Activer</button>
+      <button class="push-prompt-banner__close" id="pushPromptNo" aria-label="Plus tard">✕</button>
+    `;
+    document.body.appendChild(banner);
+    document.getElementById('pushPromptYes')?.addEventListener('click', async () => {
+      banner.remove();
+      try { localStorage.setItem('avb_push_prompt_dismissed_v1', '1'); } catch (e) {}
+      await this.subscribe();
+    });
+    document.getElementById('pushPromptNo')?.addEventListener('click', () => {
+      banner.remove();
+      try { localStorage.setItem('avb_push_prompt_dismissed_v1', '1'); } catch (e) {}
+    });
+  },
+
+  reset() {
+    this.subscribed = false;
+    this.permission = 'default';
+  }
+};
+window.PushNotif = PushNotif;
+
+// v0.30.0 — Helper pour mettre a jour le label du bouton push selon l'etat
+async function updatePushNotifLabel() {
+  const lbl = document.getElementById('navPushNotifLabel');
+  if (!lbl) return;
+  await PushNotif.refresh();
+  if (PushNotif.subscribed) lbl.textContent = '🔔 Notifications activées';
+  else if (PushNotif.permission === 'denied') lbl.textContent = '🔕 Notifications bloquées';
+  else lbl.textContent = '🔔 Activer les notifications';
+}
+window.updatePushNotifLabel = updatePushNotifLabel;
+
 // ─── Wiring V0.9.0 (à appeler au DOMContentLoaded) ─────────
 function bindV09Handlers() {
   // Charter
@@ -15778,6 +15996,13 @@ function bindV09Handlers() {
   document.getElementById('navFavoritesBtn')?.addEventListener('click', () => {
     if (typeof closeNavMenu === 'function') closeNavMenu();
     openFavoritesModal();
+  });
+
+  // v0.30.0 — Toggle notifications push
+  document.getElementById('navPushNotifBtn')?.addEventListener('click', async () => {
+    if (typeof closeNavMenu === 'function') closeNavMenu();
+    await PushNotif.toggle();
+    updatePushNotifLabel();
   });
 
   // Report content
@@ -17395,6 +17620,13 @@ function syncNavMenu() {
     const _favoritesBtn = document.getElementById('navFavoritesBtn');
     if (_profileEditBtn) _profileEditBtn.style.display = 'flex';
     if (_favoritesBtn) _favoritesBtn.style.display = 'flex';
+    // v0.30.0 — Bouton notifs push (visible si supporté + configuré)
+    const _pushBtn = document.getElementById('navPushNotifBtn');
+    if (_pushBtn) {
+      const supported = typeof PushNotif !== 'undefined' && PushNotif.isSupported() && PushNotif.isConfigured();
+      _pushBtn.style.display = supported ? 'flex' : 'none';
+      if (supported) updatePushNotifLabel();
+    }
   } else {
     if (signInBtn) signInBtn.style.display = 'flex';
     if (userInfo) userInfo.style.display = 'none';
@@ -17406,6 +17638,9 @@ function syncNavMenu() {
     const _favoritesBtn = document.getElementById('navFavoritesBtn');
     if (_profileEditBtn) _profileEditBtn.style.display = 'none';
     if (_favoritesBtn) _favoritesBtn.style.display = 'none';
+    // v0.30.0 — Bouton push cache si deconnecte
+    const _pushBtn = document.getElementById('navPushNotifBtn');
+    if (_pushBtn) _pushBtn.style.display = 'none';
     const _btnUser = document.getElementById('navMenuBtnUser');
     const _btnLabel = document.getElementById('navMenuBtnLabel');
     const _btnIcon = document.getElementById('navMenuBtnIcon');
@@ -18168,7 +18403,7 @@ async function init() {
   refreshUserUI();
 
   // V0.9.7 — démarrer notifications si connecté
-  if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); UserInterests.load(); }
+  if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); UserInterests.load(); PushNotif.refresh().then(() => PushNotif.maybePromptSoft()); }
 
   // v0.21.0 — Tour d'onboarding si premier passage
   if (typeof Onboarding !== 'undefined') Onboarding.maybeShow();
@@ -18345,7 +18580,7 @@ async function init() {
     await loadFavorites(); // V0.9.0
     refreshUserUI();
     // V0.9.7 — (re)bind notifications selon l'état
-    if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); UserInterests.load(); }
+    if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); UserInterests.load(); PushNotif.refresh().then(() => PushNotif.maybePromptSoft()); }
     else { Notif.unsubscribe(); Follow.reset(); }
     // v0.21.0 — Onboarding au signup (event SIGNED_IN couvre login + signup)
     if (event === 'SIGNED_IN' && currentUser && typeof Onboarding !== 'undefined') {

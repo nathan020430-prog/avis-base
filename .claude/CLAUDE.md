@@ -13,7 +13,7 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.29.0 (Feed personnalisé + onboarding intérêts) — 2026-05-19
+## Version actuelle — v0.30.0 (Web Push notifications) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
@@ -61,6 +61,7 @@ Le code est mergé mais les migrations doivent être exécutées manuellement da
 12. `v0.26.4-fix-stats-rpc.sql` — **HOTFIX** : la RPC `get_public_stats()` (v0.20.0) plantait en prod (`column reports.validated does not exist`) → page `/stats` cassée. Cette migration recrée la RPC avec un handler `undefined_column` qui retombe gracieusement sur "tous les `resolved` comptent" si la colonne manque. À appliquer après v0.26.1.
 13. `v0.28.0-mutual-followers.sql` — RPC publique `get_mutual_followers(p_target_id, p_limit)` qui retourne les profils suivis à la fois par moi et par la cible (preuve sociale "Suivi par @x, @y et N autres que tu suis" sur la page profil). Sans elle, la section mutual followers est masquée silencieusement.
 14. `v0.29.0-user-interests.sql` — table `user_interests` + 3 RPCs (`set_user_interests`, `get_user_interests`, `get_suggested_authors_by_interest`). Permet à l'utilisateur de choisir 3+ sujets favoris à l'onboarding, alimente le feed "Pour toi" et les suggestions d'auteurs. Sans elle, l'étape onboarding "Choisis tes sujets" enregistre rien et le feed "Pour toi" retombe sur le filtre par auteurs suivis uniquement.
+15. `v0.30.0-push-subscriptions.sql` — table `push_subscriptions` + 4 RPCs (`subscribe_push`, `unsubscribe_push`, `has_push_subscription`, `list_my_push_subscriptions`) + trigger `notify_push_on_notification` sur `notifications` INSERT qui POST vers l'Edge Function `send-push-notification` via `pg_net`. Sans elle, le bouton "Notifications push" reste caché (PushNotif détecte que la RPC manque) et aucun push n'est envoyé. **Setup admin requis** : VAPID keys + secrets Supabase + activation `pg_net` + déploiement Edge Function (voir section ⚠️ Reste à faire ci-dessous).
 
 Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
 
@@ -77,6 +78,22 @@ Les sections UI correspondantes affichent un fallback gracieux ("Migration non a
 **Auth — Phase 1** :
 1. Supabase Dashboard → Auth → Settings → activer "Confirm email"
 2. (Optionnel) Cloudflare Turnstile → créer site → remplacer la sitekey dans `index.html` (actuellement `1x00000000000000000000AA` de test)
+
+**Web Push notifications (v0.30.0)** :
+1. Générer VAPID keys : `npx web-push generate-vapid-keys` (laisse couler 2 lignes : public + private)
+2. Remplacer `VAPID_PUBLIC_KEY` dans `index.html` par la clé publique (sinon le module `PushNotif` détecte qu'il n'est pas configuré et masque le bouton)
+3. Set Supabase secrets pour l'Edge Function :
+   ```
+   supabase secrets set VAPID_PUBLIC_KEY=<...> VAPID_PRIVATE_KEY=<...> VAPID_SUBJECT=mailto:contact@avis-base.com
+   ```
+4. Déployer l'Edge Function : `supabase functions deploy send-push-notification`
+5. Activer l'extension `pg_net` côté Supabase : `create extension if not exists pg_net;`
+6. Configurer les secrets DB lus par le trigger :
+   ```
+   alter database postgres set "app.settings.edge_url" to 'https://<ref>.supabase.co/functions/v1/';
+   alter database postgres set "app.settings.service_role_key" to '<service_role_key>';
+   ```
+7. Appliquer `v0.30.0-push-subscriptions.sql` (qui crée la table + RPCs + trigger)
 
 **Décisions économie collab actées (ne pas y revenir sans demander)** :
 5€/mois, 0 salaire admin, 100% surplus aux contributeurs, opt-in affichage anonyme par défaut, seuil virement 20€, certification rémunérable obligatoire
