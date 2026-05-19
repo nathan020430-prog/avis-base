@@ -13,7 +13,7 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.25.0 (Éditeur de clips refondu) — 2026-05-19
+## Version actuelle — v0.25.1 (Publication multi-plateforme des clips) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
@@ -31,14 +31,15 @@
 - v0.23.2 → Reprise de lecture (ReadResume module + banner reprendre)
 - v0.23.3 → Auto-link sources `[N]` dans le corps d'article (Wikipedia-like)
 - v0.24.0 → Liste d'attente pré-lancement (table waitlist + RPC + modale form)
-- **v0.25.0 → Éditeur de clips refondu** (pas de SQL) :
-  - Layout 2-col avec preview format téléphone 9:16 (toggle 16:9) + overlay live hook + 1er sous-titre + footer
-  - 8 templates de hook prêts à l'emploi avec placeholders auto-sélectionnés
-  - Suggestions de hashtags selon `theme_slug` de l'article parent
-  - Mode "Collage rapide" pour générer N sous-titres équidistants en collant un texte multi-ligne
-  - Indicateur multi-plateforme TikTok/Twitter/Instagram en temps réel (chars + couleurs)
-  - Hint contextuel sur la durée du clip
-  - Prochain chantier : v0.25.1 — Assistant de publication multi-plateforme (TikTok/Twitter/Instagram)
+- v0.25.0 → Éditeur de clips refondu (preview live + templates + bulk + indicateurs)
+- **v0.25.1 → Publication multi-plateforme** :
+  - Table `clip_publications` (1 ligne par couple `clip × plateforme`) avec status, url, caption, stats JSONB
+  - 7 plateformes supportées en DB (tiktok / twitter / instagram / linkedin / facebook / snapchat / youtube_shorts), 3 actives dans l'UI (TikTok / Twitter / Instagram)
+  - Modale assistant publish avec onglets : caption optimisée par plateforme, bouton Copier, lien composer (intent Twitter pré-rempli)
+  - Trigger DB qui bascule automatiquement `clips.status='published'` + miroir `published_tiktok_url` pour compat v0.6.3
+  - Pack production enrichi : 3 captions par plateforme
+  - **Volontairement pas d'auto-posting via API** (nécessite comptes business + approbations 2-8 sem + coûts). Publication manuelle facilitée.
+  - Migration : `v0.25.1-clip-publications-migration.sql` (à appliquer après v0.24.0)
 
 Tags sur origin : `v0.16.0-prep`, `v0.16.1`, `v0.17.0`, `v0.17.0-ui-and-sql`, `v0.18.0`
 
@@ -53,6 +54,7 @@ Le code est mergé mais les migrations doivent être exécutées manuellement da
 7. `v0.20.0-stats-migration.sql` — RPCs publiques `get_public_stats()` + `get_public_top_contributors()` pour la page `/stats`. Sans cette migration, la page affiche "Migration non appliquée" au lieu de crasher.
 8. `v0.22.1-top-tippers-migration.sql` — RPC publique `get_public_top_tippers(limit, days)` pour la section "Top donateurs" sur `/financement`. Sans elle, la section est masquée silencieusement.
 9. `v0.24.0-waitlist-migration.sql` — table `waitlist` + RPC `submit_waitlist()` + vue `waitlist_summary`. Permet de collecter les emails pré-lancement. Sans elle, le form affiche "Migration non appliquée" au lieu de crasher.
+10. `v0.25.1-clip-publications-migration.sql` — table `clip_publications` (multi-plateforme) + trigger sync `clips.status` + vue `clip_publications_by_clip` + backfill TikTok. Sans elle, la modale de publication retombe sur l'ancien comportement (`clips.published_tiktok_url`) avec toast d'info.
 
 Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
 

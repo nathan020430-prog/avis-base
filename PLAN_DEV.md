@@ -86,6 +86,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.23.3** | 🔗 Auto-link sources `[N]` | Les références numériques `[1]`, `[2]` dans le corps d'article deviennent des liens cliquables qui smooth-scroll vers la source citée correspondante, avec flash visuel sur la cible | ✅ Livré |
 | **v0.24.0** | 📬 Liste d'attente pré-lancement | Table `waitlist` (email unique, kind beta/launch, source) + RPC `submit_waitlist()` (idempotente, validation email) + vue admin `waitlist_summary`. Modale frontend accessible depuis la home app-cta + page /a-propos. Form simple : email + nom optionnel + choix beta-tester / notification lancement | ✅ Livré |
 | **v0.25.0** | ✂️ Éditeur de clips refondu | Layout 2-col avec preview type téléphone 9:16 (toggle 16:9), overlay live hook + 1er sous-titre + durée, 8 templates de hook prêts à l'emploi, suggestions de hashtags selon thème de l'article, mode bulk paste pour les sous-titres (auto-découpe équitable), indicateur multi-plateforme TikTok/Twitter/Instagram en temps réel | ✅ Livré |
+| **v0.25.1** | 🚀 Publication multi-plateforme | Table `clip_publications` (1 ligne par couple clip × plateforme) + modale assistant remplaçant l'ancien "publish stats" : 3 onglets TikTok / Twitter / Instagram avec caption optimisée par plateforme + bouton Copier + lien composer (intent Twitter pré-rempli) + champ URL + 4 stats. Trigger DB qui bascule `clips.status='published'` dès qu'au moins 1 plateforme est publiée + miroir TikTok pour compat | ✅ Livré |
 | **v0.23.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -728,6 +729,56 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 🚀 v0.25.1 — Assistant de publication multi-plateforme ✅
+
+> **Livré le 2026-05-19.** Le pendant publication de la refonte de l'éditeur (v0.25.0). Permet à l'admin de publier un même clip sur **TikTok, Twitter et Instagram** depuis une seule interface, avec captions optimisées par plateforme.
+
+**Réalité du scope :** publication **manuelle facilitée** (pas d'API automatique). Les APIs des réseaux sociaux nécessitent comptes business, approbations 2-8 semaines, et coûts (X $100+/mois). On s'est aligné sur ce qui est réaliste avec retour direct.
+
+**Livré :**
+
+### SQL (`v0.25.1-clip-publications-migration.sql`)
+- Table `clip_publications` : 1 ligne par couple `(clip_id, platform)` avec url, status (`planned`/`published`/`archived`/`removed`), caption, stats JSONB, published_at, published_by
+- 7 plateformes supportées : `tiktok`, `twitter`, `instagram`, `linkedin`, `facebook`, `snapchat`, `youtube_shorts`
+- RLS : lecture publique pour `status='published'` (affichage des clips), lecture/écriture admin pour tout le reste
+- Trigger `_clip_publication_sync_clip_status` : dès qu'au moins 1 publication est `published`, `clips.status` passe à `published` + `published_at` rempli + miroir `published_tiktok_url` pour compat v0.6.3
+- Vue `clip_publications_by_clip` : agrégat par clip avec compteurs + JSON map des publications
+- Backfill : les clips existants avec `published_tiktok_url` non null sont rétro-créés dans la table
+
+### Frontend
+- **Modale `publishStatsModal` refondue** en assistant multi-plateforme :
+  - Onglets TikTok / Twitter / Instagram avec **petits dots colorés** indiquant l'état (vert = publié, orange = planifié avec URL, gris = non publié)
+  - Par onglet :
+    - Caption optimisée auto-générée (longueur adaptée à la plateforme, hashtags placés correctement, URL ajoutée pour Twitter et IG en commentaire)
+    - Bouton **Copier la caption** avec toast confirmation
+    - Bouton **↗ Ouvrir composer** : intent Twitter pré-rempli pour Twitter, lien direct vers TikTok Studio et instagram.com pour les autres
+    - Bouton **↻ Régénérer** pour recalculer la caption depuis le clip si l'utilisateur a édité
+    - Tips éditoriaux par plateforme ("TikTok : pas de lien dans la caption, mets-le en bio", "Twitter : pose une question pour engager", etc.)
+    - Champ URL post-publication
+    - 4 stats à saisir : vues, likes, commentaires, partages
+    - Toggle de statut : Planifié / ✅ Publié
+  - Bouton **Enregistrer publications** qui upsert tout dans `clip_publications` en une fois
+- **Pack production enrichi** : `generatePackText()` génère maintenant 3 sections de captions optimisées (TikTok / Twitter / Instagram) en plus du hook original
+- **Fallback gracieux** : si la migration v0.25.1 n'est pas appliquée, l'enregistrement retombe sur l'ancien comportement (UPDATE `clips.published_tiktok_url`) avec un toast d'info
+
+### Réalisme et limites
+- **Pas d'auto-posting** : on ne peut pas poster automatiquement sans comptes business validés sur Meta Developer / TikTok for Business / Twitter paid API. C'est volontairement écarté pour ce chantier.
+- **Snapchat / LinkedIn / Facebook** : la table les supporte (CHECK constraint) mais on n'expose que TikTok / Twitter / Instagram dans la modale pour rester focus sur les 3 plateformes prioritaires demandées. Ajouter une 4e/5e plateforme = 1 ligne dans `PUBLISH_PLATFORMS`.
+- Twitter intent fonctionne sans login (ouvre la fenêtre composer avec texte pré-rempli). TikTok / Instagram n'ont pas de composer URL pré-remplissable, le bouton ouvre juste l'app/site.
+
+### ✅ Critères de validation
+- [x] Sur un clip approuvé, cliquer "Marquer publié" → modale 3 onglets
+- [x] Onglet TikTok : caption optimisée affichée
+- [x] Cliquer "Copier" → presse-papier rempli + toast
+- [x] Onglet Twitter : "Ouvrir composer" ouvre `twitter.com/intent/tweet` avec le texte pré-rempli
+- [x] Onglet Instagram : "Ouvrir composer" ouvre instagram.com (pas de pré-remplissage possible)
+- [x] Saisir URL + cocher "Publié" sur 1 plateforme → enregistrement OK
+- [x] `clips.status` passe à `published` automatiquement via trigger
+- [x] Onglet `published_tiktok_url` rétro-rempli pour compat v0.6.3
+- [x] Pack production contient les 3 captions optimisées
 
 ---
 
