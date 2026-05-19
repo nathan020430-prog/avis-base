@@ -2562,6 +2562,99 @@ body.admin .card__admin{display:flex}
   .clip-editor-preview{position:static}
   .clip-preview-phone[data-ratio="vertical"]{max-width:200px}
 }
+
+/* v0.25.1 — Modale publication multi-plateforme */
+.publish-tabs{
+  display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--rule);overflow-x:auto;
+}
+.publish-tab{
+  flex:1;min-width:120px;padding:10px 14px;
+  background:none;border:none;border-bottom:2px solid transparent;
+  font-family:var(--fb);font-size:13px;font-weight:600;color:var(--ink-muted);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:color .12s,border-color .12s,background .12s;
+}
+.publish-tab:hover{color:var(--ink);background:var(--paper-2,rgba(0,0,0,.02))}
+.publish-tab--active{color:var(--accent);border-bottom-color:var(--accent)}
+.publish-tab__icon{font-size:14px;line-height:1}
+.publish-tab__dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--rule);margin-left:4px;
+}
+.publish-tab--published .publish-tab__dot{background:#5C8A6E}
+.publish-tab--planned .publish-tab__dot{background:#E0B65A}
+
+.publish-panel{display:none;flex-direction:column;gap:14px}
+.publish-panel--active{display:flex}
+
+.publish-caption-block{
+  position:relative;padding:12px 14px;
+  background:var(--paper-2,rgba(0,0,0,.03));border:1px solid var(--rule);border-radius:4px;
+}
+.publish-caption-block__head{
+  display:flex;align-items:center;gap:8px;margin-bottom:8px;
+  font-family:var(--fb);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted);
+}
+.publish-caption-block__head-info{margin-left:auto;font-weight:500;text-transform:none;letter-spacing:0;font-style:italic;color:var(--ink-light)}
+.publish-caption-textarea{
+  width:100%;min-height:90px;padding:10px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  font-family:var(--fb);font-size:13px;color:var(--ink);line-height:1.55;resize:vertical;box-sizing:border-box;
+}
+.publish-caption-textarea:focus{outline:none;border-color:var(--accent)}
+.publish-caption-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.publish-caption-actions .btn{font-size:12px;padding:6px 12px}
+
+.publish-platform-tips{
+  margin:0;padding:8px 12px;
+  background:var(--paper-2,rgba(0,0,0,.025));border-left:2px solid var(--ink-light);
+  font-family:var(--fb);font-size:11.5px;color:var(--ink-muted);line-height:1.5;font-style:italic;
+}
+
+.publish-url-block{
+  display:flex;flex-direction:column;gap:6px;
+}
+.publish-url-block__label{font-family:var(--fb);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted)}
+.publish-url-block input{
+  width:100%;padding:10px 12px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  font-family:var(--fb);font-size:13px;color:var(--ink);box-sizing:border-box;
+}
+.publish-url-block input:focus{outline:none;border-color:var(--accent)}
+
+.publish-stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+}
+.publish-stat-input{display:flex;flex-direction:column;gap:4px}
+.publish-stat-input label{font-family:var(--fb);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted);display:flex;align-items:center;gap:4px}
+.publish-stat-input input{
+  padding:7px 10px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  font-family:var(--fb);font-size:13px;color:var(--ink);
+  font-feature-settings:"tnum";text-align:right;box-sizing:border-box;
+}
+.publish-stat-input input:focus{outline:none;border-color:var(--accent)}
+
+.publish-status-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;
+  border-top:1px dashed var(--rule);margin-top:4px;
+}
+.publish-status-toggle{
+  display:flex;gap:0;border:1px solid var(--rule);border-radius:3px;overflow:hidden;
+}
+.publish-status-toggle__btn{
+  padding:5px 12px;background:var(--surface);border:none;
+  font-family:var(--fb);font-size:11.5px;font-weight:600;color:var(--ink-muted);cursor:pointer;
+  transition:background .12s,color .12s;
+}
+.publish-status-toggle__btn:hover{color:var(--ink)}
+.publish-status-toggle__btn--active{background:var(--ink);color:var(--bg)}
+.publish-status-toggle__btn[data-status="published"].publish-status-toggle__btn--active{background:#5C8A6E;color:#FDFAF3}
+
+@media (max-width:640px){
+  .publish-stats-grid{grid-template-columns:repeat(2,1fr)}
+  .publish-tab{min-width:100px;font-size:12px;padding:9px 10px}
+}
 .hook-input{
   width:100%;padding:11px 13px;background:var(--surface);
   border:1px solid var(--rule);border-radius:2px;
@@ -7339,30 +7432,24 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
   </div>
 </div>
 
-<!-- ═══ STATS TIKTOK POST-PUBLICATION (v0.6.3) ═══ -->
+<!-- ═══ v0.25.1 — PUBLISH MULTI-PLATEFORME (remplace l'ancien publishStatsModal) ═══ -->
 <div class="modal" id="publishStatsModal">
   <div class="modal__backdrop" data-close></div>
-  <div class="modal__box modal__box--lg">
+  <div class="modal__box modal__box--xl">
     <div class="modal__head">
       <div>
-        <h2 class="modal__title">✅ Marquer comme publié</h2>
-        <div class="modal__title-sub" id="publishStatsInfo"></div>
+        <h2 class="modal__title">🚀 Publier sur les réseaux</h2>
+        <div class="modal__title-sub" id="publishStatsInfo">Caption optimisée par plateforme — copie, publie, colle l'URL.</div>
       </div>
       <button class="modal__close" data-close>×</button>
     </div>
-    <div class="modal__body">
-      <div class="fg"><label class="fg__label" for="publishTikTokUrl">URL TikTok du post <span style="color:var(--accent)">*</span></label><input type="url" id="publishTikTokUrl" class="fg__input" placeholder="https://www.tiktok.com/@avis_base.nth/video/..."/></div>
-      <div style="margin-top:16px;font-size:0.82rem;color:var(--text-muted);margin-bottom:8px"><strong>Stats TikTok</strong> (facultatif, tu pourras les mettre à jour plus tard)</div>
-      <div class="stats-form-grid">
-        <div class="stat-input-group"><label for="publishViews">👁 Vues</label><input type="number" id="publishViews" placeholder="0" min="0"/></div>
-        <div class="stat-input-group"><label for="publishLikes">❤️ Likes</label><input type="number" id="publishLikes" placeholder="0" min="0"/></div>
-        <div class="stat-input-group"><label for="publishComments">💬 Commentaires</label><input type="number" id="publishComments" placeholder="0" min="0"/></div>
-        <div class="stat-input-group"><label for="publishShares">↗️ Partages</label><input type="number" id="publishShares" placeholder="0" min="0"/></div>
-      </div>
+    <div class="modal__body" id="publishMultiBody">
+      <div id="publishMultiTabs" class="publish-tabs" role="tablist"></div>
+      <div id="publishMultiTabPanels"></div>
     </div>
     <div class="modal__foot">
       <button class="btn btn--ghost btn--sm" data-close>Annuler</button>
-      <button class="btn btn--success btn--sm" id="confirmPublishStatsBtn">✅ Marquer publié</button>
+      <button class="btn btn--success btn--sm" id="confirmPublishStatsBtn">💾 Enregistrer publications</button>
     </div>
   </div>
 </div>
@@ -18387,51 +18474,356 @@ async function confirmSchedule() {
 
 let currentPublishingClipId = null;
 
+// ═══════════════════════════════════════════════════════════
+// v0.25.1 — Assistant de publication multi-plateforme
+// ═══════════════════════════════════════════════════════════
+
+const PUBLISH_PLATFORMS = [
+  {
+    key: 'tiktok',  label: 'TikTok',     icon: '🎵',
+    captionLimit: 2200, optimalLen: 150,
+    composerUrl: 'https://www.tiktok.com/upload',
+    composerLabel: 'Ouvrir TikTok Studio',
+    tips: 'Format vertical 9:16. Hook fort en 1ère seconde. Pas de lien dans la caption (TikTok pénalise). Mets le lien en bio.'
+  },
+  {
+    key: 'twitter', label: 'Twitter/X',  icon: '🐦',
+    captionLimit: 280, optimalLen: 220,
+    composerUrl: null, // utilise intent
+    composerLabel: 'Composer un tweet',
+    tips: 'Limite stricte 280 chars (avec URL = 23 chars). Pose une question pour engager. Tag @avis_base.nth.'
+  },
+  {
+    key: 'instagram', label: 'Instagram', icon: '📸',
+    captionLimit: 2200, optimalLen: 200,
+    composerUrl: 'https://www.instagram.com/',
+    composerLabel: 'Ouvrir Instagram',
+    tips: 'Reels = 9:16. Caption longue OK. Mets les hashtags en fin ou en 1er commentaire. Lien en bio uniquement.'
+  }
+];
+
+let _publishActiveTab = 'tiktok';
+let _publishState = {}; // { tiktok: {url, caption, status, stats}, twitter: {...}, ... }
+
+// Génère la caption optimisée par plateforme à partir d'un clip
+function buildPlatformCaption(clip, article, platformKey) {
+  const hook = (clip.hook || '').trim();
+  const hashtags = (clip.hashtags || []).map(h => '#' + h).join(' ');
+  const articleUrl = article ? `${SITE_BASE_URL}/#article/${article.slug}` : SITE_BASE_URL;
+
+  if (platformKey === 'twitter') {
+    // 280 chars total, URL = ~23 chars, hashtags soigneusement choisis
+    const tagsShort = (clip.hashtags || []).slice(0, 3).map(h => '#' + h).join(' ');
+    // Espace dispo : 280 - 23 (URL t.co) - 1 (espace) - tags = ~255 chars pour le hook
+    const lenForHook = 280 - 1 - 23 - 1 - tagsShort.length - 1;
+    const shortHook = hook.length > lenForHook ? hook.slice(0, lenForHook - 1).trim() + '…' : hook;
+    return `${shortHook}\n${tagsShort}\n${articleUrl}`.trim();
+  }
+  if (platformKey === 'instagram') {
+    // 2200 chars, hashtags en fin
+    return `${hook}\n\n📖 Article complet sur avis-base.com (lien en bio)\n\n${hashtags}`.trim();
+  }
+  // TikTok par défaut : court, hashtags inline
+  return `${hook}\n${hashtags}`.trim();
+}
+
 function openPublishStatsModal(clipId) {
   const c = clips.find(x => x.id === clipId);
   if (!c) return;
   const art = articles.find(a => a.id === c.articleId);
   currentPublishingClipId = clipId;
-  document.getElementById('publishStatsInfo').textContent = `${c.hook.substring(0, 60)} · ${art?.title || ''}`;
-  document.getElementById('publishTikTokUrl').value = c.publishedTiktokUrl || '';
-  document.getElementById('publishViews').value = c.tiktokViews || '';
-  document.getElementById('publishLikes').value = c.tiktokLikes || '';
-  document.getElementById('publishComments').value = c.tiktokComments || '';
-  document.getElementById('publishShares').value = c.tiktokShares || '';
-  openModal('publishStatsModal');
+  _publishActiveTab = 'tiktok';
+
+  // Init state avec captions auto-générées et URL existante (TikTok pour compat)
+  _publishState = {};
+  PUBLISH_PLATFORMS.forEach(p => {
+    _publishState[p.key] = {
+      url:     '',
+      caption: buildPlatformCaption(c, art, p.key),
+      status:  'planned',
+      stats:   { views: '', likes: '', comments: '', shares: '' }
+    };
+  });
+  // Pré-remplit avec l'URL TikTok existante (compat v0.6.3)
+  if (c.publishedTiktokUrl) {
+    _publishState.tiktok.url = c.publishedTiktokUrl;
+    _publishState.tiktok.status = 'published';
+    _publishState.tiktok.stats = {
+      views: c.tiktokViews || '',
+      likes: c.tiktokLikes || '',
+      comments: c.tiktokComments || '',
+      shares: c.tiktokShares || ''
+    };
+  }
+
+  // Sub info
+  const info = document.getElementById('publishStatsInfo');
+  if (info) info.textContent = `« ${(c.hook || '').substring(0, 60)} » · ${art?.title || ''}`;
+
+  // Si la table clip_publications existe, on charge les données déjà saisies
+  fetchExistingPublications(clipId).finally(() => {
+    renderPublishTabs();
+    renderPublishPanel(_publishActiveTab);
+    openModal('publishStatsModal');
+  });
+}
+
+async function fetchExistingPublications(clipId) {
+  if (!supa) return;
+  try {
+    const { data, error } = await supa
+      .from('clip_publications')
+      .select('platform, url, caption, status, stats')
+      .eq('clip_id', clipId);
+    if (error) {
+      // Migration pas appliquée : on continue avec le state TikTok compat seulement
+      if (/does not exist/.test(error.message || '')) {
+        console.debug('[publish] clip_publications absent, fallback compat TikTok');
+        return;
+      }
+      console.warn('[publish] fetch existing', error.message);
+      return;
+    }
+    (data || []).forEach(row => {
+      if (_publishState[row.platform]) {
+        _publishState[row.platform] = {
+          url:     row.url || _publishState[row.platform].url,
+          caption: row.caption || _publishState[row.platform].caption,
+          status:  row.status || 'planned',
+          stats:   {
+            views:    (row.stats?.views    != null) ? row.stats.views    : '',
+            likes:    (row.stats?.likes    != null) ? row.stats.likes    : '',
+            comments: (row.stats?.comments != null) ? row.stats.comments : '',
+            shares:   (row.stats?.shares   != null) ? row.stats.shares   : ''
+          }
+        };
+      }
+    });
+  } catch (e) { console.debug('[publish] fetch err', e); }
+}
+
+function renderPublishTabs() {
+  const tabs = document.getElementById('publishMultiTabs');
+  if (!tabs) return;
+  tabs.innerHTML = PUBLISH_PLATFORMS.map(p => {
+    const st = _publishState[p.key] || {};
+    const cls = [
+      'publish-tab',
+      _publishActiveTab === p.key ? 'publish-tab--active' : '',
+      st.status === 'published' ? 'publish-tab--published' : (st.status === 'planned' && st.url ? 'publish-tab--planned' : '')
+    ].filter(Boolean).join(' ');
+    return `<button class="${cls}" data-publish-tab="${p.key}" type="button" role="tab" aria-selected="${_publishActiveTab === p.key}">
+      <span class="publish-tab__icon">${p.icon}</span>
+      <span>${p.label}</span>
+      <span class="publish-tab__dot" aria-hidden="true"></span>
+    </button>`;
+  }).join('');
+  tabs.querySelectorAll('[data-publish-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _publishActiveTab = btn.dataset.publishTab;
+      renderPublishTabs();
+      renderPublishPanel(_publishActiveTab);
+    });
+  });
+}
+
+function renderPublishPanel(key) {
+  const root = document.getElementById('publishMultiTabPanels');
+  const platform = PUBLISH_PLATFORMS.find(p => p.key === key);
+  if (!root || !platform) return;
+  const st = _publishState[key] || {};
+  const captionLen = (st.caption || '').length;
+  const overLimit  = captionLen > platform.captionLimit;
+  const overOpt    = !overLimit && captionLen > platform.optimalLen;
+
+  // Composer URL : Twitter via intent (pré-remplie), autres via composer URL standard
+  let composerHref;
+  if (key === 'twitter') {
+    // L'intent Twitter pré-remplit text + url
+    composerHref = `https://twitter.com/intent/tweet?text=${encodeURIComponent(st.caption || '')}`;
+  } else {
+    composerHref = platform.composerUrl;
+  }
+
+  root.innerHTML = `
+    <div class="publish-panel publish-panel--active" data-publish-panel="${platform.key}">
+      <div class="publish-caption-block">
+        <div class="publish-caption-block__head">
+          <span>📝 Caption pour ${platform.label}</span>
+          <span class="publish-caption-block__head-info">
+            ${captionLen} / ${platform.captionLimit} chars · idéal ≤ ${platform.optimalLen}
+            ${overLimit ? '<strong style="color:#B83A2D"> · ⚠️ Dépasse la limite</strong>' :
+              overOpt   ? '<strong style="color:#E0B65A"> · long mais OK</strong>' : ''}
+          </span>
+        </div>
+        <textarea class="publish-caption-textarea" data-pub-caption="${platform.key}" rows="5">${escapeHtml(st.caption || '')}</textarea>
+        <div class="publish-caption-actions">
+          <button type="button" class="btn btn--primary btn--sm" data-pub-copy="${platform.key}">📋 Copier la caption</button>
+          ${composerHref ? `<a class="btn btn--accent btn--sm" href="${escapeHtml(composerHref)}" target="_blank" rel="noopener">↗ ${escapeHtml(platform.composerLabel)}</a>` : ''}
+          <button type="button" class="btn btn--ghost btn--sm" data-pub-regen="${platform.key}" title="Recalcule la caption depuis le clip">↻ Régénérer</button>
+        </div>
+      </div>
+
+      <p class="publish-platform-tips">${escapeHtml(platform.tips)}</p>
+
+      <div class="publish-url-block">
+        <span class="publish-url-block__label">URL après publication</span>
+        <input type="url" data-pub-url="${platform.key}" placeholder="${platform.key === 'tiktok' ? 'https://www.tiktok.com/@avis_base.nth/video/...' : platform.key === 'twitter' ? 'https://x.com/avis_base/status/...' : 'https://www.instagram.com/reel/...'}" value="${escapeHtml(st.url || '')}"/>
+      </div>
+
+      <div class="publish-stats-grid">
+        <div class="publish-stat-input"><label for="pubStat-${platform.key}-views">👁 Vues</label><input id="pubStat-${platform.key}-views" type="number" min="0" data-pub-stat="${platform.key}.views" value="${escapeHtml(String(st.stats?.views ?? ''))}" placeholder="0"/></div>
+        <div class="publish-stat-input"><label for="pubStat-${platform.key}-likes">❤️ Likes</label><input id="pubStat-${platform.key}-likes" type="number" min="0" data-pub-stat="${platform.key}.likes" value="${escapeHtml(String(st.stats?.likes ?? ''))}" placeholder="0"/></div>
+        <div class="publish-stat-input"><label for="pubStat-${platform.key}-comments">💬 Comm.</label><input id="pubStat-${platform.key}-comments" type="number" min="0" data-pub-stat="${platform.key}.comments" value="${escapeHtml(String(st.stats?.comments ?? ''))}" placeholder="0"/></div>
+        <div class="publish-stat-input"><label for="pubStat-${platform.key}-shares">↗️ Partages</label><input id="pubStat-${platform.key}-shares" type="number" min="0" data-pub-stat="${platform.key}.shares" value="${escapeHtml(String(st.stats?.shares ?? ''))}" placeholder="0"/></div>
+      </div>
+
+      <div class="publish-status-row">
+        <span style="font-family:var(--fb);font-size:11.5px;color:var(--ink-muted)">État pour cette plateforme :</span>
+        <div class="publish-status-toggle">
+          <button type="button" class="publish-status-toggle__btn ${st.status === 'planned' ? 'publish-status-toggle__btn--active' : ''}" data-pub-status="planned|${platform.key}">Planifié</button>
+          <button type="button" class="publish-status-toggle__btn ${st.status === 'published' ? 'publish-status-toggle__btn--active' : ''}" data-status="published" data-pub-status="published|${platform.key}">✅ Publié</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Bind handlers
+  root.querySelectorAll('[data-pub-caption]').forEach(ta => {
+    ta.addEventListener('input', () => {
+      _publishState[ta.dataset.pubCaption].caption = ta.value;
+      // Re-render le header pour màj le compteur
+      renderPublishPanel(ta.dataset.pubCaption);
+      // Refocus
+      setTimeout(() => {
+        const newTa = document.querySelector(`[data-pub-caption="${ta.dataset.pubCaption}"]`);
+        if (newTa) { newTa.focus(); newTa.setSelectionRange(newTa.value.length, newTa.value.length); }
+      }, 0);
+    });
+  });
+  root.querySelectorAll('[data-pub-copy]').forEach(b => {
+    b.addEventListener('click', async () => {
+      const k = b.dataset.pubCopy;
+      try {
+        await navigator.clipboard.writeText(_publishState[k].caption || '');
+        showToast(`Caption ${PUBLISH_PLATFORMS.find(p => p.key === k).label} copiée ✓`);
+      } catch { showToast('Impossible de copier', true); }
+    });
+  });
+  root.querySelectorAll('[data-pub-regen]').forEach(b => {
+    b.addEventListener('click', () => {
+      const k = b.dataset.pubRegen;
+      const c = clips.find(x => x.id === currentPublishingClipId);
+      const a = articles.find(x => x.id === c?.articleId);
+      _publishState[k].caption = buildPlatformCaption(c, a, k);
+      renderPublishPanel(k);
+      showToast('Caption régénérée');
+    });
+  });
+  root.querySelectorAll('[data-pub-url]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      _publishState[inp.dataset.pubUrl].url = inp.value.trim();
+    });
+  });
+  root.querySelectorAll('[data-pub-stat]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const [pkey, sk] = inp.dataset.pubStat.split('.');
+      _publishState[pkey].stats[sk] = inp.value === '' ? '' : (parseInt(inp.value, 10) || 0);
+    });
+  });
+  root.querySelectorAll('[data-pub-status]').forEach(b => {
+    b.addEventListener('click', () => {
+      const [status, pkey] = b.dataset.pubStatus.split('|');
+      _publishState[pkey].status = status;
+      renderPublishPanel(pkey);
+      renderPublishTabs();
+    });
+  });
 }
 
 async function confirmPublishStats() {
-  const url = document.getElementById('publishTikTokUrl').value.trim();
-  if (!url) { showToast('URL TikTok requise', true); return; }
-  try { new URL(url); } catch { showToast('URL invalide', true); return; }
-
-  const views = parseInt(document.getElementById('publishViews').value) || null;
-  const likes = parseInt(document.getElementById('publishLikes').value) || null;
-  const comments = parseInt(document.getElementById('publishComments').value) || null;
-  const shares = parseInt(document.getElementById('publishShares').value) || null;
+  if (!currentPublishingClipId) return;
+  if (!supa) { showToast('Service indisponible', true); return; }
 
   const c = clips.find(x => x.id === currentPublishingClipId);
-  const wasPublished = c && c.status === 'published';
+  const platforms = Object.keys(_publishState);
 
-  const payload = {
-    published_tiktok_url: url,
-    tiktok_views: views, tiktok_likes: likes,
-    tiktok_comments: comments, tiktok_shares: shares,
-    tiktok_stats_updated_at: new Date().toISOString()
-  };
-  if (!wasPublished) {
-    payload.status = 'published';
-    payload.published_at = new Date().toISOString();
-    payload.published_by = currentUser.id;
+  // On filtre les plateformes où l'utilisateur a rempli quelque chose
+  const toUpsert = platforms
+    .map(k => {
+      const st = _publishState[k];
+      const hasData = (st.url && st.url.length > 0) || st.status === 'published';
+      if (!hasData) return null;
+      // Validation URL si publié
+      if (st.status === 'published') {
+        if (!st.url) { showToast(`URL requise pour ${k} en statut publié`, true); return 'INVALID'; }
+        try { new URL(st.url); } catch { showToast(`URL ${k} invalide`, true); return 'INVALID'; }
+      }
+      // Clean stats : ne garde que les valeurs numériques non vides
+      const cleanStats = {};
+      Object.keys(st.stats || {}).forEach(sk => {
+        const v = st.stats[sk];
+        if (v !== '' && v != null && !Number.isNaN(v)) cleanStats[sk] = Number(v);
+      });
+      return {
+        clip_id:      currentPublishingClipId,
+        platform:     k,
+        url:          st.url || null,
+        caption:      st.caption || null,
+        status:       st.status,
+        stats:        cleanStats,
+        published_at: st.status === 'published' ? new Date().toISOString() : null,
+        published_by: currentUser?.id || null
+      };
+    })
+    .filter(Boolean);
+
+  if (toUpsert.includes('INVALID')) return;
+  if (toUpsert.length === 0) { showToast('Aucune publication à enregistrer', true); return; }
+
+  try {
+    const { error } = await supa
+      .from('clip_publications')
+      .upsert(toUpsert, { onConflict: 'clip_id,platform' });
+    if (error) {
+      if (/does not exist/.test(error.message || '')) {
+        // Fallback compat v0.6.3 : on enregistre juste TikTok dans clips.published_tiktok_url
+        const tk = _publishState.tiktok;
+        if (tk && tk.status === 'published' && tk.url) {
+          const payload = {
+            published_tiktok_url: tk.url,
+            tiktok_views: tk.stats?.views || null,
+            tiktok_likes: tk.stats?.likes || null,
+            tiktok_comments: tk.stats?.comments || null,
+            tiktok_shares: tk.stats?.shares || null,
+            status: 'published',
+            published_at: new Date().toISOString(),
+            published_by: currentUser?.id
+          };
+          const { error: errCompat } = await supa.from('clips').update(payload).eq('id', currentPublishingClipId);
+          if (errCompat) { showToast('Erreur : ' + errCompat.message, true); return; }
+          showToast('✅ Publication TikTok enregistrée (migration v0.25.1 pas appliquée — multi-plateforme désactivé)');
+          closeModal('publishStatsModal');
+          await loadClips();
+          return;
+        }
+        showToast('Migration v0.25.1 à appliquer pour le multi-plateforme', true);
+        return;
+      }
+      showToast('Erreur : ' + error.message, true);
+      return;
+    }
+
+    const publishedCount = toUpsert.filter(r => r.status === 'published').length;
+    showToast(publishedCount > 0
+      ? `✅ ${publishedCount} publication${publishedCount > 1 ? 's' : ''} enregistrée${publishedCount > 1 ? 's' : ''}`
+      : '💾 Publications planifiées enregistrées');
+    closeModal('publishStatsModal');
+    await loadClips();
+    if (document.getElementById('calendarModal').classList.contains('on')) renderCalendar();
+  } catch (e) {
+    showToast('Erreur : ' + (e?.message || 'inconnue'), true);
   }
-
-  const { error } = await supa.from('clips').update(payload).eq('id', currentPublishingClipId);
-  if (error) { showToast('Erreur : ' + error.message, true); return; }
-  showToast(wasPublished ? '📊 Stats mises à jour' : '✅ Clip marqué comme publié !');
-  closeModal('publishStatsModal');
-  await loadClips();
-  if (document.getElementById('calendarModal').classList.contains('on')) renderCalendar();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -18470,11 +18862,17 @@ function generatePackText(c, article) {
   const ytId = extractYoutubeId(article.videoSourceUrl);
   const ytWithTimestamp = ytId ? `https://youtube.com/watch?v=${ytId}&t=${c.videoStart}s` : article.videoSourceUrl;
 
-  const subtitlesFormatted = c.subtitles.map(s => 
+  const subtitlesFormatted = c.subtitles.map(s =>
     `[${secondsToMMSS(s.start)} → ${secondsToMMSS(s.end)}] ${s.text}`
   ).join('\n');
 
   const hashtagsFormatted = c.hashtags.map(h => `#${h}`).join(' ');
+  const articleUrl = `${SITE_BASE_URL}/#article/${article.slug}`;
+
+  // v0.25.1 — Captions optimisées par plateforme
+  const captionTikTok    = (typeof buildPlatformCaption === 'function') ? buildPlatformCaption(c, article, 'tiktok')    : (c.hook + '\n' + hashtagsFormatted).trim();
+  const captionTwitter   = (typeof buildPlatformCaption === 'function') ? buildPlatformCaption(c, article, 'twitter')   : c.hook;
+  const captionInstagram = (typeof buildPlatformCaption === 'function') ? buildPlatformCaption(c, article, 'instagram') : c.hook;
 
   return `═══════════════════════════════════════════════════
 📥 PACK PRODUCTION — Avis Basé
@@ -18482,7 +18880,7 @@ function generatePackText(c, article) {
 
 📰 ARTICLE SOURCE
 Titre : ${article.title}
-Lien : https://avis-base.netlify.app/#article/${article.slug}
+Lien : ${articleUrl}
 
 🎬 VIDÉO SOURCE
 URL : ${article.videoSourceUrl}
@@ -18493,7 +18891,7 @@ Début : ${secondsToMMSS(c.videoStart)} (${c.videoStart}s)
 Fin   : ${secondsToMMSS(c.videoEnd)} (${c.videoEnd}s)
 Durée : ${c.duration}s
 
-🎯 HOOK / CAPTION TIKTOK
+🎯 HOOK (original)
 ${c.hook}
 
 📄 SOUS-TITRES CHRONOLOGIQUES
@@ -18502,15 +18900,29 @@ ${subtitlesFormatted || '(aucun sous-titre)'}
 🏷️ HASHTAGS
 ${hashtagsFormatted || '(aucun hashtag)'}
 
+═══════════════════════════════════════════════════
+📱 CAPTIONS OPTIMISÉES PAR PLATEFORME (v0.25.1)
+═══════════════════════════════════════════════════
+
+🎵 TIKTOK ─────────────────────────────────────────
+${captionTikTok}
+
+🐦 TWITTER / X (≤ 280 chars) ──────────────────────
+${captionTwitter}
+
+📸 INSTAGRAM (Reels + caption longue) ─────────────
+${captionInstagram}
+
+═══════════════════════════════════════════════════
 ✍️ CRÉDIT CONTRIBUTEUR
 Proposé par : @${c.authorUsername}
 
 🔗 LIEN À METTRE EN BIO / COMMENTAIRE
-https://avis-base.netlify.app/#article/${article.slug}
+${articleUrl}
 
 ═══════════════════════════════════════════════════
 Généré le ${new Date().toLocaleString('fr-FR')}
-Via avis-base.netlify.app
+Via avis-base.com
 ═══════════════════════════════════════════════════`;
 }
 

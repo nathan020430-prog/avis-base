@@ -6,6 +6,25 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.25.1] — Publication multi-plateforme des clips (TikTok / Twitter / Instagram)
+- Nouvelle table **`clip_publications`** : 1 ligne par couple `(clip_id, platform)` avec url, status (`planned`/`published`/`archived`/`removed`), caption custom, stats JSONB, published_at, published_by. 7 plateformes supportées en DB (tiktok / twitter / instagram / linkedin / facebook / snapchat / youtube_shorts).
+- **Trigger DB** `_clip_publication_sync_clip_status` : dès qu'au moins 1 publication est `status='published'`, `clips.status` bascule en `published` + miroir `published_tiktok_url` pour conserver la compat avec l'UI v0.6.3.
+- **Vue `clip_publications_by_clip`** : agrégat par clip avec compteurs et JSON map des publications.
+- **Backfill automatique** : les clips existants avec `published_tiktok_url` non null sont rétro-créés dans la nouvelle table.
+- RLS strict : lecture publique des publications `status='published'`, lecture/écriture admin pour le reste.
+- **Modale `publishStatsModal` refondue** en assistant multi-plateforme :
+  - 3 onglets actifs dans l'UI (TikTok / Twitter / Instagram), petits dots colorés sur les onglets indiquant l'état (gris/orange/vert)
+  - Caption optimisée auto-générée par plateforme (longueur adaptée, hashtags placés intelligemment, URL article ajoutée pour Twitter et IG-en-commentaire)
+  - Bouton **📋 Copier la caption** + toast confirmation
+  - Bouton **↗ Ouvrir composer** : intent Twitter pré-rempli pour Twitter, lien direct TikTok Studio / instagram.com pour les autres (pas de pré-remplissage possible côté Meta / TikTok)
+  - Bouton **↻ Régénérer** pour recalculer la caption depuis le clip après édition
+  - Tips éditoriaux par plateforme
+  - Champ URL post-publication + 4 stats (vues, likes, commentaires, partages) + toggle Planifié / ✅ Publié
+  - Bouton **Enregistrer publications** = upsert simultané dans `clip_publications`
+- **`generatePackText()` enrichi** : le pack production .txt contient désormais 3 sections de captions optimisées (TikTok / Twitter / Instagram) en plus du hook original
+- **Fallback gracieux** : si la migration v0.25.1 n'est pas appliquée, l'enregistrement retombe sur l'ancien comportement (UPDATE `clips.published_tiktok_url`) avec un toast d'info
+- **Volontairement pas d'auto-posting via API** : les APIs des réseaux sociaux (Meta Graph, TikTok for Business, X paid API) nécessitent comptes business, approbations 2-8 semaines, et coûts ($100+/mois pour X). Le système actuel est conçu pour faciliter la publication manuelle au maximum.
+
 ## [v0.25.0] — Éditeur de clips refondu (preview live + templates + bulk subs)
 - **Layout 2 colonnes** sur l'éditeur de clips : preview à gauche (sticky desktop), form à droite. Stack vertical sur mobile.
 - **Preview format téléphone** : frame stylisée 9:16 par défaut (avec toggle 16:9 paysage), overlay live affichant le **hook** en haut, le **1er sous-titre** au milieu, et `@avis_base.nth · 15s` en bas. Placeholder élégant tant que les timestamps ne sont pas renseignés.
