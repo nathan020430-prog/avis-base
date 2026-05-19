@@ -3320,6 +3320,136 @@ body.reading .reading-progress{opacity:1}
 [data-theme="dark"] .reading-progress__bar{box-shadow:0 0 8px rgba(212,74,61,0.5)}
 
 /* ═══════════════════════════════════════════
+   v0.23.0 — UX lecture améliorée
+═══════════════════════════════════════════ */
+
+/* Floating reading-time indicator (top-right, in article modal) */
+.read-meta{
+  position:fixed;top:14px;right:14px;
+  z-index:1102;
+  display:none;
+  align-items:center;gap:8px;
+  font-family:var(--fb);font-size:11.5px;font-weight:600;
+  color:var(--ink);background:var(--surface);
+  padding:6px 11px;border:1px solid var(--rule);border-radius:999px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  letter-spacing:.02em;
+  pointer-events:auto;
+}
+body.reading .read-meta{display:inline-flex;animation:read-meta-in .3s ease-out}
+@keyframes read-meta-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.read-meta__icon{font-size:13px;line-height:1}
+.read-meta__remaining{font-feature-settings:"tnum"}
+.read-meta__done{color:#5C8A6E}
+[data-theme="dark"] .read-meta__done{color:#9DD4A8}
+.read-meta__btn{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--ff);font-weight:600;color:var(--ink-muted);
+  padding:2px 6px;border-radius:3px;
+  line-height:1;font-size:13px;
+}
+.read-meta__btn:hover{background:var(--paper-2,rgba(0,0,0,.05));color:var(--ink)}
+.read-meta__btn--aa{font-family:var(--fd,var(--ff))}
+.read-meta__sep{width:1px;height:14px;background:var(--rule);opacity:.6}
+
+@media (max-width:640px){
+  .read-meta{top:10px;right:10px;font-size:11px;padding:5px 10px;gap:6px}
+}
+
+/* Reading preferences popover */
+.read-prefs{
+  position:fixed;top:54px;right:14px;z-index:1103;
+  display:none;flex-direction:column;gap:12px;
+  background:var(--surface);border:1px solid var(--rule);
+  border-radius:6px;padding:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,.14);
+  min-width:220px;
+  animation:read-prefs-in .18s ease-out;
+}
+@keyframes read-prefs-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.read-prefs.on{display:flex}
+.read-prefs__row{display:flex;flex-direction:column;gap:6px}
+.read-prefs__label{font-family:var(--fb);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted)}
+.read-prefs__btns{display:flex;gap:4px}
+.read-prefs__btn{
+  flex:1;padding:7px 10px;
+  background:var(--paper-2,rgba(0,0,0,.03));border:1px solid var(--rule);
+  font-family:var(--fb);font-size:12.5px;font-weight:600;color:var(--ink);
+  cursor:pointer;border-radius:3px;
+  transition:background .12s,border-color .12s;
+}
+.read-prefs__btn:hover{background:var(--paper-2,rgba(0,0,0,.07));border-color:var(--ink-light)}
+.read-prefs__btn--active{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
+.read-prefs__btn--aa-s{font-size:11px}
+.read-prefs__btn--aa-m{font-size:13px}
+.read-prefs__btn--aa-l{font-size:16px}
+.read-prefs__btn--serif{font-family:var(--ff)}
+.read-prefs__btn--sans{font-family:var(--fb)}
+.read-prefs__btn--reset{padding:6px 10px;font-size:11px;color:var(--ink-muted);background:none;border:1px solid var(--rule)}
+.read-prefs__hint{font-family:var(--fb);font-size:11px;color:var(--ink-light);font-style:italic;line-height:1.4;margin:0}
+
+/* Apply reading prefs sizes (only when in reading mode) */
+body.reading .article-page__body{transition:font-size .15s,font-family .15s}
+body.read-prefs--size-s .article-page__body{font-size:0.94rem;line-height:1.65}
+body.read-prefs--size-m .article-page__body{font-size:1.06rem;line-height:1.7}
+body.read-prefs--size-l .article-page__body{font-size:1.19rem;line-height:1.75}
+body.read-prefs--font-sans .article-page__body{font-family:'Manrope',system-ui,sans-serif}
+body.read-prefs--font-serif .article-page__body{font-family:'Fraunces','Georgia',serif}
+
+/* Articles suggérés en fin d'article */
+.article-suggested{
+  margin:48px 0 24px;padding:24px 0 0;
+  border-top:1px solid var(--rule);
+}
+.article-suggested__title{
+  font-family:var(--ff);font-weight:600;font-size:18px;color:var(--ink);
+  margin:0 0 4px;letter-spacing:-.01em;
+}
+.article-suggested__sub{
+  font-family:var(--fb);font-size:13px;color:var(--ink-muted);
+  margin:0 0 18px;font-style:italic;
+}
+.article-suggested__list{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+}
+.article-suggested__card{
+  display:flex;flex-direction:column;gap:8px;
+  padding:14px;background:var(--paper-2,rgba(0,0,0,.02));
+  border:1px solid var(--rule);border-radius:3px;
+  cursor:pointer;transition:border-color .15s,transform .15s;
+  text-decoration:none;color:var(--ink);
+}
+.article-suggested__card:hover{
+  border-color:var(--accent);
+  transform:translateY(-2px);
+}
+.article-suggested__theme{
+  font-family:var(--fb);font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--accent);
+}
+.article-suggested__heading{
+  font-family:var(--ff);font-weight:500;font-size:14.5px;
+  line-height:1.4;color:var(--ink);
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.article-suggested__meta{
+  margin-top:auto;
+  font-family:var(--fb);font-size:11px;color:var(--ink-muted);
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+}
+.article-suggested__cred{
+  font-weight:600;font-feature-settings:"tnum";
+}
+.article-suggested__cred--base{color:#5C8A6E}
+.article-suggested__cred--bon{color:var(--ink)}
+.article-suggested__cred--moyen{color:#E0B65A}
+.article-suggested__cred--faible{color:#B83A2D}
+[data-theme="dark"] .article-suggested__cred--base{color:#9DD4A8}
+[data-theme="dark"] .article-suggested__cred--moyen{color:#F5D58C}
+[data-theme="dark"] .article-suggested__cred--faible{color:#F5A3A3}
+
+/* ═══════════════════════════════════════════
    SHARE BUTTONS (article page)
 ═══════════════════════════════════════════ */
 .share-bar{
@@ -6440,6 +6570,35 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
 <!-- Reading progress bar (visible uniquement en lecture d'article) -->
 <div class="reading-progress" aria-hidden="true"><div id="readingProgressBar" class="reading-progress__bar"></div></div>
 
+<!-- v0.23.0 — Meta lecture flottante (top-right, visible en mode reading) -->
+<div class="read-meta" id="readMeta" role="status" aria-live="polite">
+  <span class="read-meta__icon" aria-hidden="true">⏱</span>
+  <span class="read-meta__remaining" id="readMetaRemaining">—</span>
+  <span class="read-meta__sep" aria-hidden="true"></span>
+  <button class="read-meta__btn read-meta__btn--aa" id="readPrefsToggle" type="button" aria-label="Préférences de lecture" title="Préférences de lecture">Aa</button>
+</div>
+
+<!-- v0.23.0 — Popover préférences typographie -->
+<div class="read-prefs" id="readPrefs" role="dialog" aria-label="Préférences de lecture">
+  <div class="read-prefs__row">
+    <span class="read-prefs__label">Taille du texte</span>
+    <div class="read-prefs__btns">
+      <button class="read-prefs__btn read-prefs__btn--aa-s" data-read-pref="size" data-value="s" type="button">A</button>
+      <button class="read-prefs__btn read-prefs__btn--aa-m" data-read-pref="size" data-value="m" type="button">A</button>
+      <button class="read-prefs__btn read-prefs__btn--aa-l" data-read-pref="size" data-value="l" type="button">A</button>
+    </div>
+  </div>
+  <div class="read-prefs__row">
+    <span class="read-prefs__label">Police</span>
+    <div class="read-prefs__btns">
+      <button class="read-prefs__btn read-prefs__btn--serif" data-read-pref="font" data-value="serif" type="button">Serif</button>
+      <button class="read-prefs__btn read-prefs__btn--sans" data-read-pref="font" data-value="sans" type="button">Sans-serif</button>
+    </div>
+  </div>
+  <button class="read-prefs__btn read-prefs__btn--reset" id="readPrefsReset" type="button">↺ Réinitialiser</button>
+  <p class="read-prefs__hint">Tes préférences sont mémorisées sur cet appareil.</p>
+</div>
+
 <footer class="footer--media">
   <div class="footer__inner">
     <div>
@@ -9366,7 +9525,124 @@ function updateReadingProgress() {
   const max = scroller.scrollHeight - scroller.clientHeight;
   const pct = max > 0 ? Math.min(1, Math.max(0, scroller.scrollTop / max)) : 0;
   bar.style.transform = `scaleX(${pct})`;
+
+  // v0.23.0 — Met à jour le temps de lecture restant
+  if (typeof ReadPrefs !== 'undefined') ReadPrefs.updateRemaining(pct);
 }
+
+// ═══════════════════════════════════════════════════════════
+// v0.23.0 — Préférences de lecture + temps restant
+// ═══════════════════════════════════════════════════════════
+const ReadPrefs = (() => {
+  const STORAGE_KEY = 'avb_read_prefs_v1';
+  let _currentReadingMinutes = 0;
+  let _open = false;
+
+  const DEFAULT = { size: 'm', font: 'serif' };
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { ...DEFAULT };
+      const p = JSON.parse(raw);
+      return {
+        size: ['s','m','l'].includes(p.size) ? p.size : DEFAULT.size,
+        font: ['serif','sans'].includes(p.font) ? p.font : DEFAULT.font
+      };
+    } catch (e) { return { ...DEFAULT }; }
+  }
+
+  function save(prefs) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs)); } catch (e) {}
+  }
+
+  function apply(prefs) {
+    document.body.classList.remove('read-prefs--size-s','read-prefs--size-m','read-prefs--size-l');
+    document.body.classList.remove('read-prefs--font-serif','read-prefs--font-sans');
+    document.body.classList.add('read-prefs--size-' + (prefs.size || 'm'));
+    document.body.classList.add('read-prefs--font-' + (prefs.font || 'serif'));
+    refreshButtons(prefs);
+  }
+
+  function refreshButtons(prefs) {
+    document.querySelectorAll('[data-read-pref]').forEach(btn => {
+      const kind = btn.dataset.readPref;
+      const val = btn.dataset.value;
+      btn.classList.toggle('read-prefs__btn--active', prefs[kind] === val);
+    });
+  }
+
+  function setPref(kind, value) {
+    const prefs = load();
+    prefs[kind] = value;
+    save(prefs);
+    apply(prefs);
+  }
+
+  function reset() {
+    save({ ...DEFAULT });
+    apply({ ...DEFAULT });
+    if (typeof showToast === 'function') showToast('Préférences réinitialisées');
+  }
+
+  function togglePopover(force) {
+    const pop = document.getElementById('readPrefs');
+    if (!pop) return;
+    _open = (typeof force === 'boolean') ? force : !_open;
+    pop.classList.toggle('on', _open);
+  }
+
+  // Mise à jour du label "X min restantes" sur le badge meta
+  function updateRemaining(pct) {
+    const el = document.getElementById('readMetaRemaining');
+    if (!el) return;
+    if (_currentReadingMinutes <= 0) {
+      el.textContent = '—';
+      return;
+    }
+    if (pct >= 0.985) {
+      el.textContent = '✓ lu';
+      el.classList.add('read-meta__done');
+      return;
+    }
+    el.classList.remove('read-meta__done');
+    const remainingMin = Math.max(1, Math.ceil(_currentReadingMinutes * (1 - pct)));
+    el.textContent = remainingMin + ' min restantes';
+  }
+
+  function setCurrentArticleReadingMinutes(mins) {
+    _currentReadingMinutes = Math.max(0, Math.floor(mins || 0));
+    updateRemaining(0);
+  }
+
+  function bindHandlers() {
+    document.getElementById('readPrefsToggle')?.addEventListener('click', e => {
+      e.stopPropagation();
+      togglePopover();
+    });
+    document.querySelectorAll('[data-read-pref]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setPref(btn.dataset.readPref, btn.dataset.value);
+      });
+    });
+    document.getElementById('readPrefsReset')?.addEventListener('click', reset);
+    // Click outside → close popover
+    document.addEventListener('click', e => {
+      if (!_open) return;
+      if (e.target.closest('#readPrefs') || e.target.closest('#readPrefsToggle')) return;
+      togglePopover(false);
+    });
+    // Escape → close popover
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && _open) togglePopover(false);
+    });
+    // Applique les prefs au boot
+    apply(load());
+  }
+
+  return { bindHandlers, apply, load, setCurrentArticleReadingMinutes, updateRemaining };
+})();
+window.ReadPrefs = ReadPrefs;
 
 // ── Partage article ───────────────────────────────────────────
 async function shareArticle(a, kind) {
@@ -9469,6 +9745,59 @@ function renderArticleVoteBar(a) {
   </div>`;
 }
 
+// v0.23.0 — Suggestions d'articles à découvrir en fin d'article
+function renderSuggestedArticles(currentArticle) {
+  if (!currentArticle) return '';
+  let seen = [];
+  try { seen = JSON.parse(sessionStorage.getItem('avb_seen_articles') || '[]'); } catch (e) {}
+
+  const eligible = articles.filter(a =>
+    a.id !== currentArticle.id &&
+    a.status === 'published' &&
+    !isModerated(a)
+  );
+
+  // Score un article : +5 si même thème, + likes/10 + reads/100, malus -3 si déjà vu
+  const score = (a) => {
+    let s = 0;
+    if (a.themeSlug === currentArticle.themeSlug) s += 5;
+    s += Math.min(20, (a.likesCount || 0) / 10);
+    s += Math.min(10, (a.reads || 0) / 100);
+    if (seen.includes(a.id)) s -= 3;
+    return s;
+  };
+
+  const ranked = eligible
+    .map(a => ({ a, s: score(a) }))
+    .sort((x, y) => y.s - x.s);
+
+  const top = ranked.slice(0, 3).map(r => r.a);
+  if (top.length === 0) return '';
+
+  const cards = top.map(a => {
+    const theme = getThemeLabel(a.themeSlug);
+    const cred = computeCredibility(a.citedSources);
+    const credCls = cred.total >= 90 ? 'base' : cred.total >= 70 ? 'bon' : cred.total >= 50 ? 'moyen' : 'faible';
+    return `<a class="article-suggested__card" data-suggested-slug="${escapeHtml(a.slug)}" href="#article/${escapeHtml(a.slug)}">
+      <span class="article-suggested__theme">${escapeHtml(theme)}</span>
+      <div class="article-suggested__heading">${escapeHtml(a.title)}</div>
+      <div class="article-suggested__meta">
+        <span>${escapeHtml(a.authorUsername || 'Anonyme')}</span>
+        <span>·</span>
+        <span>${a.readingMinutes} min</span>
+        <span>·</span>
+        <span class="article-suggested__cred article-suggested__cred--${credCls}" title="Basitude : ${cred.total}/100">${cred.grade}</span>
+      </div>
+    </a>`;
+  }).join('');
+
+  return `<aside class="article-suggested" aria-label="Articles à découvrir">
+    <h3 class="article-suggested__title">📰 Articles à découvrir</h3>
+    <p class="article-suggested__sub">D'autres sujets sourcés dans le même fil éditorial.</p>
+    <div class="article-suggested__list">${cards}</div>
+  </aside>`;
+}
+
 function renderArticlePage(a) {
   const body = document.getElementById('articlePageBody');
   if (!body) return;
@@ -9566,7 +9895,34 @@ function renderArticlePage(a) {
     ${citedSection}
     ${a.status === 'published' && (!currentUser || a.authorId !== currentUser.id) ? renderTipJarInline(a) : ''}
     ${a.status === 'published' ? renderArticleVoteBar(a) : ''}
+    ${a.status === 'published' ? renderSuggestedArticles(a) : ''}
   `;
+
+  // v0.23.0 — Reading prefs : applique le temps de lecture pour le badge meta
+  if (typeof ReadPrefs !== 'undefined') {
+    ReadPrefs.setCurrentArticleReadingMinutes(a.readingMinutes);
+  }
+  // v0.23.0 — Mémorise l'article comme lu dans la session (pour exclure des suggestions)
+  try {
+    const seen = JSON.parse(sessionStorage.getItem('avb_seen_articles') || '[]');
+    if (!seen.includes(a.id)) {
+      seen.push(a.id);
+      sessionStorage.setItem('avb_seen_articles', JSON.stringify(seen.slice(-50)));
+    }
+  } catch (e) {}
+  // v0.23.0 — Wire clicks sur les cartes d'articles suggérés
+  body.querySelectorAll('[data-suggested-slug]').forEach(card => {
+    card.addEventListener('click', e => {
+      e.preventDefault();
+      const slug = card.dataset.suggestedSlug;
+      if (slug) {
+        // Scroll up the modal body avant d'ouvrir le nouvel article
+        const scroller = document.querySelector('#articlePageModal .modal__body');
+        if (scroller) scroller.scrollTop = 0;
+        openArticlePage(slug);
+      }
+    });
+  });
 
   // v0.17.0 Phase 3 — bind tip jar inline (si rendu)
   body.querySelectorAll('.tip-inline[data-tip-article]').forEach(el => bindTipJarInline(el));
@@ -17430,6 +17786,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // v0.21.1 — Bandeau RGPD
   document.getElementById('rgpdBannerOk')?.addEventListener('click', dismissRgpdBanner);
   showRgpdBannerIfNeeded();
+
+  // v0.23.0 — Reading prefs (taille / police) + meta flottante
+  if (typeof ReadPrefs !== 'undefined') ReadPrefs.bindHandlers();
 
   // ═══ v0.7 NAV MENU ═══
   document.getElementById('navMenuBtn')?.addEventListener('click', e => {

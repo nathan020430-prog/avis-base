@@ -13,7 +13,7 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.22.1 (Finance — Top tippers publics) — 2026-05-19
+## Version actuelle — v0.23.0 (UX lecture : prefs typo + temps restant + articles suggérés) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
@@ -25,10 +25,11 @@
 - v0.21.0 → Polish pre-launch (mod clips dashboard + SEO JSON-LD + onboarding + perf preconnect)
 - v0.21.1 → Polish RGPD + Changelog public (bandeau cookies + modale changelog)
 - v0.22.0 → Finance — Customer Portal Stripe (Edge Function + section adhésion + tips reçus)
-- **v0.22.1 → Finance — Top tippers publics** :
-  - RPC `get_public_top_tippers(limit, days)` filtrée sur display_consent=true
-  - Nouvelle section "Top donateurs — 30 derniers jours" sur /financement, entre Mur des soutiens et Articles rémunérés
-  - Confirmation : /financement est 100 % live data (les autres vues étaient déjà branchées depuis v0.17.0)
+- v0.22.1 → Finance — Top tippers publics (RPC + section /financement)
+- **v0.23.0 → UX lecture améliorée** :
+  - Bouton `Aa` flottant + popover : taille texte (S/M/L) + police (Serif/Sans-serif), persisté en localStorage
+  - Badge `⏱ X min restantes` en temps réel selon scroll, passe à `✓ lu` à 98.5%
+  - Section « 📰 Articles à découvrir » en fin d'article : 3 suggestions par scoring (thème + likes + reads, malus si déjà vu en session)
 
 Tags sur origin : `v0.16.0-prep`, `v0.16.1`, `v0.17.0`, `v0.17.0-ui-and-sql`, `v0.18.0`
 
