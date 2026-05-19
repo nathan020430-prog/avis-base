@@ -81,6 +81,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.22.0** | 💰 Finance — Customer Portal | Nouvelle Edge Function `create-portal-session` (Stripe Billing Portal) + section "Mon adhésion Avis Basé+" sur `/mon-financement` (statut, prochain renouvellement, bouton "Gérer mon abonnement") + historique des tips reçus en tant que contributeur, agrégé par mois | ✅ Livré |
 | **v0.22.1** | 💰 Finance — Top tippers | RPC `get_public_top_tippers(limit, days)` + section "Top donateurs — 30 derniers jours" sur `/financement` (opt-in via `display_consent`). Confirme que `/financement` est désormais 100 % live data (les vues `public_economy_current` / `public_donor_wall` / `public_article_leaderboard` / `public_monthly_archive` étaient déjà branchées depuis v0.17.0) | ✅ Livré |
 | **v0.23.0** | 📖 UX lecture | Préférences typo (3 tailles + serif/sans-serif, persistance localStorage) + temps de lecture restant dynamique (badge flottant top-right) + 3 articles suggérés en fin d'article (algorithme : même thème + likes + reads, exclusion des articles déjà lus en session) | ✅ Livré |
+| **v0.23.1** | 📣 Citation partageable | Sélection texte dans un article → tooltip flottant avec Twitter / Copier / Partage natif. Format auto : « citation » — auteur + lien article + via @avis_base.nth | ✅ Livré |
 | **v0.23.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -723,6 +724,31 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 📣 v0.23.1 — Citation partageable ✅
+
+> **Livré le 2026-05-19.** Une feature petite mais à fort impact pour le partage organique : quand quelqu'un trouve une phrase qui le frappe dans un article, il peut la partager en 2 clics sur Twitter (ou copier le texte avec l'attribution + le lien).
+
+**Livré :**
+- Module `QuoteShare` (frontend uniquement, pas de SQL)
+- Détecte les sélections de texte dans `.article-page__body`
+- Filtres : >= 12 caractères, tronque à 280 (limite Twitter), ignore les sélections hors article
+- Tooltip flottant qui apparaît au-dessus de la sélection (ou en dessous si pas assez d'espace en haut)
+- 3 actions : 🐦 Twitter, 📋 Copier, 📲 Partage natif (Web Share API, masqué si non supporté)
+- Format Twitter : `« citation »\n— @auteur, sur Avis Basé\n[url article] via @avis_base.nth`
+- Format Copier : citation + auteur + URL, prêt à coller dans n'importe quel champ
+- Repositionnement automatique en cas de scroll
+- Hide automatique sur Escape, click ailleurs, ou perte de sélection
+
+### ✅ Critères de validation
+- [x] Sélectionner 1+ phrase dans un article → tooltip apparaît
+- [x] Tooltip se positionne intelligemment (au-dessus / en dessous selon l'espace)
+- [x] Clic Twitter → ouvre `intent/tweet` dans une popup
+- [x] Clic Copier → presse-papier rempli + toast "Citation copiée ✓"
+- [x] Si Web Share API dispo (iOS/Android), bouton "Partager" natif visible
+- [x] Échap, click ailleurs, ou désélectionner → tooltip se ferme
 
 ---
 

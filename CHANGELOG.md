@@ -6,6 +6,16 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.23.1] — Citation partageable depuis l'article
+- Sélectionner du texte dans la page article fait apparaître un **tooltip flottant** avec 3 actions :
+  - 🐦 **Twitter** — ouvre intent/tweet avec `« citation »\n— @auteur, sur Avis Basé\n[url] via @avis_base.nth`
+  - 📋 **Copier** — copie `« citation »\n— auteur\n[url]` dans le presse-papier
+  - 📲 **Partage natif** (Web Share API) — masqué automatiquement si non supporté
+- Filtres : longueur minimale 12 caractères, troncature à 280 (limite Twitter), ignore les sélections hors `.article-page__body`
+- Tooltip se positionne intelligemment au-dessus de la sélection (ou en dessous si pas assez d'espace), avec une petite flèche pointant vers le texte
+- Repositionnement automatique au scroll, hide intelligent (Esc / click ailleurs / désélection)
+- Format `« » + attribution auteur + lien + via @avis_base.nth` pensé pour maximiser le partage organique sur les réseaux sociaux
+
 ## [v0.23.0] — UX lecture : prefs typo + temps restant + articles suggérés
 - **Préférences typographiques** :
   - Bouton flottant `Aa` en haut à droite de la page article (visible en mode lecture)
