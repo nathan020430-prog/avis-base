@@ -1,8 +1,11 @@
 // Avis Basé — Service Worker
 // Strategy: network-first for HTML (so updates apply instantly like big social apps),
 // cache-first for static assets, no caching for Supabase API calls.
+//
+// v0.26.3 — Bump VERSION pour buster les caches a chaque release importante.
+//           Ajout de offline.html dans le shell + meilleure gestion offline.
 
-const VERSION = 'v1.0.0';
+const VERSION = 'v0.26.3';
 const SHELL_CACHE = `avis-shell-${VERSION}`;
 const STATIC_CACHE = `avis-static-${VERSION}`;
 
@@ -10,7 +13,8 @@ const SHELL_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icon.svg'
+  '/icon.svg',
+  '/offline.html'
 ];
 
 // Install: pre-cache shell
@@ -83,7 +87,8 @@ async function networkFirst(request, cacheName) {
     const cached = await caches.match(request);
     if (cached) return cached;
     if (request.mode === 'navigate') {
-      const fallback = await caches.match('/index.html');
+      // v0.26.3 — Essaie d'abord /index.html (SPA), sinon /offline.html
+      const fallback = await caches.match('/index.html') || await caches.match('/offline.html');
       if (fallback) return fallback;
     }
     throw err;

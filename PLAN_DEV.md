@@ -87,6 +87,10 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.24.0** | 📬 Liste d'attente pré-lancement | Table `waitlist` (email unique, kind beta/launch, source) + RPC `submit_waitlist()` (idempotente, validation email) + vue admin `waitlist_summary`. Modale frontend accessible depuis la home app-cta + page /a-propos. Form simple : email + nom optionnel + choix beta-tester / notification lancement | ✅ Livré |
 | **v0.25.0** | ✂️ Éditeur de clips refondu | Layout 2-col avec preview type téléphone 9:16 (toggle 16:9), overlay live hook + 1er sous-titre + durée, 8 templates de hook prêts à l'emploi, suggestions de hashtags selon thème de l'article, mode bulk paste pour les sous-titres (auto-découpe équitable), indicateur multi-plateforme TikTok/Twitter/Instagram en temps réel | ✅ Livré |
 | **v0.25.1** | 🚀 Publication multi-plateforme | Table `clip_publications` (1 ligne par couple clip × plateforme) + modale assistant remplaçant l'ancien "publish stats" : 3 onglets TikTok / Twitter / Instagram avec caption optimisée par plateforme + bouton Copier + lien composer (intent Twitter pré-rempli) + champ URL + 4 stats. Trigger DB qui bascule `clips.status='published'` dès qu'au moins 1 plateforme est publiée + miroir TikTok pour compat | ✅ Livré |
+| **v0.26.0** | 💡 Help section clips | Modale tutoriel intégrée dans l'éditeur de clips, 4 onglets : Capture, Édition, Publication, Best practices. Workflow complet capture → édition → publication, avec recettes de hook, conseils sous-titres, outils gratuits recommandés | ✅ Livré |
+| **v0.26.1** | 💰 Stats financières enrichies | RPCs publiques `get_public_finance_summary()` + `get_public_finance_history(n)` qui exposent le cumul revenus / pool / reversé contributeurs depuis le lancement + 12 mois d'historique. Section "Transparence financière" sur `/stats` avec 3 cards + mini-chart Chart.js (revenu vs pool mois par mois) | ✅ Livré |
+| **v0.26.2** | 🔍 Search amélioré | Historique des 8 dernières recherches en localStorage, affiché en dropdown au focus avec input vide. Auto-save 1.5s après inactivité. Suggestions enrichies : 2 sections groupées (📰 Articles + 📎 Sources) avec navigation clavier qui supporte les 2 types | ✅ Livré |
+| **v0.26.3** | 📡 Service Worker offline | Bump cache `v0.26.3` + nouvelle page `/offline.html` stylisée + bandeau status online/offline qui s'affiche automatiquement quand `navigator.onLine` passe à false. Manifest nettoyé (référence screenshot manquante retirée) | ✅ Livré |
 | **v0.23.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -729,6 +733,105 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 📡 v0.26.3 — Service Worker offline + PWA polish ✅
+
+> **Livré le 2026-05-19.** PWA polish pour le pré-lancement : meilleure expérience hors-ligne + cache cassé proprement à chaque release.
+
+**Livré :**
+- `sw.js` : bump `VERSION` à `v0.26.3` (les anciens caches sont nettoyés à l'activation), ajout de `/offline.html` dans le shell pré-caché
+- Nouvelle page `/offline.html` (HTML autonome, stylisée Avis Basé) avec :
+  - Message "Pas de connexion" + icône 📡
+  - Bouton "Réessayer" qui recharge la page
+  - Status pulsant qui passe au vert dès que `navigator.onLine` repasse à true
+  - Auto-reload 1 s après retour de la connexion
+- Bandeau status online/offline dans l'app (`#offlineBanner`) :
+  - Apparaît automatiquement quand `window.offline` event firé
+  - Variante "✓ Connexion rétablie" 3.5 s puis disparaît
+  - Dismissible (skip pour la session)
+- `manifest.json` nettoyé : retrait de la référence à `/screenshot-mobile.png` qui n'existait pas
+- Compat préservée : le fallback du SW essaie d'abord `/index.html` (SPA cached) puis `/offline.html`
+
+### ✅ Critères de validation
+- [x] DevTools → Network → Offline : le bandeau "Hors ligne" apparaît
+- [x] Service Worker actif, version `v0.26.3` (visible dans `chrome://serviceworker-internals` ou DevTools → Application)
+- [x] `localhost:8080/offline.html` affiche la page stylisée
+- [x] Reconnexion → bandeau passe en "Connexion rétablie" puis disparaît
+- [x] Cache cassé proprement à la prochaine release (bump de VERSION)
+
+---
+
+## 🔍 v0.26.2 — Search amélioré ✅
+
+> **Livré le 2026-05-19.** Petites améliorations qui rendent la recherche plus rapide à utiliser.
+
+**Livré :**
+- Module `SEARCH_HISTORY` qui stocke les 8 dernières recherches dans `localStorage.avb_search_recent_v1`
+- Quand le user focus l'input avec une query vide → dropdown des recherches récentes apparaît avec :
+  - Icône horloge sur chaque ligne
+  - Bouton × visible au hover pour retirer une entrée
+  - Lien "Effacer" pour purger tout l'historique
+  - Click sur une recherche → fill l'input + relance la recherche
+- Auto-save dans l'historique : 1.5 s après inactivité (évite de spammer les frappes intermédiaires)
+- Suggestions étendues : dropdown groupé `📰 Articles` puis `📎 Sources`
+  - Top 4 articles publiés matchent par titre/subtitle/auteur
+  - Top 5 sources matchent comme avant
+- Navigation clavier (↑↓ Enter) supporte les 2 types : ouvre la bonne modale selon l'item
+
+### ✅ Critères de validation
+- [x] Tape une recherche → après 1.5 s elle apparaît dans l'historique
+- [x] Re-focus l'input vide → historique affiché
+- [x] Click sur une recherche récente → input filled + résultats rendus
+- [x] Click sur ⨯ d'une ligne → entrée retirée de l'historique
+- [x] Click sur "Effacer" → tout l'historique purgé
+- [x] Suggestions séparées en sections Articles / Sources, navigation clavier OK
+
+---
+
+## 💰 v0.26.1 — Stats financières enrichies ✅
+
+> **Livré le 2026-05-19.** Pousse plus loin la transparence financière sur la page publique `/stats` : on voit le cumul depuis le lancement + l'évolution mois par mois.
+
+**Livré :**
+- Migration SQL `v0.26.1-public-finance-stats-migration.sql` :
+  - RPC publique `get_public_finance_summary()` → JSON avec `current_month` (depuis `public_economy_current`), `cumulative` (revenu / pool / fees Stripe / infra / reversé contributeurs depuis le début) et `counts` (mois clôturés / membres actifs / contributeurs payés)
+  - RPC publique `get_public_finance_history(p_months)` → tableau JSON des N derniers mois (defaut 12) avec `payout_month / revenue_cents / pool_cents / etc.`
+  - Toutes deux ouvertes à `anon + authenticated`, tolérantes aux migrations partielles (exception when undefined_table)
+- Frontend `/stats` :
+  - Nouvelle section "💰 Transparence financière" avec 3 grandes cards (Revenu cumulé, Pool total contributeurs, Reversé aux contributeurs)
+  - Mini chart Chart.js (line, 2 datasets : revenu vs pool) sur les 12 derniers mois quand l'historique le permet
+  - Lien interne "Voir la page Financement" qui ferme la modale stats et bascule sur `/financement`
+- Fallback gracieux : si la migration n'est pas appliquée ou pas de données, la section est masquée silencieusement
+
+### ✅ Critères de validation
+- [x] La section "Transparence financière" apparaît dans `/stats` si la migration est appliquée
+- [x] Les 3 cards montrent le bon cumul (revenu, pool, reversé)
+- [x] Chart.js rend une ligne avec les 12 derniers mois si données suffisantes (≥ 2)
+- [x] Pas de crash si migration absente ou aucun mois clôturé
+
+---
+
+## 💡 v0.26.0 — Help section / tutoriel clips intégré ✅
+
+> **Livré le 2026-05-19.** Doc embarquée pour rendre la production de clips concrète et autonome — du choix du moment vidéo jusqu'à la publication.
+
+**Livré :**
+- Bouton `💡 Aide` dans le header du clip editor (à côté de la croix de fermeture)
+- Nouvelle modale `clipHelpModal` avec 4 onglets :
+  1. **🎯 Capture** — choisir le bon moment, durée idéale par fourchette, astuce preview live
+  2. **✂️ Édition** — recettes de hook (4 patterns gagnants), conseils sous-titres (Timeline vs Bulk), hashtags
+  3. **🚀 Publication** — workflow complet : review admin → fabriquer la vidéo (CapCut/ffmpeg/etc.) → assistant multi-plateforme → suivi des stats
+  4. **⭐ Best practices** — 5 règles d'or, 5 erreurs à éviter, 4 outils gratuits recommandés
+- CSS dédié (`.clip-help-tabs`, `.clip-help__card`, `.clip-help__grid`)
+- Footer "Compris, je me lance ✨"
+
+### ✅ Critères de validation
+- [x] Cliquer "💡 Aide" dans le clip editor ouvre la modale tutoriel
+- [x] Les 4 onglets switchent correctement (aria-selected)
+- [x] Lisible sur mobile (grid devient 1 colonne)
+- [x] Pas de regression sur l'éditeur de clips lui-même
 
 ---
 

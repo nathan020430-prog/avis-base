@@ -47,6 +47,10 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.26.3** — Service Worker offline : bump cache `v0.26.3`, nouvelle page `/offline.html` stylisée, bandeau status online/offline automatique, manifest nettoyé.
+- **v0.26.2** — Search amélioré : historique des 8 dernières recherches en localStorage, dropdown au focus, suggestions groupées 📰 Articles + 📎 Sources avec navigation clavier.
+- **v0.26.1** — Stats financières enrichies : RPCs `get_public_finance_summary()` + `get_public_finance_history(n)` + section "Transparence financière" sur `/stats` avec 3 cards + mini-chart 12 mois.
+- **v0.26.0** — Help section clips : modale tutoriel 4 onglets (Capture / Édition / Publication / Best practices) accessible depuis l'éditeur de clips.
 - **v0.25.1** — Publication multi-plateforme : table `clip_publications` + modale assistant remplaçant "Marquer publié". 3 onglets TikTok / Twitter / Instagram avec captions optimisées par plateforme, lien composer pré-rempli (intent Twitter), stats à saisir. Trigger DB qui bascule `clips.status='published'` automatiquement. Pack production enrichi de 3 captions par plateforme.
 - **v0.25.0** — Éditeur de clips refondu : layout 2-col avec preview format téléphone vertical 9:16 (toggle 16:9) avec overlay live hook + sous-titre + durée. 8 templates de hook prêts à l'emploi, suggestions de hashtags par thème, mode bulk paste pour générer N sous-titres équidistants, indicateur multi-plateforme TikTok/Twitter/Instagram en temps réel.
 - **v0.24.0** — Liste d'attente pré-lancement : table `waitlist` + RPC publique `submit_waitlist()` (idempotente) + modale form accessible depuis la home et la page À propos. 2 kinds : `launch` (notification jour J) ou `beta` (rejoindre les beta-testeurs actifs).
@@ -113,7 +117,8 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 17. `v0.20.0-stats-migration.sql` (V0.20.0 — RPCs publiques `get_public_stats()` + `get_public_top_contributors()`)
 18. `v0.22.1-top-tippers-migration.sql` (V0.22.1 — RPC publique `get_public_top_tippers(limit, days)` filtrée sur display_consent=true)
 19. `v0.24.0-waitlist-migration.sql` (V0.24.0 — table `waitlist` + RPC `submit_waitlist()` + vue admin `waitlist_summary`)
-20. **`v0.25.1-clip-publications-migration.sql`** (V0.25.1 — table `clip_publications` + trigger sync `clips.status` + vue `clip_publications_by_clip` + backfill TikTok pour compat v0.6.3) ← **NOUVEAU**
+20. `v0.25.1-clip-publications-migration.sql` (V0.25.1 — table `clip_publications` + trigger sync `clips.status` + vue `clip_publications_by_clip` + backfill TikTok pour compat v0.6.3)
+21. **`v0.26.1-public-finance-stats-migration.sql`** (V0.26.1 — RPCs publiques `get_public_finance_summary()` + `get_public_finance_history(n)` pour la section transparence financière sur `/stats`) ← **NOUVEAU**
 
 ## Développement local
 
@@ -128,4 +133,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.25.1
+© Avis Basé · Beta · v0.26.3
