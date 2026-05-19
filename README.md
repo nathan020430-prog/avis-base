@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.23.1** — Citation partageable : sélectionner du texte dans un article fait apparaître un tooltip "Twitter / Copier / Partager", avec attribution auteur + lien article. Format Twitter : `« citation » — @auteur via @avis_base.nth`.
 - **v0.23.0** — UX lecture : préférences typographiques (3 tailles + Serif/Sans-serif, persistance localStorage) + temps de lecture restant dynamique + 3 articles suggérés en fin d'article (même thème + likes + reads, exclusion des articles déjà lus en session).
 - **v0.22.1** — Finance — Top tippers : RPC `get_public_top_tippers(limit, days)` + section "Top donateurs — 30 derniers jours" sur `/financement` (opt-in `display_consent`). La page financement est désormais 100 % alimentée par les vraies vues.
 - **v0.22.0** — Finance — Customer Portal Stripe : nouvelle Edge Function `create-portal-session` + section "Mon adhésion" sur `/mon-financement` (statut, prochain renouvellement, bouton "Gérer mon abonnement" via Stripe Billing Portal) + historique des tips reçus en tant que contributeur, agrégé par mois.
@@ -120,4 +121,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.23.0
+© Avis Basé · Beta · v0.23.1

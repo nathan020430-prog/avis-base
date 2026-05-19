@@ -3396,6 +3396,44 @@ body.read-prefs--size-l .article-page__body{font-size:1.19rem;line-height:1.75}
 body.read-prefs--font-sans .article-page__body{font-family:'Manrope',system-ui,sans-serif}
 body.read-prefs--font-serif .article-page__body{font-family:'Fraunces','Georgia',serif}
 
+/* v0.23.1 — Tooltip "Citer ce passage" qui apparaît sur sélection texte */
+.quote-tooltip{
+  position:fixed;z-index:1104;
+  display:flex;gap:4px;
+  background:var(--ink);color:var(--bg);
+  padding:5px;border-radius:6px;
+  box-shadow:0 6px 20px rgba(0,0,0,.22);
+  animation:quote-pop .14s ease-out;
+  pointer-events:auto;
+}
+@keyframes quote-pop{from{opacity:0;transform:translateY(6px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.quote-tooltip__btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 10px;
+  background:transparent;border:none;color:inherit;
+  font-family:var(--fb);font-size:12px;font-weight:500;
+  cursor:pointer;border-radius:3px;
+  transition:background .12s;
+  white-space:nowrap;
+}
+.quote-tooltip__btn:hover{background:rgba(255,255,255,.12)}
+.quote-tooltip__btn svg{flex-shrink:0;opacity:.8}
+.quote-tooltip__btn:hover svg{opacity:1}
+.quote-tooltip::after{
+  content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+  width:0;height:0;
+  border-left:6px solid transparent;border-right:6px solid transparent;
+  border-top:6px solid var(--ink);
+}
+.quote-tooltip--below::after{
+  bottom:auto;top:-6px;
+  border-top:none;border-bottom:6px solid var(--ink);
+}
+@media (max-width:640px){
+  .quote-tooltip__btn{padding:8px 10px;font-size:12.5px}
+  .quote-tooltip__btn span{display:inline}
+}
+
 /* Articles suggérés en fin d'article */
 .article-suggested{
   margin:48px 0 24px;padding:24px 0 0;
@@ -6570,6 +6608,22 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
 <!-- Reading progress bar (visible uniquement en lecture d'article) -->
 <div class="reading-progress" aria-hidden="true"><div id="readingProgressBar" class="reading-progress__bar"></div></div>
 
+<!-- v0.23.1 — Bouton "Citer ce passage" qui apparaît à la sélection de texte -->
+<div class="quote-tooltip" id="quoteTooltip" role="dialog" aria-label="Citer ce passage" style="display:none">
+  <button class="quote-tooltip__btn" id="quoteShareTwitter" type="button" title="Partager sur Twitter">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 4.01c-1 .49-1.98.689-3 .99-1.121-1.265-2.783-1.335-4.38-.737S11.977 6.323 12 8v1c-3.245.083-6.135-1.395-8-4 0 0-4.182 7.433 4 11-1.872 1.247-3.739 2.088-6 2 3.308 1.803 6.913 2.423 10.034 1.517 3.58-1.04 6.522-3.723 7.651-7.742a13.84 13.84 0 0 0 .497-3.753c0-.249 1.51-2.772 1.818-4.013z"/></svg>
+    <span>Twitter</span>
+  </button>
+  <button class="quote-tooltip__btn" id="quoteShareCopy" type="button" title="Copier la citation + le lien">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    <span>Copier</span>
+  </button>
+  <button class="quote-tooltip__btn quote-tooltip__btn--native" id="quoteShareNative" type="button" title="Partager (apps installées)" style="display:none">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    <span>Partager</span>
+  </button>
+</div>
+
 <!-- v0.23.0 — Meta lecture flottante (top-right, visible en mode reading) -->
 <div class="read-meta" id="readMeta" role="status" aria-live="polite">
   <span class="read-meta__icon" aria-hidden="true">⏱</span>
@@ -9531,6 +9585,168 @@ function updateReadingProgress() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// v0.23.1 — Citation partageable depuis l'article
+// ═══════════════════════════════════════════════════════════
+const QuoteShare = (() => {
+  const MIN_LEN = 12;    // ne déclenche pas pour les sélections trop courtes
+  const MAX_LEN = 280;   // tronque à 280 caractères pour Twitter
+  let _currentArticle = null;
+  let _currentQuote = '';
+  let _hideTimer = null;
+
+  function setCurrentArticle(a) { _currentArticle = a; }
+
+  function _articleUrl() {
+    if (!_currentArticle) return SITE_BASE_URL;
+    return `${SITE_BASE_URL}/#article/${_currentArticle.slug}`;
+  }
+  function _articleTitle() {
+    return _currentArticle ? _currentArticle.title : 'Article Avis Basé';
+  }
+  function _truncate(s, n) {
+    s = (s || '').replace(/\s+/g, ' ').trim();
+    return s.length > n ? s.slice(0, n - 1).trim() + '…' : s;
+  }
+
+  function _selectionInsideArticleBody() {
+    const sel = window.getSelection && window.getSelection();
+    if (!sel || sel.isCollapsed) return null;
+    const text = _truncate(sel.toString(), MAX_LEN);
+    if (text.length < MIN_LEN) return null;
+    // Vérifie que la sélection est dans .article-page__body (sinon ignorer)
+    const range = sel.getRangeAt(0);
+    const containerEl = range.commonAncestorContainer.nodeType === 1
+      ? range.commonAncestorContainer
+      : range.commonAncestorContainer.parentElement;
+    if (!containerEl || !containerEl.closest('.article-page__body')) return null;
+    return { text, range };
+  }
+
+  function _show(text, range) {
+    const tip = document.getElementById('quoteTooltip');
+    if (!tip) return;
+    _currentQuote = text;
+    tip.style.display = 'flex';
+    // Position au-dessus de la sélection
+    const rect = range.getBoundingClientRect();
+    const tipRect = tip.getBoundingClientRect();
+    const x = Math.max(8, Math.min(window.innerWidth - tipRect.width - 8,
+      rect.left + (rect.width / 2) - (tipRect.width / 2)));
+    let y = rect.top - tipRect.height - 8;
+    let below = false;
+    if (y < 60) {
+      // pas assez d'espace au-dessus, on met en dessous
+      y = rect.bottom + 8;
+      below = true;
+    }
+    tip.style.left = x + 'px';
+    tip.style.top  = y + 'px';
+    tip.classList.toggle('quote-tooltip--below', below);
+    // Native share button visibility
+    const native = document.getElementById('quoteShareNative');
+    if (native) native.style.display = (navigator && typeof navigator.share === 'function') ? 'inline-flex' : 'none';
+  }
+
+  function _hide() {
+    const tip = document.getElementById('quoteTooltip');
+    if (tip) tip.style.display = 'none';
+    _currentQuote = '';
+  }
+
+  function _scheduleCheck() {
+    clearTimeout(_hideTimer);
+    _hideTimer = setTimeout(() => {
+      const sel = _selectionInsideArticleBody();
+      if (!sel) { _hide(); return; }
+      _show(sel.text, sel.range);
+    }, 80);
+  }
+
+  function shareTwitter() {
+    if (!_currentQuote) return;
+    const quote = `« ${_currentQuote} »`;
+    const author = _currentArticle ? _currentArticle.authorUsername : 'Avis Basé';
+    const text = `${quote}\n— ${author}, sur Avis Basé`;
+    const url = _articleUrl();
+    const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&via=avis_base.nth`;
+    window.open(intent, '_blank', 'noopener,width=600,height=480');
+    _hide();
+  }
+  async function shareCopy() {
+    if (!_currentQuote) return;
+    const quote = `« ${_currentQuote} »`;
+    const url = _articleUrl();
+    const author = _currentArticle ? _currentArticle.authorUsername : '';
+    const payload = `${quote}\n— ${author}\n${url}`;
+    try {
+      await navigator.clipboard.writeText(payload);
+      if (typeof showToast === 'function') showToast('Citation copiée ✓');
+    } catch (e) {
+      if (typeof showToast === 'function') showToast('Impossible de copier', true);
+    }
+    _hide();
+  }
+  async function shareNative() {
+    if (!_currentQuote || !navigator.share) return;
+    const quote = `« ${_currentQuote} »`;
+    const url = _articleUrl();
+    try {
+      await navigator.share({
+        title: _articleTitle(),
+        text: quote,
+        url: url
+      });
+    } catch (e) { /* user cancel */ }
+    _hide();
+  }
+
+  function bindHandlers() {
+    document.getElementById('quoteShareTwitter')?.addEventListener('click', e => { e.stopPropagation(); shareTwitter(); });
+    document.getElementById('quoteShareCopy')?.addEventListener('click', e => { e.stopPropagation(); shareCopy(); });
+    document.getElementById('quoteShareNative')?.addEventListener('click', e => { e.stopPropagation(); shareNative(); });
+
+    // Sélection texte → check + show
+    document.addEventListener('mouseup', e => {
+      // Ne pas reset si on clique sur le tooltip lui-même
+      if (e.target.closest('#quoteTooltip')) return;
+      _scheduleCheck();
+    });
+    document.addEventListener('selectionchange', () => {
+      // Le selectionchange peut fire pendant le drag → on attend mouseup
+    });
+    document.addEventListener('touchend', () => _scheduleCheck());
+
+    // Sortie de l'article → hide
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') _hide();
+    });
+    // Click ailleurs → hide
+    document.addEventListener('mousedown', e => {
+      if (e.target.closest('#quoteTooltip')) return;
+      const sel = window.getSelection && window.getSelection();
+      if (!sel || sel.isCollapsed) _hide();
+    });
+    // Scroll dans le modal article → réajuste la position si la sélection est toujours active
+    const modal = document.getElementById('articlePageModal');
+    if (modal) {
+      const scroller = modal.querySelector('.modal__body');
+      if (scroller) {
+        scroller.addEventListener('scroll', () => {
+          const tip = document.getElementById('quoteTooltip');
+          if (tip && tip.style.display === 'flex') {
+            const s = _selectionInsideArticleBody();
+            if (s) _show(s.text, s.range); else _hide();
+          }
+        }, { passive: true });
+      }
+    }
+  }
+
+  return { bindHandlers, setCurrentArticle };
+})();
+window.QuoteShare = QuoteShare;
+
+// ═══════════════════════════════════════════════════════════
 // v0.23.0 — Préférences de lecture + temps restant
 // ═══════════════════════════════════════════════════════════
 const ReadPrefs = (() => {
@@ -9902,6 +10118,8 @@ function renderArticlePage(a) {
   if (typeof ReadPrefs !== 'undefined') {
     ReadPrefs.setCurrentArticleReadingMinutes(a.readingMinutes);
   }
+  // v0.23.1 — Met à jour l'article courant pour le module QuoteShare
+  if (typeof QuoteShare !== 'undefined') QuoteShare.setCurrentArticle(a);
   // v0.23.0 — Mémorise l'article comme lu dans la session (pour exclure des suggestions)
   try {
     const seen = JSON.parse(sessionStorage.getItem('avb_seen_articles') || '[]');
@@ -17789,6 +18007,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // v0.23.0 — Reading prefs (taille / police) + meta flottante
   if (typeof ReadPrefs !== 'undefined') ReadPrefs.bindHandlers();
+
+  // v0.23.1 — Citation partageable depuis l'article
+  if (typeof QuoteShare !== 'undefined') QuoteShare.bindHandlers();
 
   // ═══ v0.7 NAV MENU ═══
   document.getElementById('navMenuBtn')?.addEventListener('click', e => {
