@@ -6,6 +6,24 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.21.0] — Polish pre-launch
+- **Modération clips dans le dashboard mod** : la file mod affiche maintenant un bouton "👁 Voir article parent" pour les clips et "👁 Voir l'article" pour les commentaires (avec scroll + highlight). Les actions hide/unhide/dismiss/resolve fonctionnaient déjà côté RPC, c'est l'UI qui n'était branchée que pour les articles.
+- **Audit SEO** :
+  - `setArticleMeta()` génère désormais les meta `article:published_time`, `article:modified_time`, `article:author`, `article:section`
+  - Injection dynamique d'un JSON-LD de type `NewsArticle` par article ouvert, avec headline, image, dates, auteur, publisher, mainEntityOfPage et citations (jusqu'à 20 sources)
+  - `resetMeta()` nettoie tout ça quand on quitte un article
+- **Onboarding nouveau user** :
+  - Tour guidé en 5 étapes affiché au premier login (`localStorage.avb_onboarding_done_v1`)
+  - Étapes : Bienvenue → Basitude (échelle 0-100, 4 paliers) → Mobile/desktop → Modération transparente → Suggestions à suivre (top 5 contributeurs, follow inline)
+  - Barre de progression + boutons "Suivant / Précédent / Passer le tour"
+  - Déclenchement sur `SIGNED_IN` (login + signup) ET au boot si profil chargé et flag absent
+  - Relançable depuis console via `window.Onboarding.start()`
+- **Audit perf (Lighthouse pre-launch)** :
+  - `<link rel="preconnect">` : Supabase project URL, cdn.jsdelivr.net
+  - `<link rel="dns-prefetch">` : i.ytimg.com, www.youtube.com, challenges.cloudflare.com
+  - Supabase JS reste en chargement bloquant (`<script src>`) car il est utilisé par un inline script en body au boot. Chart.js et Turnstile sont en `defer` comme avant.
+  - Meta `color-scheme: light dark` + `format-detection: telephone=no`
+
 ## [v0.20.0] — Transparence & Identité
 - Nouvelle page **/a-propos** (modale, hash `#a-propos`) : manifeste éditorial, différenciateurs, "pourquoi desktop-only", équipe, liens externes (TikTok, GitHub, contact, beta-testeurs), pointeur vers le changelog public
 - Nouvelle page **/stats** (modale, hash `#stats`) :

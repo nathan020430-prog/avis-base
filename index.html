@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="theme-color" content="#FAFAF7" id="themeMeta" media="(prefers-color-scheme: light)"/>
 <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)"/>
+<meta name="color-scheme" content="light dark"/>
+<meta name="format-detection" content="telephone=no"/>
 <title>Avis Basé — Le média collaboratif qui source tout</title>
 <meta name="description" id="metaDescription" content="Média collaboratif qui vérifie et source l'actualité. Articles écrits par la communauté, sources citées sur TikTok @avis_base.nth."/>
 <meta name="author" content="Avis Basé — Communauté"/>
@@ -56,9 +58,17 @@
 {"@context":"https://schema.org","@type":"NewsMediaOrganization","name":"Avis Basé","url":"https://avis-base.com/","logo":"https://avis-base.com/logo.png","description":"Média collaboratif qui vérifie et source l'actualité","sameAs":["https://www.tiktok.com/@avis_base.nth"]}
 </script>
 
+<!-- v0.21.0 — Preconnect + dns-prefetch des origines critiques (perf TTFB) -->
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preconnect" href="https://panjgsqwitwduxckgbbq.supabase.co" crossorigin/>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<link rel="dns-prefetch" href="https://i.ytimg.com"/>
+<link rel="dns-prefetch" href="https://www.youtube.com"/>
+<link rel="dns-prefetch" href="https://challenges.cloudflare.com"/>
+
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,500;1,9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<!-- Supabase JS doit etre charge AVANT l'inline script qui fait window.supabase.createClient() en body. Pas de defer. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Chart.js v4 — utilisé par la page /financement (camembert + ligne historique) -->
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
@@ -5410,6 +5420,45 @@ body.is-mobile .notif-bell{width:32px;height:32px}
   .stats-top__row{grid-template-columns:28px 1fr auto;gap:8px;font-size:12px}
   .stats-top__articles{display:none}
 }
+
+/* ───────────────────────────────────────────────────────────────
+   v0.21.0 — Onboarding nouveau user
+─────────────────────────────────────────────────────────────── */
+.onboarding-modal{max-width:560px;padding-top:30px}
+.onboarding__progress{display:flex;gap:6px;justify-content:center;margin-bottom:22px}
+.onboarding__progress-dot{width:24px;height:3px;border-radius:2px;background:var(--rule);transition:background .2s}
+.onboarding__progress-dot--active{background:var(--accent)}
+.onboarding__progress-dot--done{background:var(--ink-light)}
+
+.onboarding__step{min-height:280px;display:flex;flex-direction:column;justify-content:center}
+.onboarding__icon{font-size:48px;line-height:1;margin-bottom:14px;text-align:center}
+.onboarding__title{font-family:var(--ff);font-weight:600;font-size:22px;color:var(--ink);margin:0 0 12px;text-align:center;letter-spacing:-.01em}
+.onboarding__desc{font-family:var(--fb);font-size:14.5px;color:var(--ink);line-height:1.6;margin:0 0 14px;text-align:center}
+.onboarding__desc strong{font-weight:600;color:var(--accent)}
+.onboarding__list{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:8px}
+.onboarding__list li{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule);border-radius:3px;font-family:var(--fb);font-size:13.5px;color:var(--ink);line-height:1.5}
+.onboarding__list li strong{display:block;font-weight:600;margin-bottom:2px}
+.onboarding__list-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+
+.onboarding__suggestions{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.onboarding__suggestion{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--rule);border-radius:3px;font-family:var(--fb)}
+.onboarding__suggestion-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#FDFAF3;display:flex;align-items:center;justify-content:center;font-family:var(--ff);font-weight:600;font-size:15px}
+.onboarding__suggestion-body{min-width:0}
+.onboarding__suggestion-name{font-size:13.5px;color:var(--ink);font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.onboarding__suggestion-meta{font-size:11.5px;color:var(--ink-muted);margin-top:2px}
+.onboarding__suggestion .follow-btn{font-size:11px;padding:5px 12px;flex-shrink:0}
+
+.onboarding__actions{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid var(--rule)}
+.onboarding__skip-btn{margin-right:auto;font-size:12px;color:var(--ink-muted)}
+
+@media (max-width:640px){
+  .onboarding-modal{padding-left:18px;padding-right:18px}
+  .onboarding__step{min-height:240px}
+  .onboarding__title{font-size:19px}
+  .onboarding__desc{font-size:13.5px}
+  .onboarding__actions{flex-wrap:wrap;gap:8px}
+  .onboarding__skip-btn{order:3;width:100%;margin-right:0;margin-top:6px;text-align:center}
+}
 </style>
 </head>
 <body>
@@ -6989,6 +7038,20 @@ body.is-mobile .notif-bell{width:32px;height:32px}
     <p>Tu peux à tout moment supprimer un contenu que tu as publié, ou demander la suppression complète de ton compte via la page <a href="#suppression-compte" style="color:var(--accent)">Suppression du compte</a>. Les signalements liés à un contenu supprimé sont également effacés (cascade).</p>
 
     <p class="charter-modal__footer">Cette charte évolue avec la communauté. Pour proposer une modification, ouvre une issue sur le <a href="https://github.com/nathan020430-prog/avis-base" target="_blank" rel="noopener" style="color:var(--accent)">GitHub public</a> ou écris à <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a>.</p>
+  </div>
+</div>
+
+<!-- v0.21.0 — Onboarding nouveau user (1er login) -->
+<div class="v8-backdrop" id="onboardingBackdrop" style="display:none">
+  <div class="v8-modal onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="onbTitle">
+    <button class="v8-modal__close" id="onboardingSkip" aria-label="Fermer">×</button>
+    <div class="onboarding__progress" id="onboardingProgress" aria-hidden="true"></div>
+    <div class="onboarding__step" id="onboardingStep"></div>
+    <div class="onboarding__actions">
+      <button class="btn btn--ghost" id="onboardingPrev" style="display:none">← Précédent</button>
+      <button class="btn btn--ghost onboarding__skip-btn" id="onboardingSkipBtn">Passer le tour</button>
+      <button class="btn btn--primary" id="onboardingNext">Suivant →</button>
+    </div>
   </div>
 </div>
 
@@ -8949,7 +9012,7 @@ function setArticleMeta(a) {
   if (!a) return resetMeta();
   const url = `${SITE_BASE_URL}/#article/${a.slug}`;
   const title = `${a.title} — Avis Basé`;
-  const desc = (a.subtitle || a.body || '').toString().replace(/[#*`\n>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
+  const desc = (a.subtitle || a.bodyMarkdown || '').toString().replace(/[#*`\n>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
   const img = buildArticleOgImage(a);
   document.title = title;
   setMetaTag('metaDescription', 'content', desc);
@@ -8962,6 +9025,18 @@ function setArticleMeta(a) {
   setMetaTag('twTitle', 'content', title);
   setMetaTag('twDescription', 'content', desc);
   setMetaTag('twImage', 'content', img);
+
+  // v0.21.0 — Métas article-spécifiques (article:* et NewsArticle JSON-LD)
+  setOrCreateMeta('article:published_time', a.publishedAt || a.createdAt || '', 'property');
+  setOrCreateMeta('article:modified_time', a.updatedAt || a.publishedAt || a.createdAt || '', 'property');
+  setOrCreateMeta('article:author', a.authorUsername || 'Avis Basé', 'property');
+  if (a.themeSlug) {
+    const theme = (typeof articleThemes !== 'undefined') ? articleThemes.find(t => t.slug === a.themeSlug) : null;
+    setOrCreateMeta('article:section', (theme && theme.label) || a.themeSlug, 'property');
+  }
+
+  // NewsArticle JSON-LD — injecté dynamiquement
+  injectArticleJsonLd(a, url, img);
 }
 function resetMeta() {
   const url = `${SITE_BASE_URL}/`;
@@ -8978,6 +9053,60 @@ function resetMeta() {
   setMetaTag('twTitle', 'content', title);
   setMetaTag('twDescription', 'content', desc);
   setMetaTag('twImage', 'content', DEFAULT_OG_IMAGE);
+  removeMeta('article:published_time');
+  removeMeta('article:modified_time');
+  removeMeta('article:author');
+  removeMeta('article:section');
+  removeArticleJsonLd();
+}
+
+// v0.21.0 — Helpers pour les meta tags article:* et JSON-LD dynamique
+function setOrCreateMeta(name, value, kind) {
+  if (!value) return removeMeta(name);
+  const sel = kind === 'property' ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+  let el = document.head.querySelector(sel);
+  if (!el) {
+    el = document.createElement('meta');
+    if (kind === 'property') el.setAttribute('property', name);
+    else el.setAttribute('name', name);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('content', value);
+}
+function removeMeta(name) {
+  document.head.querySelectorAll(`meta[property="${name}"], meta[name="${name}"]`).forEach(el => el.remove());
+}
+function injectArticleJsonLd(a, url, img) {
+  removeArticleJsonLd();
+  const sources = Array.isArray(a.citedSources) ? a.citedSources : [];
+  const jsonld = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: a.title,
+    description: (a.subtitle || '').toString().slice(0, 200) || undefined,
+    image: img ? [img] : undefined,
+    datePublished: a.publishedAt || a.createdAt,
+    dateModified: a.updatedAt || a.publishedAt || a.createdAt,
+    author: { '@type': 'Person', name: a.authorUsername || 'Avis Basé' },
+    publisher: {
+      '@type': 'NewsMediaOrganization',
+      name: 'Avis Basé',
+      logo: { '@type': 'ImageObject', url: SITE_BASE_URL + '/logo.png' }
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    citation: sources.length ? sources.slice(0, 20).map(s => s.url).filter(Boolean) : undefined
+  };
+  // Clean undefined keys
+  Object.keys(jsonld).forEach(k => jsonld[k] === undefined && delete jsonld[k]);
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.id = 'articleJsonLd';
+  script.textContent = JSON.stringify(jsonld);
+  document.head.appendChild(script);
+}
+function removeArticleJsonLd() {
+  const el = document.getElementById('articleJsonLd');
+  if (el) el.remove();
 }
 
 // ── Reading progress bar ──────────────────────────────────────
@@ -11510,6 +11639,182 @@ function closeAboutModal() {
   document.body.style.overflow = '';
 }
 window.openAboutModal = openAboutModal;
+
+// ═══════════════════════════════════════════════════════════
+// v0.21.0 — Onboarding nouveau user
+// ═══════════════════════════════════════════════════════════
+const Onboarding = (() => {
+  const STORAGE_KEY = 'avb_onboarding_done_v1';
+  let stepIdx = 0;
+  let suggestions = [];
+
+  // 5 étapes du tour
+  const STEPS = [
+    {
+      icon: '👋',
+      title: 'Bienvenue sur Avis Basé',
+      desc: `On est un <strong>média collaboratif</strong> qui source tout. Chaque article cite ses sources, chaque affirmation peut être vérifiée. L'objectif : redonner aux lecteurs les outils pour comprendre l'actualité par eux-mêmes.`,
+      list: null
+    },
+    {
+      icon: '📎',
+      title: 'La Basitude — comment lire un article',
+      desc: `Chaque article a un score de <strong>Basitude</strong> entre 0 et 100. Il mesure la qualité des sources citées et la crédibilité de l'auteur.`,
+      list: [
+        { icon: '🌟', label: 'Base (≥90%)', text: 'Au moins 4 sources fiables, validées par la communauté.' },
+        { icon: '✅', label: 'Bon (≥70%)', text: 'Plusieurs sources reconnues, faits vérifiables.' },
+        { icon: '⚠️', label: 'Moyen (≥50%)', text: 'À lire avec recul, certaines sources mériteraient renfort.' },
+        { icon: '❓', label: 'Faible (<50%)', text: 'Peu sourcé ou auteur encore en phase d\'apprentissage.' }
+      ]
+    },
+    {
+      icon: '💬',
+      title: 'Tu peux interagir sur mobile, écrire sur ordinateur',
+      desc: `Sur mobile : <strong>likes, commentaires, follow, signalement</strong>. La rédaction d'articles et de clips se fait sur ordinateur uniquement — c'est un choix éditorial assumé pour pousser à mieux structurer.`,
+      list: [
+        { icon: '👍', label: 'Liker / Commenter', text: 'Sur tous les appareils.' },
+        { icon: '🚩', label: 'Signaler un contenu', text: '8 raisons standardisées. Au-delà de 3 signalements, le contenu est masqué automatiquement.' },
+        { icon: '✍️', label: 'Écrire un article', text: 'Desktop uniquement. Tu prends le temps de sourcer correctement.' }
+      ]
+    },
+    {
+      icon: '🛡️',
+      title: 'Modération communautaire transparente',
+      desc: `À partir d'un score de Basitude ≥ <strong>50</strong>, tu peux participer à la peer review des signalements. Toutes les actions sont journalisées — rien de caché.`,
+      list: [
+        { icon: '🤝', label: 'Quorum 3 votes', text: 'Trois "valide" → contenu masqué. Trois "pas un problème" → signalement classé.' },
+        { icon: '📜', label: 'Charte publique', text: 'Le détail complet du fonctionnement est dans la charte de modération, lisible par tous.' },
+        { icon: '🔁', label: 'Recours possible', text: 'Si ton contenu est masqué injustement, tu peux le modifier ou contacter l\'équipe.' }
+      ]
+    },
+    {
+      icon: '🤝',
+      title: 'Des contributeurs à suivre pour démarrer',
+      desc: `Voici les profils les plus fiables du moment. Suis-en quelques-uns pour remplir ton <strong>Mon Feed</strong> personnalisé.`,
+      list: null,
+      suggestions: true
+    }
+  ];
+
+  async function maybeShow() {
+    if (!currentUser || !currentProfile) return;
+    try {
+      if (localStorage.getItem(STORAGE_KEY)) return;
+    } catch (e) { return; }
+    // Petit délai pour ne pas spammer l'écran au démarrage
+    setTimeout(() => start(), 700);
+  }
+
+  async function start() {
+    stepIdx = 0;
+    // Pré-charge les suggestions pour le dernier step (silencieusement)
+    try {
+      const { data } = await supa.rpc('get_public_top_contributors', { p_limit: 5 });
+      suggestions = (data || []).filter(u => !currentProfile || u.username !== currentProfile.username);
+    } catch (e) { suggestions = []; }
+    const bd = document.getElementById('onboardingBackdrop');
+    if (!bd) return;
+    bd.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    render();
+  }
+
+  function render() {
+    const step = STEPS[stepIdx];
+    if (!step) { finish(); return; }
+    const stepEl = document.getElementById('onboardingStep');
+    const prog = document.getElementById('onboardingProgress');
+    if (!stepEl || !prog) return;
+
+    prog.innerHTML = STEPS.map((_, i) => {
+      const cls = i === stepIdx ? 'onboarding__progress-dot--active' :
+                  i <  stepIdx ? 'onboarding__progress-dot--done' : '';
+      return `<span class="onboarding__progress-dot ${cls}"></span>`;
+    }).join('');
+
+    let listHtml = '';
+    if (step.list && step.list.length) {
+      listHtml = `<ul class="onboarding__list">${step.list.map(it => `
+        <li><span class="onboarding__list-icon">${it.icon}</span><span><strong>${escapeHtml(it.label)}</strong>${escapeHtml(it.text)}</span></li>
+      `).join('')}</ul>`;
+    } else if (step.suggestions) {
+      if (!suggestions.length) {
+        listHtml = `<p class="onboarding__desc" style="margin-top:14px;color:var(--ink-muted);font-style:italic">Pas encore de suggestion. Reviens dans quelques jours — la communauté grandit.</p>`;
+      } else {
+        listHtml = `<div class="onboarding__suggestions">${suggestions.map(u => {
+          const init = (u.username || '?')[0].toUpperCase();
+          const lvl = (typeof getUserLevel === 'function') ? getUserLevel(u.credibility_score || 0) : { icon: '🌱', label: u.credibility_level || 'nouveau' };
+          return `<div class="onboarding__suggestion">
+            <div class="onboarding__suggestion-avatar">${escapeHtml(init)}</div>
+            <div class="onboarding__suggestion-body">
+              <div class="onboarding__suggestion-name">
+                ${escapeHtml(u.username)}
+                ${u.is_certified ? '<span title="Auteur rémunérable">✓</span>' : ''}
+                ${u.is_member ? '<span title="Membre Avis Basé+">💛</span>' : ''}
+              </div>
+              <div class="onboarding__suggestion-meta">${lvl.icon} ${escapeHtml(lvl.label || '')} · ${u.credibility_score || 0}% · ${u.articles_published || 0} article${(u.articles_published || 0) > 1 ? 's' : ''}</div>
+            </div>
+            <button class="btn btn--accent btn--sm follow-btn" data-onb-follow="${escapeHtml(u.username)}">Suivre</button>
+          </div>`;
+        }).join('')}</div>`;
+      }
+    }
+
+    stepEl.innerHTML = `
+      <div class="onboarding__icon" aria-hidden="true">${step.icon}</div>
+      <h2 class="onboarding__title" id="onbTitle">${escapeHtml(step.title)}</h2>
+      <p class="onboarding__desc">${step.desc}</p>
+      ${listHtml}
+    `;
+
+    const prevBtn = document.getElementById('onboardingPrev');
+    const nextBtn = document.getElementById('onboardingNext');
+    if (prevBtn) prevBtn.style.display = stepIdx > 0 ? 'inline-flex' : 'none';
+    if (nextBtn) nextBtn.textContent = stepIdx === STEPS.length - 1 ? '✨ C\'est parti !' : 'Suivant →';
+
+    // Wire follow buttons (suggestions)
+    stepEl.querySelectorAll('[data-onb-follow]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const username = btn.dataset.onbFollow;
+        const target = suggestions.find(s => s.username === username);
+        if (!target) return;
+        // On a besoin de l'id du profil — un fetch léger
+        const { data: p, error } = await supa.from('profiles').select('id').eq('username', username).maybeSingle();
+        if (error || !p?.id) { showToast('Impossible de récupérer le profil', true); return; }
+        if (typeof Follow !== 'undefined' && Follow.toggle) {
+          await Follow.toggle(p.id);
+          btn.textContent = Follow.isFollowing(p.id) ? '✓ Suivi' : 'Suivre';
+          btn.classList.toggle('follow-btn--active', Follow.isFollowing(p.id));
+        }
+      });
+    });
+  }
+
+  function next() {
+    if (stepIdx < STEPS.length - 1) { stepIdx++; render(); }
+    else finish();
+  }
+  function prev() { if (stepIdx > 0) { stepIdx--; render(); } }
+  function skip() { finish(); }
+  function finish() {
+    try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
+    const bd = document.getElementById('onboardingBackdrop');
+    if (bd) bd.style.display = 'none';
+    document.body.style.overflow = '';
+    showToast('Bienvenue dans la communauté 👋');
+  }
+
+  function bindHandlers() {
+    document.getElementById('onboardingNext')?.addEventListener('click', next);
+    document.getElementById('onboardingPrev')?.addEventListener('click', prev);
+    document.getElementById('onboardingSkip')?.addEventListener('click', skip);
+    document.getElementById('onboardingSkipBtn')?.addEventListener('click', skip);
+  }
+
+  // Permet de relancer manuellement le tour depuis la console : window.Onboarding.start()
+  return { maybeShow, start, next, prev, skip, finish, bindHandlers };
+})();
+window.Onboarding = Onboarding;
 
 // v0.20.0 — Stats publiques
 function openStatsModal() {
@@ -14732,6 +15037,9 @@ async function init() {
   // V0.9.7 — démarrer notifications si connecté
   if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); }
 
+  // v0.21.0 — Tour d'onboarding si premier passage
+  if (typeof Onboarding !== 'undefined') Onboarding.maybeShow();
+
   await loadCharter();
   // v0.6 : Load articles + themes + tones FIRST (main content)
   await loadArticleThemes();
@@ -14903,6 +15211,10 @@ async function init() {
     // V0.9.7 — (re)bind notifications selon l'état
     if (currentUser) { Notif.load(); Notif.subscribe(); Follow.load(); }
     else { Notif.unsubscribe(); Follow.reset(); }
+    // v0.21.0 — Onboarding au signup (event SIGNED_IN couvre login + signup)
+    if (event === 'SIGNED_IN' && currentUser && typeof Onboarding !== 'undefined') {
+      Onboarding.maybeShow();
+    }
     if (isAdmin()) {
       await loadSubmissions();
       await loadReports();
@@ -16421,7 +16733,9 @@ const Moderation = (() => {
         <span>⏱ ${timeAgo(it.last_reported_at)}</span>
       </div>
       <div class="mod-queue-item__actions">
-        ${it.target_type === 'article' ? `<button class="btn btn--ghost btn--sm" data-mod-view="${escapeHtml(it.target_id)}">👁 Ouvrir</button>` : ''}
+        ${it.target_type === 'article' ? `<button class="btn btn--ghost btn--sm" data-mod-view-article="${escapeHtml(it.target_id)}">👁 Ouvrir</button>` : ''}
+        ${it.target_type === 'clip'    ? `<button class="btn btn--ghost btn--sm" data-mod-view-clip="${escapeHtml(it.target_id)}">👁 Voir article parent</button>` : ''}
+        ${it.target_type === 'comment' ? `<button class="btn btn--ghost btn--sm" data-mod-view-comment="${escapeHtml(it.target_id)}">👁 Voir l'article</button>` : ''}
         <button class="btn btn--danger btn--sm" data-mod-act="hide">🚫 Masquer</button>
         <button class="btn btn--success btn--sm" data-mod-act="resolve_reports">✅ Valider signalement (masquer)</button>
         <button class="btn btn--ghost btn--sm" data-mod-act="dismiss_reports">❌ Classer sans suite</button>
@@ -16431,13 +16745,43 @@ const Moderation = (() => {
   }
 
   function bindQueueActions() {
-    document.querySelectorAll('[data-mod-view]').forEach(b => {
+    document.querySelectorAll('[data-mod-view-article]').forEach(b => {
       b.addEventListener('click', () => {
-        const id = b.dataset.modView;
+        const id = b.dataset.modViewArticle;
         const a = articles.find(x => x.id === id);
         if (!a) { showToast('Article introuvable côté front. Rafraîchis.', true); return; }
         closeModal('moderationModal');
         openArticlePage(a.slug);
+      });
+    });
+    document.querySelectorAll('[data-mod-view-clip]').forEach(b => {
+      b.addEventListener('click', () => {
+        const id = b.dataset.modViewClip;
+        const c = clips.find(x => x.id === id);
+        if (!c) { showToast('Clip introuvable côté front. Rafraîchis.', true); return; }
+        const a = articles.find(x => x.id === c.articleId);
+        if (!a) { showToast('Article parent introuvable.', true); return; }
+        closeModal('moderationModal');
+        openArticlePage(a.slug);
+      });
+    });
+    document.querySelectorAll('[data-mod-view-comment]').forEach(b => {
+      b.addEventListener('click', async () => {
+        const id = b.dataset.modViewComment;
+        const { data, error } = await supa.from('comments').select('article_id').eq('id', id).maybeSingle();
+        if (error || !data?.article_id) { showToast('Commentaire introuvable.', true); return; }
+        const a = articles.find(x => x.id === data.article_id);
+        if (!a) { showToast('Article parent introuvable.', true); return; }
+        closeModal('moderationModal');
+        openArticlePage(a.slug);
+        setTimeout(() => {
+          const el = document.getElementById('comment-' + id);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.style.background = 'var(--accent-soft)';
+            setTimeout(() => el.style.background = '', 1800);
+          }
+        }, 700);
       });
     });
     document.querySelectorAll('[data-mod-act]').forEach(b => {
@@ -16543,6 +16887,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // V0.9.7 — Wiring notifications
   if (typeof Notif !== 'undefined') Notif.bindHandlers();
+
+  // v0.21.0 — Wiring onboarding
+  if (typeof Onboarding !== 'undefined') Onboarding.bindHandlers();
 
   // ═══ v0.7 NAV MENU ═══
   document.getElementById('navMenuBtn')?.addEventListener('click', e => {

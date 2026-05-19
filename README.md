@@ -47,6 +47,7 @@ Le fichier [`v0.8-migration.sql`](./v0.8-migration.sql) contient les tables, RPC
 
 ## Versions
 
+- **v0.21.0** — Polish pre-launch : modération clips dans le dashboard mod (ouverture parent article/comment) + audit SEO (NewsArticle JSON-LD par article + meta `article:*`) + onboarding nouveau user (tour guidé 5 étapes + suggestions follow) + audit perf (preconnect Supabase/CDN, dns-prefetch YouTube/Cloudflare, `defer` sur Supabase JS, color-scheme).
 - **v0.20.0** — Transparence & Identité : page **/a-propos** (manifeste, différenciateurs, équipe, liens) + page **/stats** publiques (compteurs articles/contributeurs/sources/commentaires/basitude moyenne + stats modération + top 10 contributeurs). RPCs `get_public_stats()` / `get_public_top_contributors()` ouvertes à `anon`.
 - **v0.19.1** — Modération (suite) : notifications auteur quand son contenu est masqué/restauré (trigger DB) + charte de modération publique (modale `#charte-moderation` accessible depuis footer / signalement / charte éditoriale)
 - **v0.19.0** — Modération avancée : signalement enrichi (8 raisons + 3 niveaux de sévérité), masquage auto (≥3 signalements distincts ou 1 priorité haute), peer review communautaire (score ≥50, quorum 3 votes), dashboard mod (admin ou score ≥75), journal d'actions, RPC `submit_report`/`submit_peer_review`/`mod_apply_action`
@@ -114,4 +115,4 @@ La clé Supabase exposée dans `index.html` est la clé **`anon`** (publique par
 
 ---
 
-© Avis Basé · Beta · v0.20.0
+© Avis Basé · Beta · v0.21.0

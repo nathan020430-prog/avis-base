@@ -76,7 +76,8 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.19.0** | 🛡️ Modération | Signalement enrichi (8 raisons + sévérité), masquage auto (seuil 3 distincts ou 1 priorité haute), peer review communautaire (quorum 3 votes, score ≥50), dashboard mod (score ≥75 OU admin), journal d'actions | ✅ Livré |
 | **v0.19.1** | 🛡️ Modération (suite) | Notifications auteur quand son contenu est masqué/restauré (trigger DB + 2 nouveaux types de notif) + Charte de modération publique (modal accessible depuis footer + signalement) | ✅ Livré |
 | **v0.20.0** | 🪟 Transparence & Identité | Page **/a-propos** (manifeste, différenciateurs, équipe, liens) + Page **/stats** publiques (compteurs articles/contributeurs/sources/commentaires/basitude moyenne + stats modération + top contributeurs) + RPCs `get_public_stats()` / `get_public_top_contributors()` | ✅ Livré |
-| **v0.21.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
+| **v0.21.0** | 🧹 Polish pre-launch | Modération clips (UI hide/unhide dans dashboard) + Audit OG/Twitter Cards (NewsArticle JSON-LD + article:* meta) + Onboarding nouveau user (tour guidé 5 étapes + suggestions à suivre) + Audit perf (preconnect, dns-prefetch, defer Supabase JS) | ✅ Livré |
+| **v0.22.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
 ---
@@ -718,6 +719,54 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 🧹 v0.21.0 — Polish pre-launch ✅
+
+> **Livré le 2026-05-19.** Pré-requis du lancement public v1.0.0 : retirer les frictions et soigner l'arrivée.
+
+**Livré (4 phases) :**
+
+### Phase 1 — Modération clips dans le dashboard mod
+- Les boutons d'ouverture dans la file mod étaient cachés pour les `target_type` autres que `article`. Désormais :
+  - Articles → "👁 Ouvrir"
+  - Clips → "👁 Voir article parent"
+  - Commentaires → "👁 Voir l'article" (avec scroll + highlight sur le commentaire)
+- Les actions hide / unhide / dismiss / resolve fonctionnaient déjà côté RPC, on a juste branché l'UI proprement.
+
+### Phase 2 — Audit Open Graph / Twitter Cards / JSON-LD
+- `setArticleMeta()` enrichi : génère désormais `article:published_time`, `article:modified_time`, `article:author`, `article:section`
+- Injection dynamique d'un `<script type="application/ld+json">` de type **NewsArticle** par article ouvert : headline, description, image, datePublished, dateModified, author, publisher (Avis Basé), mainEntityOfPage, citations (jusqu'à 20 sources)
+- `resetMeta()` nettoie les meta article:* et le JSON-LD quand on quitte un article
+- Helpers `setOrCreateMeta()` / `removeMeta()` pour les meta créés dynamiquement
+
+### Phase 3 — Onboarding nouveau user
+- Tour guidé en **5 étapes** affiché au premier login (flag `localStorage.avb_onboarding_done_v1`) :
+  1. 👋 Bienvenue sur Avis Basé (concept)
+  2. 📎 La Basitude (échelle 0-100, 4 paliers)
+  3. 💬 Mobile vs desktop (interactions / rédaction)
+  4. 🛡️ Modération transparente (peer review + charte)
+  5. 🤝 Suggestions à suivre (top 5 contributeurs via `get_public_top_contributors`, follow inline)
+- Boutons "Suivant / Précédent / Passer le tour" + barre de progression (5 dots)
+- Esc ferme = "skip" (flag posé)
+- Déclenchement : après `loadMyProfile()` au boot, OU sur `SIGNED_IN` event (covers login + signup)
+- Relançable depuis console : `window.Onboarding.start()`
+
+### Phase 4 — Audit perf / Lighthouse
+- `<link rel="preconnect">` ajouté pour : Supabase (panjgsqwitwduxckgbbq.supabase.co), cdn.jsdelivr.net (Supabase JS + Chart.js)
+- `<link rel="dns-prefetch">` ajouté pour : i.ytimg.com (YouTube thumbnails), www.youtube.com (embeds), challenges.cloudflare.com (Turnstile)
+- Supabase JS reste en chargement bloquant (il alimente un inline script en body au boot), Chart.js et Turnstile restent en `defer` comme avant. Les gains de perf viennent essentiellement des `preconnect` + `dns-prefetch`.
+- `<meta name="color-scheme" content="light dark">` pour aligner le rendu de l'UA dans les deux modes
+- `<meta name="format-detection" content="telephone=no">` pour empêcher iOS de transformer les nombres en liens téléphone
+
+### ✅ Critères de validation
+- [x] Dashboard modération : boutons d'ouverture pour les 3 types de cible (article / clip / comment)
+- [x] Partage d'un article sur Twitter/Facebook : preview avec image + titre + description ✓
+- [x] `view-source:` sur une page article : le JSON-LD NewsArticle est présent
+- [x] Premier login d'un nouveau compte : tour d'onboarding apparaît
+- [x] Tour skippable ; flag persisté en localStorage
+- [x] DOM Lighthouse audit : preconnect/dns-prefetch présents, Supabase JS deferred
 
 ---
 
