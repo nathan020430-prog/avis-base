@@ -76,7 +76,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.19.0** | 🛡️ Modération | Signalement enrichi (8 raisons + sévérité), masquage auto (seuil 3 distincts ou 1 priorité haute), peer review communautaire (quorum 3 votes, score ≥50), dashboard mod (score ≥75 OU admin), journal d'actions | ✅ Livré |
 | **v0.19.1** | 🛡️ Modération (suite) | Notifications auteur quand son contenu est masqué/restauré (trigger DB + 2 nouveaux types de notif) + Charte de modération publique (modal accessible depuis footer + signalement) | ✅ Livré |
 | **v0.20.0** | 🪟 Transparence & Identité | Page **/a-propos** (manifeste, différenciateurs, équipe, liens) + Page **/stats** publiques (compteurs articles/contributeurs/sources/commentaires/basitude moyenne + stats modération + top contributeurs) + RPCs `get_public_stats()` / `get_public_top_contributors()` | ✅ Livré |
-| **v0.20.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) | 4-6 semaines |
+| **v0.21.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
 ---
