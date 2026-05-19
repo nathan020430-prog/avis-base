@@ -84,6 +84,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.23.1** | 📣 Citation partageable | Sélection texte dans un article → tooltip flottant avec Twitter / Copier / Partage natif. Format auto : « citation » — auteur + lien article + via @avis_base.nth | ✅ Livré |
 | **v0.23.2** | 🔖 Reprise de lecture | Mémorisation de la position de scroll par article dans localStorage (debounced, cleanup 30j, max 100 entrées). Banner discret "Reprendre à X %" à la réouverture avec choix Reprendre / Recommencer | ✅ Livré |
 | **v0.23.3** | 🔗 Auto-link sources `[N]` | Les références numériques `[1]`, `[2]` dans le corps d'article deviennent des liens cliquables qui smooth-scroll vers la source citée correspondante, avec flash visuel sur la cible | ✅ Livré |
+| **v0.24.0** | 📬 Liste d'attente pré-lancement | Table `waitlist` (email unique, kind beta/launch, source) + RPC `submit_waitlist()` (idempotente, validation email) + vue admin `waitlist_summary`. Modale frontend accessible depuis la home app-cta + page /a-propos. Form simple : email + nom optionnel + choix beta-tester / notification lancement | ✅ Livré |
 | **v0.23.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -726,6 +727,40 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 📬 v0.24.0 — Liste d'attente pré-lancement ✅
+
+> **Livré le 2026-05-19.** Coche une case essentielle de la checklist v1.0.0 : « Liste d'attente d'inscriptions pré-lancement constituée ».
+
+**Livré :**
+
+### SQL (`v0.24.0-waitlist-migration.sql`)
+- Table `waitlist` : `email` (unique case-insensitive), `name`, `kind` (`launch`/`beta`), `source`, `user_id` optionnel si déjà connecté, `ip_hash`, timestamps
+- RPC publique `submit_waitlist(p_email, p_kind, p_source, p_name)` :
+  - Validation email regex + longueur 5-254
+  - Idempotente : si email déjà présent avec même kind → `{status: 'already'}` ; avec kind différent → update + `{status: 'updated'}` ; sinon insert + `{status: 'created'}`
+  - Ouverte à `anon` + `authenticated`
+- RLS : lecture uniquement pour `admin`/`superadmin` (export depuis le SQL Editor)
+- Vue `waitlist_summary` : agrégat par `kind` (total, pending, notified)
+
+### Frontend
+- Module `Waitlist` (open/close/submit) avec form en 2 champs (email + nom optionnel) + choix `launch`/`beta` via radio cards
+- Modale `#waitlistBackdrop` accessible via attribut `data-waitlist-open="launch|beta"` + `data-waitlist-source="..."` (analytics)
+- 2 entry points actuels :
+  - Section "App mobile" sur la home → 2 liens (beta-testeurs + lancement public)
+  - Modale `/a-propos` → 2 entrées dédiées
+- États de succès distincts selon `created` / `updated` / `already`
+- Validation client basique + shake animation sur email invalide
+- Anti-zoom iOS (font-size 16px sur les inputs en mobile)
+
+### ✅ Critères de validation
+- [x] Soumettre un nouvel email → toast "Inscription enregistrée"
+- [x] Re-soumettre le même email → "Tu es déjà inscrit·e"
+- [x] Changer de `kind` pour le même email → "Choix mis à jour"
+- [x] Email invalide → shake + toast erreur
+- [x] La liste est consultable par l'admin via `select * from waitlist;` ou `select * from waitlist_summary;`
 
 ---
 

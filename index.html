@@ -3396,6 +3396,58 @@ body.read-prefs--size-l .article-page__body{font-size:1.19rem;line-height:1.75}
 body.read-prefs--font-sans .article-page__body{font-family:'Manrope',system-ui,sans-serif}
 body.read-prefs--font-serif .article-page__body{font-family:'Fraunces','Georgia',serif}
 
+/* v0.24.0 — Modale liste d'attente */
+.waitlist-modal{max-width:520px}
+.waitlist-kind{display:flex;flex-direction:column;gap:8px;margin:12px 0 18px}
+.waitlist-kind__opt{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:12px 14px;
+  border:1px solid var(--rule);background:var(--paper-2,rgba(0,0,0,.02));
+  border-radius:4px;cursor:pointer;
+  transition:background .12s,border-color .12s;
+}
+.waitlist-kind__opt:hover{background:var(--paper-2,rgba(0,0,0,.04));border-color:var(--ink-light)}
+.waitlist-kind__opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft,rgba(184,58,45,.06))}
+.waitlist-kind__opt input{margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;cursor:pointer}
+.waitlist-kind__opt > div{display:flex;flex-direction:column;gap:2px}
+.waitlist-kind__opt strong{font-family:var(--ff);font-weight:600;font-size:14px;color:var(--ink)}
+.waitlist-kind__opt span{font-family:var(--fb);font-size:12.5px;color:var(--ink-muted);line-height:1.4}
+
+.waitlist-form{display:flex;flex-direction:column;gap:14px}
+.waitlist-form__row{display:flex;flex-direction:column;gap:4px}
+.waitlist-form__label{font-family:var(--fb);font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.waitlist-form input{
+  width:100%;padding:10px 12px;
+  background:var(--surface);border:1px solid var(--rule);
+  font-family:var(--fb);font-size:14px;color:var(--ink);
+  border-radius:3px;
+  transition:border-color .15s;
+  box-sizing:border-box;
+}
+.waitlist-form input:focus{outline:none;border-color:var(--accent)}
+.waitlist-form input:invalid{border-color:#B83A2D}
+.waitlist-form input.shake{animation:waitlist-shake .35s ease-in-out}
+@keyframes waitlist-shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-4px)}
+  50%{transform:translateX(4px)}
+  75%{transform:translateX(-2px)}
+}
+.waitlist-form__note{font-family:var(--fb);font-size:11.5px;color:var(--ink-muted);line-height:1.5;margin:2px 0 0;font-style:italic}
+.waitlist-form__note strong{font-weight:600;color:var(--ink)}
+.waitlist-form__actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+
+.waitlist-success{display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px 12px;text-align:center}
+.waitlist-success__icon{font-size:42px;line-height:1}
+.waitlist-success__title{font-family:var(--ff);font-weight:600;font-size:20px;color:var(--ink);margin:6px 0 2px}
+.waitlist-success__msg{font-family:var(--fb);font-size:13.5px;color:var(--ink-muted);line-height:1.5;margin:0 0 12px;max-width:32ch}
+
+@media (max-width:640px){
+  .waitlist-form input{font-size:16px}  /* prévient le zoom iOS */
+  .waitlist-form__actions{flex-direction:column-reverse}
+  .waitlist-form__actions .btn{width:100%}
+}
+
 /* v0.23.3 — Auto-links [N] vers les sources citées */
 .cite-ref{
   display:inline-block;
@@ -6627,7 +6679,7 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
       </div>
 
       <p class="app-cta__note">
-        En phase beta. Tu peux <a href="mailto:beta@avis-base.com?subject=Beta-testeur%20app">demander à rejoindre les bêta-testeurs</a>.
+        En phase beta. Tu peux <a href="#" data-waitlist-open="beta" data-waitlist-source="home-app-cta">rejoindre les bêta-testeurs</a> ou être <a href="#" data-waitlist-open="launch" data-waitlist-source="home-app-cta">prévenu du lancement public</a>.
       </p>
     </div>
 
@@ -7426,6 +7478,55 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
   </div>
 </div>
 
+<!-- v0.24.0 — Liste d'attente (beta-testeurs / lancement) -->
+<div class="v8-backdrop" id="waitlistBackdrop" style="display:none">
+  <div class="v8-modal waitlist-modal" role="dialog" aria-modal="true" aria-labelledby="waitlistTitle">
+    <button class="v8-modal__close" id="waitlistClose" aria-label="Fermer">×</button>
+    <h2 id="waitlistTitle">Rejoindre la liste d'attente</h2>
+    <p class="charter-modal__lead" id="waitlistLead">Sois prévenu·e en avant-première du lancement public d'Avis Basé, ou rejoins les beta-testeurs pour donner ton avis pendant le soft-launch.</p>
+
+    <div class="waitlist-kind">
+      <label class="waitlist-kind__opt">
+        <input type="radio" name="waitlistKind" value="launch" checked/>
+        <div>
+          <strong>📢 Lancement public</strong>
+          <span>Tu reçois 1 email le jour du lancement v1.0.0. Rien d'autre.</span>
+        </div>
+      </label>
+      <label class="waitlist-kind__opt">
+        <input type="radio" name="waitlistKind" value="beta"/>
+        <div>
+          <strong>🧪 Beta-testeur</strong>
+          <span>Tu rejoins les beta-testeurs actifs : tu testes les nouveautés, on te demande ton avis.</span>
+        </div>
+      </label>
+    </div>
+
+    <form id="waitlistForm" class="waitlist-form" novalidate>
+      <label class="waitlist-form__row">
+        <span class="waitlist-form__label">Email *</span>
+        <input type="email" id="waitlistEmail" required autocomplete="email" placeholder="ton@email.com" maxlength="254"/>
+      </label>
+      <label class="waitlist-form__row">
+        <span class="waitlist-form__label">Prénom <span style="font-weight:400;color:var(--ink-muted)">(optionnel)</span></span>
+        <input type="text" id="waitlistName" autocomplete="given-name" placeholder="Comment t'appeler ?" maxlength="80"/>
+      </label>
+      <p class="waitlist-form__note">Ton email est utilisé <strong>uniquement</strong> pour la notification choisie. Pas de revente, jamais. <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--accent)">Politique de confidentialité</a>.</p>
+      <div class="waitlist-form__actions">
+        <button type="button" class="btn btn--ghost" id="waitlistCancel">Annuler</button>
+        <button type="submit" class="btn btn--primary" id="waitlistSubmit">M'inscrire</button>
+      </div>
+    </form>
+
+    <div class="waitlist-success" id="waitlistSuccess" style="display:none">
+      <div class="waitlist-success__icon">✅</div>
+      <h3 class="waitlist-success__title" id="waitlistSuccessTitle">Inscription enregistrée</h3>
+      <p class="waitlist-success__msg" id="waitlistSuccessMsg">Tu seras prévenu·e au bon moment. Merci 🙏</p>
+      <button class="btn btn--ghost" id="waitlistSuccessClose" type="button">Fermer</button>
+    </div>
+  </div>
+</div>
+
 <!-- v0.21.1 — Changelog public -->
 <div class="v8-backdrop" id="changelogBackdrop" style="display:none">
   <div class="v8-modal charter-modal" role="dialog" aria-modal="true" aria-labelledby="changelogTitle">
@@ -7626,7 +7727,8 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
       <li><strong>TikTok</strong> — <a href="https://www.tiktok.com/@avis_base.nth" target="_blank" rel="noopener" style="color:var(--accent)">@avis_base.nth</a> (clips synthétiques des articles longs)</li>
       <li><strong>GitHub</strong> — <a href="https://github.com/nathan020430-prog/avis-base" target="_blank" rel="noopener" style="color:var(--accent)">nathan020430-prog/avis-base</a> (code source + issues publiques)</li>
       <li><strong>Contact</strong> — <a href="mailto:contact@avis-base.com" style="color:var(--accent)">contact@avis-base.com</a></li>
-      <li><strong>Beta-testeurs app mobile</strong> — <a href="mailto:beta@avis-base.com?subject=Beta-testeur%20app" style="color:var(--accent)">beta@avis-base.com</a></li>
+      <li><strong>Beta-testeurs app mobile</strong> — <a href="#" data-waitlist-open="beta" data-waitlist-source="a-propos-modal" style="color:var(--accent);font-weight:600">rejoins la liste de beta</a> · ou par mail à <a href="mailto:beta@avis-base.com?subject=Beta-testeur%20app" style="color:var(--accent)">beta@avis-base.com</a></li>
+      <li><strong>Liste d'attente lancement</strong> — <a href="#" data-waitlist-open="launch" data-waitlist-source="a-propos-modal" style="color:var(--accent);font-weight:600">être prévenu·e du lancement public</a></li>
     </ul>
 
     <h3>🗓 Versions</h3>
@@ -9643,6 +9745,126 @@ function updateReadingProgress() {
   // v0.23.2 — Sauve la position de scroll pour la reprise (debounced)
   if (typeof ReadResume !== 'undefined') ReadResume.debouncedSave(pct);
 }
+
+// ═══════════════════════════════════════════════════════════
+// v0.24.0 — Liste d'attente pré-lancement (waitlist)
+// ═══════════════════════════════════════════════════════════
+const Waitlist = (() => {
+  let _source = 'unknown';
+  let _initialKind = 'launch';
+
+  function open(opts) {
+    opts = opts || {};
+    _source = opts.source || 'unknown';
+    _initialKind = (opts.kind === 'beta') ? 'beta' : 'launch';
+    const bd = document.getElementById('waitlistBackdrop');
+    if (!bd) return;
+    // Reset état
+    document.getElementById('waitlistForm').style.display = 'flex';
+    document.getElementById('waitlistSuccess').style.display = 'none';
+    const emailEl = document.getElementById('waitlistEmail');
+    const nameEl = document.getElementById('waitlistName');
+    if (emailEl) emailEl.value = '';
+    if (nameEl) nameEl.value = '';
+    // Préfille kind
+    document.querySelectorAll('input[name="waitlistKind"]').forEach(r => {
+      r.checked = (r.value === _initialKind);
+    });
+    bd.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => emailEl?.focus(), 100);
+  }
+
+  function close() {
+    const bd = document.getElementById('waitlistBackdrop');
+    if (bd) bd.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  async function submit(e) {
+    if (e) e.preventDefault();
+    const emailEl = document.getElementById('waitlistEmail');
+    const nameEl = document.getElementById('waitlistName');
+    const submitBtn = document.getElementById('waitlistSubmit');
+    const email = (emailEl?.value || '').trim();
+    const name = (nameEl?.value || '').trim() || null;
+    const kindEl = document.querySelector('input[name="waitlistKind"]:checked');
+    const kind = kindEl?.value || 'launch';
+    // Validation client basique
+    if (!email || email.length < 5 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      if (emailEl) {
+        emailEl.classList.add('shake');
+        setTimeout(() => emailEl.classList.remove('shake'), 400);
+      }
+      showToast('Email invalide', true);
+      return;
+    }
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Inscription…'; }
+    try {
+      const { data, error } = await supa.rpc('submit_waitlist', {
+        p_email: email,
+        p_kind: kind,
+        p_source: _source,
+        p_name: name
+      });
+      if (error) {
+        const msg = String(error.message || '');
+        if (msg.includes('does not exist')) {
+          showToast('Service indisponible — migration v0.24.0 à appliquer', true);
+        } else if (msg.includes('invalid_email')) {
+          showToast('Format d\'email invalide', true);
+        } else {
+          showToast('Erreur : ' + msg, true);
+        }
+        return;
+      }
+      // Succès
+      const status = data?.status || 'created';
+      const title = document.getElementById('waitlistSuccessTitle');
+      const msg = document.getElementById('waitlistSuccessMsg');
+      if (status === 'already') {
+        if (title) title.textContent = 'Tu es déjà inscrit·e';
+        if (msg) msg.innerHTML = 'Pas besoin de t\'inscrire à nouveau — on a bien ton email pour la notification choisie.';
+      } else if (status === 'updated') {
+        if (title) title.textContent = 'Choix mis à jour';
+        if (msg) msg.innerHTML = `Tu es maintenant dans la liste <strong>${kind === 'beta' ? 'beta-testeurs' : 'lancement public'}</strong>.`;
+      } else {
+        if (title) title.textContent = 'Inscription enregistrée ✓';
+        if (msg) msg.innerHTML = kind === 'beta'
+          ? 'On te recontactera très bientôt avec les détails pour rejoindre les beta-testeurs. Merci 🙏'
+          : 'Tu seras le·la premier·ère à savoir quand Avis Basé sera lancé publiquement. Merci 🙏';
+      }
+      document.getElementById('waitlistForm').style.display = 'none';
+      document.getElementById('waitlistSuccess').style.display = 'flex';
+    } catch (err) {
+      showToast('Erreur : ' + (err?.message || 'inconnue'), true);
+    } finally {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'M\'inscrire'; }
+    }
+  }
+
+  function bindHandlers() {
+    document.getElementById('waitlistClose')?.addEventListener('click', close);
+    document.getElementById('waitlistCancel')?.addEventListener('click', close);
+    document.getElementById('waitlistSuccessClose')?.addEventListener('click', close);
+    document.getElementById('waitlistBackdrop')?.addEventListener('click', e => {
+      if (e.target.id === 'waitlistBackdrop') close();
+    });
+    document.getElementById('waitlistForm')?.addEventListener('submit', submit);
+    // Liens externes pour ouvrir la modale
+    document.querySelectorAll('[data-waitlist-open]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        const kind = el.dataset.waitlistOpen || 'launch';
+        const src  = el.dataset.waitlistSource || 'unknown';
+        open({ kind, source: src });
+      });
+    });
+  }
+
+  return { open, close, bindHandlers };
+})();
+window.Waitlist = Waitlist;
 
 // ═══════════════════════════════════════════════════════════
 // v0.23.2 — Reprise de lecture (resume reading)
@@ -14165,7 +14387,7 @@ function bindV09Handlers() {
   // Esc to close v0.9.0 modals
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    ['profileEditBackdrop','favoritesBackdrop','reportContentBackdrop','charterModalBackdrop','moderationCharterBackdrop','aboutBackdrop','statsBackdrop','changelogBackdrop'].forEach(id => {
+    ['profileEditBackdrop','favoritesBackdrop','reportContentBackdrop','charterModalBackdrop','moderationCharterBackdrop','aboutBackdrop','statsBackdrop','changelogBackdrop','waitlistBackdrop'].forEach(id => {
       const el = document.getElementById(id);
       if (el && el.style.display === 'flex') el.style.display = 'none';
     });
@@ -18248,6 +18470,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // v0.23.2 — Reprise de lecture (cleanup au boot)
   if (typeof ReadResume !== 'undefined') ReadResume.init();
+
+  // v0.24.0 — Waitlist (beta-testeurs / lancement)
+  if (typeof Waitlist !== 'undefined') Waitlist.bindHandlers();
 
   // ═══ v0.7 NAV MENU ═══
   document.getElementById('navMenuBtn')?.addEventListener('click', e => {

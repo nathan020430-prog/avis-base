@@ -13,7 +13,7 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.23.3 (Auto-link sources [N] dans l'article) — 2026-05-19
+## Version actuelle — v0.24.0 (Liste d'attente pré-lancement) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
@@ -29,11 +29,13 @@
 - v0.23.0 → UX lecture améliorée (prefs typo + temps restant + articles suggérés)
 - v0.23.1 → Citation partageable (sélection texte article → tooltip Twitter/Copier/Partager)
 - v0.23.2 → Reprise de lecture (ReadResume module + banner reprendre)
-- **v0.23.3 → Auto-link sources [N]** :
-  - Les références `[1]`, `[2]` dans le corps d'article deviennent des liens vers `#cited-N`
-  - Smooth scroll dans le modal body au clic + flash visuel 1.7s sur la source cible
-  - Style discret accent + hover, intégré dans `renderArticleMarkdown`
-  - Convention alignée sur Wikipédia, cœur du « média qui source tout »
+- v0.23.3 → Auto-link sources `[N]` dans le corps d'article (Wikipedia-like)
+- **v0.24.0 → Liste d'attente pré-lancement** :
+  - Table `waitlist` (email unique CI, kind launch/beta, source, ip_hash)
+  - RPC `submit_waitlist(email, kind, source, name)` ouverte à anon, idempotente
+  - Modale frontend accessible via attribut `data-waitlist-open="launch|beta"` depuis la home + /a-propos
+  - Vue admin `waitlist_summary` (agrégat par kind)
+  - Migration : `v0.24.0-waitlist-migration.sql` (à appliquer après v0.22.1)
 
 Tags sur origin : `v0.16.0-prep`, `v0.16.1`, `v0.17.0`, `v0.17.0-ui-and-sql`, `v0.18.0`
 
@@ -47,6 +49,7 @@ Le code est mergé mais les migrations doivent être exécutées manuellement da
 6. `v0.19.1-moderation-notifs.sql` — étend `notifications.type` avec `content_hidden`/`content_restored` + trigger `notify_on_moderation_change` sur articles et clips. Sans cette migration, les notifs de masquage ne se déclencheront pas (mais aucune erreur côté front).
 7. `v0.20.0-stats-migration.sql` — RPCs publiques `get_public_stats()` + `get_public_top_contributors()` pour la page `/stats`. Sans cette migration, la page affiche "Migration non appliquée" au lieu de crasher.
 8. `v0.22.1-top-tippers-migration.sql` — RPC publique `get_public_top_tippers(limit, days)` pour la section "Top donateurs" sur `/financement`. Sans elle, la section est masquée silencieusement.
+9. `v0.24.0-waitlist-migration.sql` — table `waitlist` + RPC `submit_waitlist()` + vue `waitlist_summary`. Permet de collecter les emails pré-lancement. Sans elle, le form affiche "Migration non appliquée" au lieu de crasher.
 
 Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
 
