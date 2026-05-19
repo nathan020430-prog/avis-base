@@ -6,6 +6,39 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.26.3] — Service Worker offline + PWA polish
+- `sw.js` : VERSION bumpée à `v0.26.3` → les anciens caches sont automatiquement nettoyés à l'activation. Ajout de `/offline.html` dans le pré-cache shell.
+- Nouvelle page **`/offline.html`** stylisée Avis Basé : message "Pas de connexion", bouton "Réessayer", status pulsant qui passe au vert dès que `navigator.onLine` repasse à true, auto-reload après 1 s de connexion rétablie.
+- Bandeau status online/offline (`#offlineBanner`) dans l'app principale : apparaît automatiquement quand `window.offline` fire, variante "✓ Connexion rétablie" 3.5 s, dismissible pour la session.
+- `manifest.json` nettoyé : retrait de la référence à `/screenshot-mobile.png` qui n'existait pas.
+- Pas de migration SQL.
+
+## [v0.26.2] — Search amélioré (historique + suggestions groupées)
+- Module `SEARCH_HISTORY` qui stocke les **8 dernières recherches** dans `localStorage.avb_search_recent_v1` (auto-save 1.5 s après l'arrêt de la frappe)
+- Dropdown des recherches récentes affiché au focus de l'input quand la query est vide
+- Bouton × visible au hover pour retirer une entrée + lien "Effacer" pour purger tout l'historique
+- Suggestions enrichies : 2 sections groupées (**📰 Articles** + **📎 Sources**), navigation clavier (↑↓ Enter) qui supporte les 2 types et ouvre la bonne modale
+- Articles publiés matched par titre + sous-titre + auteur, top 4 affichés
+- Pas de migration SQL.
+
+## [v0.26.1] — Stats financières enrichies (`/stats`)
+- Migration **`v0.26.1-public-finance-stats-migration.sql`** :
+  - RPC publique `get_public_finance_summary()` → JSON avec `current_month` (depuis `public_economy_current`), `cumulative` (revenu / pool / fees Stripe / infra / reversé contributeurs) et `counts` (mois clôturés / membres actifs / contributeurs payés)
+  - RPC publique `get_public_finance_history(p_months)` → tableau des N derniers mois clôturés (defaut 12, max 60)
+  - Ouvertes à `anon` + `authenticated`, tolérantes aux migrations partielles
+- Frontend `/stats` : nouvelle section **"💰 Transparence financière"** avec 3 cards (Revenu cumulé, Pool total contributeurs, Reversé aux contributeurs) + mini-chart Chart.js (line, 2 datasets : revenu vs pool sur 12 mois)
+- Lien interne "Voir la page Financement" qui ferme la modale stats et bascule sur `/financement`
+- Fallback gracieux si migration absente ou pas de données
+
+## [v0.26.0] — Help section / tutoriel clips intégré
+- Bouton **💡 Aide** dans le header du clip editor (à côté de la croix de fermeture)
+- Nouvelle modale `clipHelpModal` avec 4 onglets :
+  - **🎯 Capture** — choisir le bon moment, durée idéale par fourchette
+  - **✂️ Édition** — 4 recettes de hook gagnantes, conseils sous-titres (Timeline vs Bulk), hashtags
+  - **🚀 Publication** — workflow complet review admin → fabriquer la vidéo (CapCut/ffmpeg/etc.) → assistant multi-plateforme → suivi des stats
+  - **⭐ Best practices** — 5 règles d'or, 5 erreurs à éviter, 4 outils gratuits recommandés
+- Pas de migration SQL.
+
 ## [v0.25.1] — Publication multi-plateforme des clips (TikTok / Twitter / Instagram)
 - Nouvelle table **`clip_publications`** : 1 ligne par couple `(clip_id, platform)` avec url, status (`planned`/`published`/`archived`/`removed`), caption custom, stats JSONB, published_at, published_by. 7 plateformes supportées en DB (tiktok / twitter / instagram / linkedin / facebook / snapchat / youtube_shorts).
 - **Trigger DB** `_clip_publication_sync_clip_status` : dès qu'au moins 1 publication est `status='published'`, `clips.status` bascule en `published` + miroir `published_tiktok_url` pour conserver la compat avec l'UI v0.6.3.

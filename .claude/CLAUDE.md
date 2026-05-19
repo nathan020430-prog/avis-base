@@ -13,7 +13,7 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.25.1 (Publication multi-plateforme des clips) — 2026-05-19
+## Version actuelle — v0.26.3 (PWA polish + SW offline) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
@@ -32,14 +32,16 @@
 - v0.23.3 → Auto-link sources `[N]` dans le corps d'article (Wikipedia-like)
 - v0.24.0 → Liste d'attente pré-lancement (table waitlist + RPC + modale form)
 - v0.25.0 → Éditeur de clips refondu (preview live + templates + bulk + indicateurs)
-- **v0.25.1 → Publication multi-plateforme** :
-  - Table `clip_publications` (1 ligne par couple `clip × plateforme`) avec status, url, caption, stats JSONB
-  - 7 plateformes supportées en DB (tiktok / twitter / instagram / linkedin / facebook / snapchat / youtube_shorts), 3 actives dans l'UI (TikTok / Twitter / Instagram)
-  - Modale assistant publish avec onglets : caption optimisée par plateforme, bouton Copier, lien composer (intent Twitter pré-rempli)
-  - Trigger DB qui bascule automatiquement `clips.status='published'` + miroir `published_tiktok_url` pour compat v0.6.3
-  - Pack production enrichi : 3 captions par plateforme
-  - **Volontairement pas d'auto-posting via API** (nécessite comptes business + approbations 2-8 sem + coûts). Publication manuelle facilitée.
-  - Migration : `v0.25.1-clip-publications-migration.sql` (à appliquer après v0.24.0)
+- v0.25.1 → Publication multi-plateforme (table `clip_publications` + assistant UI 3 onglets TikTok/Twitter/Instagram)
+- v0.26.0 → Help section clips (modale tutoriel 4 onglets : Capture / Édition / Publication / Best practices)
+- v0.26.1 → Stats financières enrichies (RPCs `get_public_finance_summary` + `get_public_finance_history` + section "Transparence financière" sur `/stats` avec mini-chart Chart.js 12 mois)
+- v0.26.2 → Search amélioré (historique 8 dernières recherches en localStorage + suggestions groupées Articles + Sources)
+- **v0.26.3 → Service Worker offline + PWA polish** :
+  - Bump cache `v0.26.3` dans `sw.js` (busts les anciens caches)
+  - Nouvelle page `/offline.html` stylisée (auto-reload sur retour connexion)
+  - Bandeau status online/offline dans l'app (`#offlineBanner`) qui apparaît auto + variante "Connexion rétablie"
+  - `manifest.json` nettoyé (référence screenshot manquante retirée)
+  - Migration SQL à appliquer : `v0.26.1-public-finance-stats-migration.sql` (après v0.25.1)
 
 Tags sur origin : `v0.16.0-prep`, `v0.16.1`, `v0.17.0`, `v0.17.0-ui-and-sql`, `v0.18.0`
 
@@ -55,6 +57,7 @@ Le code est mergé mais les migrations doivent être exécutées manuellement da
 8. `v0.22.1-top-tippers-migration.sql` — RPC publique `get_public_top_tippers(limit, days)` pour la section "Top donateurs" sur `/financement`. Sans elle, la section est masquée silencieusement.
 9. `v0.24.0-waitlist-migration.sql` — table `waitlist` + RPC `submit_waitlist()` + vue `waitlist_summary`. Permet de collecter les emails pré-lancement. Sans elle, le form affiche "Migration non appliquée" au lieu de crasher.
 10. `v0.25.1-clip-publications-migration.sql` — table `clip_publications` (multi-plateforme) + trigger sync `clips.status` + vue `clip_publications_by_clip` + backfill TikTok. Sans elle, la modale de publication retombe sur l'ancien comportement (`clips.published_tiktok_url`) avec toast d'info.
+11. `v0.26.1-public-finance-stats-migration.sql` — RPCs publiques `get_public_finance_summary()` + `get_public_finance_history(n)` pour la section "Transparence financière" sur `/stats`. Sans elle, la section est masquée silencieusement.
 
 Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
 

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Hors ligne — Avis Basé</title>
+<meta name="description" content="Tu es hors ligne. Reviens dès que ta connexion revient — on attend de pied ferme."/>
+<meta name="robots" content="noindex"/>
+<link rel="icon" href="/favicon.ico"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+  :root {
+    --bg:#F4EFE4; --ink:#15110B; --ink-muted:#5C5345; --accent:#B5773B; --rule:#D9CFB7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#15110B; --ink:#FDFAF3; --ink-muted:#B9AE96; --accent:#E0A560; --rule:#33291A; }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:-apple-system,system-ui,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:32px;line-height:1.5;
+  }
+  .dateline{
+    font-size:11px;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--ink-muted);margin-bottom:14px;font-weight:600;
+  }
+  h1{
+    font-family:Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(40px,9vw,76px);
+    letter-spacing:-.02em;margin-bottom:14px;text-align:center;line-height:1.05;
+  }
+  h1 em{font-style:italic;color:var(--accent)}
+  p{font-size:16px;color:var(--ink-muted);max-width:42ch;text-align:center;margin-bottom:20px}
+  p strong{color:var(--ink);font-weight:600}
+  .btn{
+    display:inline-block;padding:11px 22px;
+    background:var(--ink);color:var(--bg);text-decoration:none;
+    font-weight:600;font-size:14px;letter-spacing:.02em;
+    border:1px solid var(--ink);border-radius:3px;
+    transition:opacity .15s;cursor:pointer;
+  }
+  .btn:hover{opacity:.85}
+  .btn--ghost{background:none;color:var(--ink);border:1px solid var(--rule);margin-left:8px}
+  .btn--ghost:hover{border-color:var(--ink);background:none;opacity:1}
+  .icon{font-size:60px;line-height:1;margin-bottom:14px;opacity:.7}
+  .status{
+    margin-top:24px;font-size:12px;color:var(--ink-light,#888);font-style:italic;
+    display:flex;align-items:center;gap:8px;
+  }
+  .status-dot{width:8px;height:8px;border-radius:50%;background:#B83A2D;animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+</style>
+</head>
+<body>
+  <div class="dateline">Avis Basé</div>
+  <div class="icon" aria-hidden="true">📡</div>
+  <h1>Pas de <em>connexion</em></h1>
+  <p>Tu es hors ligne. <strong>Les articles que tu as déjà ouverts</strong> restent accessibles grâce au cache local. Reconnecte-toi pour voir les nouveaux.</p>
+  <div>
+    <button class="btn" type="button" onclick="location.reload()">Réessayer</button>
+    <a class="btn btn--ghost" href="/">Retour à la une</a>
+  </div>
+  <div class="status">
+    <span class="status-dot" aria-hidden="true"></span>
+    <span id="status-text">Hors ligne — vérification…</span>
+  </div>
+  <script>
+    function updateStatus() {
+      const t = document.getElementById('status-text');
+      if (!t) return;
+      if (navigator.onLine) {
+        t.textContent = '✓ Connexion rétablie — clique « Réessayer »';
+        t.parentNode.querySelector('.status-dot').style.background = '#5C8A6E';
+      } else {
+        t.textContent = 'Hors ligne — en attente de la connexion';
+        t.parentNode.querySelector('.status-dot').style.background = '#B83A2D';
+      }
+    }
+    window.addEventListener('online',  updateStatus);
+    window.addEventListener('offline', updateStatus);
+    updateStatus();
+    // Auto-reload dès que la connexion revient (1s pour laisser le navigateur stabiliser)
+    window.addEventListener('online', () => setTimeout(() => location.reload(), 1000));
+  </script>
+</body>
+</html>

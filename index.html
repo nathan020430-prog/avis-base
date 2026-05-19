@@ -660,6 +660,43 @@ img{max-width:100%;display:block}
   border:1px solid var(--rule);font-family:inherit;
 }
 
+/* v0.26.2 — Recents + sections + article matches */
+.search-sugg__group{
+  padding:7px 14px 5px;
+  font-family:var(--fb);font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--ink-muted);
+  background:var(--surface-alt);border-bottom:1px solid var(--rule-light);
+}
+.search-sugg--article .search-sugg__thumb-mini{
+  width:32px;height:32px;border-radius:2px;flex-shrink:0;
+  background:var(--accent-soft,rgba(184,58,45,.08));
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+}
+.search-recents__head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;background:var(--surface-alt);
+  border-bottom:1px solid var(--rule-light);
+  font-family:var(--fb);font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted);
+}
+.search-recents__clear{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--fb);font-size:11px;color:var(--accent);font-weight:600;
+  text-transform:none;letter-spacing:0;
+  padding:2px 6px;border-radius:2px;
+}
+.search-recents__clear:hover{background:var(--accent-soft,rgba(184,58,45,.08))}
+.search-sugg--recent .search-sugg__title{font-weight:500;color:var(--ink)}
+.search-sugg__remove{
+  background:none;border:none;cursor:pointer;
+  font-size:16px;color:var(--ink-light);
+  padding:0 8px;border-radius:50%;line-height:1;flex-shrink:0;
+  opacity:0;transition:opacity .12s,color .12s;
+}
+.search-sugg--recent:hover .search-sugg__remove{opacity:1}
+.search-sugg__remove:hover{color:var(--accent)}
+
 /* ═══════════════════════════════════════════
    ARTICLE CARDS (Broadsheet "story--card" style)
 ═══════════════════════════════════════════ */
@@ -2561,6 +2598,42 @@ body.admin .card__admin{display:flex}
   .clip-editor-grid{grid-template-columns:1fr;gap:14px}
   .clip-editor-preview{position:static}
   .clip-preview-phone[data-ratio="vertical"]{max-width:200px}
+}
+
+/* v0.26.0 — Help section clips (modale tutoriel) */
+.clip-help-tabs{
+  display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--rule);overflow-x:auto;
+}
+.clip-help-tab{
+  padding:10px 14px;background:none;border:none;border-bottom:2px solid transparent;
+  font-family:var(--fb);font-size:13px;font-weight:600;color:var(--ink-muted);
+  cursor:pointer;white-space:nowrap;transition:color .12s,border-color .12s,background .12s;
+}
+.clip-help-tab:hover{color:var(--ink);background:var(--paper-2,rgba(0,0,0,.02))}
+.clip-help-tab--active{color:var(--accent);border-bottom-color:var(--accent)}
+.clip-help-panel{display:flex;flex-direction:column;gap:14px}
+.clip-help__h{
+  font-family:var(--ff);font-weight:600;font-size:15.5px;color:var(--ink);
+  margin:8px 0 0;letter-spacing:-.005em;
+}
+.clip-help-panel p{margin:0;font-family:var(--fb);font-size:13.5px;color:var(--ink);line-height:1.6}
+.clip-help-panel p code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;padding:1px 5px;background:var(--paper-2,rgba(0,0,0,.05));border-radius:2px}
+.clip-help-panel em{color:var(--ink-muted)}
+.clip-help__list{list-style:disc;padding-left:22px;margin:0;display:flex;flex-direction:column;gap:5px;font-family:var(--fb);font-size:13.5px;color:var(--ink);line-height:1.55}
+.clip-help__list--ordered{list-style:decimal}
+.clip-help__list strong{font-weight:600}
+.clip-help__grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px}
+.clip-help__card{
+  padding:11px 13px;background:var(--paper-2,rgba(0,0,0,.03));border:1px solid var(--rule);border-radius:3px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.clip-help__card strong{font-family:var(--ff);font-weight:600;font-size:14px;color:var(--accent)}
+.clip-help__card span{font-family:var(--fb);font-size:12px;color:var(--ink-muted);line-height:1.5}
+.clip-help__card--warn strong{color:#B83A2D}
+[data-theme="dark"] .clip-help__card--warn strong{color:#F5A3A3}
+@media (max-width:640px){
+  .clip-help__grid{grid-template-columns:1fr}
+  .clip-help-tab{font-size:12px;padding:9px 10px}
 }
 
 /* v0.25.1 — Modale publication multi-plateforme */
@@ -5919,6 +5992,10 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 .stats-modal__loading{padding:32px;text-align:center;color:var(--ink-muted);font-family:var(--fb);font-size:13px}
 
 .stats-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:14px;margin:14px 0 22px}
+.stats-grid--3{grid-template-columns:repeat(3, 1fr)}
+.stats-finance-chart{margin:14px 0;padding:12px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule);border-radius:3px;height:200px;position:relative}
+.stats-finance-chart canvas{max-height:170px}
+.stats-finance-note{margin:8px 0 0;font-family:var(--fb);font-size:12px;color:var(--ink-muted);font-style:italic;line-height:1.5}
 .stats-card{padding:18px 16px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule);border-radius:3px;display:flex;flex-direction:column;gap:6px;transition:border-color .15s}
 .stats-card:hover{border-color:var(--ink-light)}
 .stats-card__value{font-family:var(--fd,var(--ff));font-size:32px;font-weight:500;line-height:1;color:var(--ink);font-feature-settings:"tnum"}
@@ -6003,6 +6080,34 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 .changelog__list code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;padding:1px 5px;background:var(--paper-2,rgba(0,0,0,.05));border-radius:2px}
 
 /* ───────────────────────────────────────────────────────────────
+   v0.26.3 — Bandeau status online/offline
+─────────────────────────────────────────────────────────────── */
+.offline-banner{
+  position:fixed;left:0;right:0;top:0;z-index:9100;
+  display:flex;align-items:center;gap:10px;
+  padding:9px 16px;
+  background:#FBF1ED;border-bottom:1px solid #E5B8A8;color:#7A2D1A;
+  font-family:var(--fb);font-size:12.5px;font-weight:500;
+  animation:offline-slide-down .25s ease-out;
+}
+[data-theme="dark"] .offline-banner{background:#3A2017;border-bottom-color:#7A3F2D;color:#F5A3A3}
+@keyframes offline-slide-down{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.offline-banner__dot{
+  width:8px;height:8px;border-radius:50%;background:#B83A2D;flex-shrink:0;
+  animation:offline-pulse 1.6s ease-in-out infinite;
+}
+@keyframes offline-pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.offline-banner__msg{flex:1;line-height:1.4}
+.offline-banner__close{
+  background:none;border:none;cursor:pointer;
+  font-size:18px;color:inherit;opacity:.65;padding:2px 6px;border-radius:2px;line-height:1;
+}
+.offline-banner__close:hover{opacity:1;background:rgba(0,0,0,.05)}
+.offline-banner--restored{background:#E0F0E5;border-bottom-color:#5C8A6E;color:#1F4025}
+.offline-banner--restored .offline-banner__dot{background:#5C8A6E;animation:none}
+[data-theme="dark"] .offline-banner--restored{background:#1F4025;border-bottom-color:#5C8A6E;color:#9DD4A8}
+
+/* ───────────────────────────────────────────────────────────────
    v0.21.1 — Bandeau RGPD/cookies (sticky bottom, dismissible)
 ─────────────────────────────────────────────────────────────── */
 .rgpd-banner{position:fixed;left:12px;right:12px;bottom:12px;z-index:9000;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:13px 16px;box-shadow:0 6px 20px rgba(0,0,0,.12);max-width:760px;margin:0 auto;animation:rgpd-slide-up .25s ease-out}
@@ -6066,6 +6171,13 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
 </style>
 </head>
 <body>
+
+<!-- v0.26.3 — Bandeau de statut online/offline (visible uniquement hors ligne) -->
+<aside id="offlineBanner" class="offline-banner" role="status" aria-live="polite" style="display:none">
+  <span class="offline-banner__dot" aria-hidden="true"></span>
+  <span class="offline-banner__msg">📡 Hors ligne — tu vois les articles déjà chargés. Reconnecte-toi pour voir les nouveaux.</span>
+  <button type="button" class="offline-banner__close" id="offlineBannerClose" aria-label="Masquer">×</button>
+</aside>
 
 <!-- v0.21.1 — Bandeau cookies / RGPD (visible une seule fois) -->
 <aside id="rgpdBanner" class="rgpd-banner" role="region" aria-label="Information cookies" style="display:none">
@@ -7513,6 +7625,130 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
   </div>
 </div>
 
+<!-- v0.26.0 — Modale "Comment fabriquer un bon clip ?" -->
+<div class="modal" id="clipHelpModal">
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__box modal__box--lg">
+    <div class="modal__head">
+      <div>
+        <h2 class="modal__title">💡 Comment fabriquer un bon clip ?</h2>
+        <div class="modal__title-sub">Workflow complet capture → édition → publication</div>
+      </div>
+      <button class="modal__close" data-close>×</button>
+    </div>
+    <div class="modal__body">
+      <div class="clip-help-tabs" id="clipHelpTabs" role="tablist">
+        <button class="clip-help-tab clip-help-tab--active" data-help-tab="capture" role="tab" aria-selected="true">1. 🎯 Capture</button>
+        <button class="clip-help-tab" data-help-tab="edit" role="tab" aria-selected="false">2. ✂️ Édition</button>
+        <button class="clip-help-tab" data-help-tab="publish" role="tab" aria-selected="false">3. 🚀 Publication</button>
+        <button class="clip-help-tab" data-help-tab="best" role="tab" aria-selected="false">4. ⭐ Best practices</button>
+      </div>
+
+      <div class="clip-help-panel" data-help-panel="capture">
+        <h3 class="clip-help__h">Choisir le bon moment dans la vidéo</h3>
+        <p>Un bon clip part d'un <strong>moment punchy</strong> dans la vidéo source. Vise les passages qui :</p>
+        <ul class="clip-help__list">
+          <li>Contiennent une <strong>affirmation surprenante</strong> ou un chiffre marquant</li>
+          <li>Reformulent un concept compliqué en une phrase claire</li>
+          <li>Posent une question qui rend curieux</li>
+          <li>Présentent un fait peu connu mais sourcé</li>
+        </ul>
+
+        <h3 class="clip-help__h">Durée idéale</h3>
+        <div class="clip-help__grid">
+          <div class="clip-help__card"><strong>15 - 30 s</strong><span>Sweet spot TikTok / Reels. Hook rapide, info dense, à reposter.</span></div>
+          <div class="clip-help__card"><strong>30 - 60 s</strong><span>Très bon pour expliquer un point + appeler à lire l'article. Fonctionne sur TikTok, Reels et Shorts.</span></div>
+          <div class="clip-help__card"><strong>60 - 90 s</strong><span>OK pour LinkedIn et IG longue forme. Trop long pour Twitter (≤140s plafond).</span></div>
+          <div class="clip-help__card clip-help__card--warn"><strong>&gt; 90 s</strong><span>Découpe-le. Au-delà, le taux de complétion s'effondre sur la plupart des plateformes.</span></div>
+        </div>
+
+        <h3 class="clip-help__h">Astuce : utilise le preview en direct</h3>
+        <p>Quand tu bouges les timestamps dans l'éditeur, le <strong>preview YouTube se met à jour</strong>. Lance la lecture pour vérifier que tu prends bien le bon passage. Si une phrase commence à <code>1:23</code> et finit à <code>1:38</code>, mets <code>1:22</code> en début pour avoir une demi-seconde d'amorce.</p>
+      </div>
+
+      <div class="clip-help-panel" data-help-panel="edit" style="display:none">
+        <h3 class="clip-help__h">Écrire le hook (l'accroche)</h3>
+        <p>Le hook est <strong>la première phrase qui s'affiche sur la vidéo</strong>. Sa mission : faire arrêter le scroll. Quelques recettes qui marchent :</p>
+        <ul class="clip-help__list">
+          <li><strong>🤯 Surprise + chiffre</strong> — "85 % des Français ignorent que…"</li>
+          <li><strong>🚨 Contradiction</strong> — "Ce qu'on te dit sur X, mais en vrai…"</li>
+          <li><strong>❓ Question</strong> — "Pourquoi les retraites partent vraiment ?"</li>
+          <li><strong>⚡ Promesse</strong> — "En 30 s : tout comprendre sur Y"</li>
+        </ul>
+        <p>L'éditeur fournit <strong>8 templates de hook</strong> via le bouton <code>✨ Templates</code> : clique sur un modèle, le <code>{placeholder}</code> est auto-sélectionné, tu n'as qu'à écraser.</p>
+
+        <h3 class="clip-help__h">Sous-titres</h3>
+        <p>Les sous-titres sont <strong>obligatoires</strong> : la plupart des gens regardent en mute, surtout sur TikTok et Reels. Deux modes possibles dans l'éditeur :</p>
+        <ul class="clip-help__list">
+          <li><strong>Timeline</strong> : tu rentres précisément le timing de chaque ligne. Recommandé pour les clips de 30 s+.</li>
+          <li><strong>Collage rapide</strong> : tu colles ton texte ligne par ligne, l'éditeur découpe en N segments équidistants sur la durée. Tu peux ajuster ensuite. Idéal pour démarrer vite.</li>
+        </ul>
+        <p>Garde chaque ligne <strong>courte</strong> (5-10 mots, ~3 secondes max) pour que ça reste lisible.</p>
+
+        <h3 class="clip-help__h">Hashtags</h3>
+        <p>L'éditeur te suggère <strong>4-6 hashtags pertinents</strong> selon le thème de l'article. Ajoute-en 2-3 spécifiques au sujet du clip (nom de personne, événement, etc.). 10 maximum.</p>
+        <p><em>Astuce TikTok : pas plus de 5-8 hashtags, sinon l'algo te catégorise mal.</em></p>
+      </div>
+
+      <div class="clip-help-panel" data-help-panel="publish" style="display:none">
+        <h3 class="clip-help__h">Étape 1 — Le clip part en relecture</h3>
+        <p>Quand tu soumets ton clip via <strong>📤 Envoyer en relecture</strong>, il passe en <code>review</code>. Un admin vérifie qu'il respecte la charte éditoriale, puis le marque <code>approved</code>.</p>
+
+        <h3 class="clip-help__h">Étape 2 — L'admin enregistre le clip vidéo</h3>
+        <p>Une fois le clip approuvé, l'admin doit <strong>fabriquer la vidéo</strong> hors plateforme :</p>
+        <ol class="clip-help__list clip-help__list--ordered">
+          <li>Télécharger le <strong>Pack production .txt</strong> depuis le dashboard admin → contient les timestamps, le hook, les sous-titres, les 3 captions optimisées par plateforme</li>
+          <li>Capturer / découper la vidéo YouTube au bon moment (outils : OBS Studio, ffmpeg, Premiere, CapCut, etc.)</li>
+          <li>Ajouter les sous-titres en surimpression (CapCut est rapide et gratuit, ou DaVinci Resolve)</li>
+          <li>Exporter en <strong>9:16 (1080×1920)</strong> pour TikTok/Reels, ou 16:9 pour LinkedIn paysage</li>
+        </ol>
+
+        <h3 class="clip-help__h">Étape 3 — Publier via l'assistant multi-plateforme</h3>
+        <p>Dans le dashboard admin, clique <strong>"Marquer publié"</strong> sur le clip. La modale assistant s'ouvre avec 3 onglets : TikTok, Twitter, Instagram.</p>
+        <ul class="clip-help__list">
+          <li><strong>TikTok</strong> : copie la caption, clique "Ouvrir TikTok Studio", uploade la vidéo, colle la caption. Une fois posté, reviens et colle l'URL TikTok dans l'assistant.</li>
+          <li><strong>Twitter/X</strong> : clique "Composer un tweet" → la caption est déjà pré-remplie. Attache ta vidéo. Tweete. Colle l'URL.</li>
+          <li><strong>Instagram Reels</strong> : copie la caption, ouvre Instagram, crée ton Reel, colle. Reviens et colle l'URL.</li>
+        </ul>
+
+        <h3 class="clip-help__h">Étape 4 — Suivi des stats</h3>
+        <p>Reviens dans l'assistant pour <strong>mettre à jour les stats</strong> (vues, likes, commentaires, partages) au fil du temps. Ça nourrit la page <code>/stats</code> publique.</p>
+      </div>
+
+      <div class="clip-help-panel" data-help-panel="best" style="display:none">
+        <h3 class="clip-help__h">Les 5 règles d'or</h3>
+        <ol class="clip-help__list clip-help__list--ordered">
+          <li><strong>Une idée par clip.</strong> Tu n'as pas 30 minutes — tu as 30 secondes. Concentre-toi sur <em>un</em> fait, <em>une</em> nuance, <em>une</em> question.</li>
+          <li><strong>Source visible.</strong> Mentionne la source à l'écran (overlay nom de la chaîne ou de l'étude). On est <em>le</em> média qui source tout, c'est notre signature.</li>
+          <li><strong>Hook en moins d'une seconde.</strong> Si l'utilisateur n'a pas compris pourquoi regarder à la 1<sup>re</sup> seconde, il scroll.</li>
+          <li><strong>Lien dans la bio, pas dans la caption.</strong> TikTok pénalise les liens en caption (et Instagram ne les rend pas cliquables). Mets `lien en bio` dans la caption + l'URL article dans ta bio actuelle.</li>
+          <li><strong>Publier à la bonne heure.</strong> 18 h - 20 h en semaine, 11 h - 13 h le week-end pour la France. Évite le mardi (jour creux).</li>
+        </ol>
+
+        <h3 class="clip-help__h">À éviter absolument</h3>
+        <ul class="clip-help__list">
+          <li><strong>Pas de hook</strong> → on dirait une intro de podcast, personne ne reste.</li>
+          <li><strong>Sous-titres trop longs</strong> → 5-10 mots par ligne max.</li>
+          <li><strong>Pas de source visible</strong> → casse notre positionnement éditorial.</li>
+          <li><strong>Cliché ou titre putaclic</strong> → "Vous N'ALLEZ PAS Y CROIRE…" non. La charte le précise.</li>
+          <li><strong>Plus de 10 hashtags</strong> → diminue le reach.</li>
+        </ul>
+
+        <h3 class="clip-help__h">Outils gratuits recommandés</h3>
+        <ul class="clip-help__list">
+          <li><strong>CapCut</strong> (Web + mobile) — découpe + sous-titres + export 9:16 en quelques clics</li>
+          <li><strong>OBS Studio</strong> — capture d'écran propre depuis YouTube</li>
+          <li><strong>DaVinci Resolve</strong> — montage pro gratuit pour les versions plus longues</li>
+          <li><strong>Whisper.cpp / Whisper Web</strong> — transcription auto si tu veux générer les sous-titres depuis l'audio</li>
+        </ul>
+      </div>
+    </div>
+    <div class="modal__foot">
+      <button class="btn btn--primary btn--sm" data-close>Compris, je me lance ✨</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ CLIP EDITOR MODAL (refondu v0.25.0) ═══ -->
 <div class="modal" id="clipEditorModal">
   <div class="modal__backdrop" data-close></div>
@@ -7522,7 +7758,10 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
         <h2 class="modal__title" id="clipEditorTitle">✂️ Proposer un clip TikTok</h2>
         <div class="modal__title-sub" id="clipEditorSubtitle">Choisis le moment viral de la vidéo + écris les sous-titres</div>
       </div>
-      <button class="modal__close" data-close>×</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button type="button" class="btn btn--ghost btn--sm" id="clipHelpBtn" title="Comment fabriquer un bon clip ?">💡 Aide</button>
+        <button class="modal__close" data-close>×</button>
+      </div>
     </div>
     <div class="modal__body">
 
@@ -13211,6 +13450,66 @@ function closeAboutModal() {
 window.openAboutModal = openAboutModal;
 
 // ═══════════════════════════════════════════════════════════
+// v0.26.3 — Indicateur online/offline
+// ═══════════════════════════════════════════════════════════
+const OnlineStatus = (() => {
+  const KEY = 'avb_offline_banner_dismissed_v1';
+  let _dismissedThisSession = false;
+  let _restoredTimer = null;
+
+  function setBannerHidden() {
+    const el = document.getElementById('offlineBanner');
+    if (el) el.style.display = 'none';
+  }
+
+  function showOffline() {
+    if (_dismissedThisSession) return;
+    const el = document.getElementById('offlineBanner');
+    if (!el) return;
+    el.classList.remove('offline-banner--restored');
+    el.querySelector('.offline-banner__msg').textContent = '📡 Hors ligne — tu vois les articles déjà chargés. Reconnecte-toi pour voir les nouveaux.';
+    el.style.display = 'flex';
+  }
+
+  function showRestored() {
+    const el = document.getElementById('offlineBanner');
+    if (!el) return;
+    el.classList.add('offline-banner--restored');
+    el.querySelector('.offline-banner__msg').textContent = '✓ Connexion rétablie — données mises à jour.';
+    el.style.display = 'flex';
+    clearTimeout(_restoredTimer);
+    _restoredTimer = setTimeout(setBannerHidden, 3500);
+  }
+
+  function dismissOnce() {
+    _dismissedThisSession = true;
+    setBannerHidden();
+  }
+
+  function update() {
+    if (navigator.onLine) {
+      // Si on était hors ligne (banner affiché) → on montre brièvement "rétabli"
+      const el = document.getElementById('offlineBanner');
+      const wasOffline = el && el.style.display === 'flex' && !el.classList.contains('offline-banner--restored');
+      if (wasOffline) showRestored();
+    } else {
+      showOffline();
+    }
+  }
+
+  function bindHandlers() {
+    document.getElementById('offlineBannerClose')?.addEventListener('click', dismissOnce);
+    window.addEventListener('online',  update);
+    window.addEventListener('offline', update);
+    // Check initial state
+    if (!navigator.onLine) showOffline();
+  }
+
+  return { bindHandlers, update };
+})();
+window.OnlineStatus = OnlineStatus;
+
+// ═══════════════════════════════════════════════════════════
 // v0.21.1 — Bandeau RGPD/cookies (informatif, dismissible)
 // ═══════════════════════════════════════════════════════════
 const RGPD_STORAGE_KEY = 'avb_rgpd_ack_v1';
@@ -13442,9 +13741,11 @@ async function loadAndRenderStats() {
   content.innerHTML = `<div class="stats-modal__loading">Chargement…</div>`;
 
   try {
-    const [statsRes, topRes] = await Promise.all([
+    const [statsRes, topRes, finRes, finHistRes] = await Promise.all([
       supa.rpc('get_public_stats'),
-      supa.rpc('get_public_top_contributors', { p_limit: 10 })
+      supa.rpc('get_public_top_contributors', { p_limit: 10 }),
+      supa.rpc('get_public_finance_summary').then(r => r).catch(() => ({ error: { message: 'rpc_unavailable' }})),
+      supa.rpc('get_public_finance_history', { p_months: 12 }).then(r => r).catch(() => ({ error: { message: 'rpc_unavailable' }}))
     ]);
 
     if (statsRes.error) {
@@ -13556,9 +13857,137 @@ async function loadAndRenderStats() {
       ` : ''}
 
       ${topHtml}
+
+      <div id="statsFinanceSection"></div>
     `;
+
+    // v0.26.1 — Render section finance enrichie (si RPCs dispos)
+    renderStatsFinanceSection(finRes, finHistRes);
   } catch (e) {
     content.innerHTML = `<div class="stats-modal__loading">Erreur : ${escapeHtml(String(e))}</div>`;
+  }
+}
+
+// v0.26.1 — Section "Transparence financière" sur /stats
+function renderStatsFinanceSection(finRes, finHistRes) {
+  const root = document.getElementById('statsFinanceSection');
+  if (!root) return;
+
+  // Si la migration v0.26.1 pas appliquée, on n'affiche rien (silencieux)
+  if (finRes?.error || !finRes?.data) {
+    return;
+  }
+  const fin = finRes.data || {};
+  const cur = fin.current_month || {};
+  const cum = fin.cumulative || {};
+  const cnt = fin.counts || {};
+  const history = (finHistRes && !finHistRes.error) ? (finHistRes.data || []) : [];
+
+  const fmtEur = (cents) => {
+    if (cents == null) return '€0';
+    const eur = cents / 100;
+    if (eur >= 1000) return '€' + Math.round(eur / 100) / 10 + 'k';
+    return '€' + eur.toFixed(2).replace('.', ',').replace(/,00$/, '');
+  };
+
+  // Aucun mois cloturé + pas de revenu actuel : on cache (rien à montrer)
+  if ((cum.revenue_cents || 0) === 0 && (cur.revenue_cents || 0) === 0 && (cnt.active_members || 0) === 0) {
+    return;
+  }
+
+  let chartHtml = '';
+  if (history.length >= 2) {
+    chartHtml = `<div class="stats-finance-chart">
+      <canvas id="statsFinanceChart" height="120" aria-label="Évolution mensuelle revenus / pool" role="img"></canvas>
+    </div>`;
+  }
+
+  root.innerHTML = `
+    <div class="stats-section">
+      <h3 class="stats-section__title">💰 Transparence financière <span class="stats-section__title-sub">depuis le lancement de l'économie collaborative</span></h3>
+      <div class="stats-grid stats-grid--3">
+        <div class="stats-card stats-card--accent">
+          <div class="stats-card__value">${fmtEur(cum.revenue_cents)}</div>
+          <div class="stats-card__label">Revenu cumulé</div>
+          <div class="stats-card__sub">${cnt.months_archived || 0} mois clôturés · ${cnt.active_members || 0} membres actifs</div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-card__value">${fmtEur(cum.pool_cents)}</div>
+          <div class="stats-card__label">Pool total contributeurs</div>
+          <div class="stats-card__sub">après frais Stripe (${fmtEur(cum.stripe_fees_cents)}) + infra (${fmtEur(cum.infra_cents)})</div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-card__value">${fmtEur(cum.contributors_paid_cents)}</div>
+          <div class="stats-card__label">Reversé aux contributeurs</div>
+          <div class="stats-card__sub">${cnt.paying_contributors_total || 0} contributeur${(cnt.paying_contributors_total || 0) > 1 ? 's' : ''} payé${(cnt.paying_contributors_total || 0) > 1 ? 's' : ''}</div>
+        </div>
+      </div>
+      ${chartHtml}
+      <p class="stats-finance-note">100 % du surplus est reversé aux contributeurs. Pour le détail mois par mois, voir <a href="#financement" id="statsLinkToFinancement" style="color:var(--accent);font-weight:600">la page Financement</a>.</p>
+    </div>
+  `;
+
+  document.getElementById('statsLinkToFinancement')?.addEventListener('click', e => {
+    e.preventDefault();
+    if (typeof closeStatsModal === 'function') closeStatsModal();
+    if (typeof switchView === 'function') switchView('financement');
+  });
+
+  // Mini-chart Chart.js si dispo et au moins 2 mois
+  if (history.length >= 2 && typeof Chart !== 'undefined') {
+    const ctx = document.getElementById('statsFinanceChart');
+    if (!ctx) return;
+    try {
+      // Détruire un ancien chart si présent
+      if (window._statsFinanceChartInstance) window._statsFinanceChartInstance.destroy();
+      const labels = history.map(h => {
+        const [y, m] = (h.payout_month || '').split('-');
+        const months = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sept','Oct','Nov','Déc'];
+        return (months[parseInt(m, 10) - 1] || m) + ' ' + (y ? y.slice(2) : '');
+      });
+      const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#222';
+      const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#B83A2D';
+      const muted = getComputedStyle(document.documentElement).getPropertyValue('--ink-muted').trim() || '#888';
+      window._statsFinanceChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Revenu mensuel',
+              data: history.map(h => (h.revenue_cents || 0) / 100),
+              borderColor: accent,
+              backgroundColor: accent + '20',
+              tension: 0.25, borderWidth: 2, pointRadius: 3, pointHoverRadius: 5
+            },
+            {
+              label: 'Pool contributeurs',
+              data: history.map(h => (h.pool_cents || 0) / 100),
+              borderColor: ink,
+              backgroundColor: ink + '15',
+              borderDash: [4, 4],
+              tension: 0.25, borderWidth: 2, pointRadius: 3, pointHoverRadius: 5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: muted, font: { size: 11 } } },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} €`
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { color: muted, font: { size: 10 } }, grid: { color: muted + '20' } },
+            y: { ticks: { color: muted, font: { size: 10 }, callback: v => v + ' €' }, grid: { color: muted + '20' } }
+          }
+        }
+      });
+    } catch (e) { console.debug('[stats] finance chart fail', e); }
   }
 }
 
@@ -16660,9 +17089,108 @@ function closeModal(id) {
 }
 
 // ═══ SEARCH DROPDOWN ═══
+// v0.26.2 — Historique des recherches récentes
+const SEARCH_HISTORY = (() => {
+  const KEY = 'avb_search_recent_v1';
+  const MAX = 8;
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr.filter(x => typeof x === 'string' && x.length > 0) : [];
+    } catch (e) { return []; }
+  }
+  function save(arr) { try { localStorage.setItem(KEY, JSON.stringify(arr.slice(0, MAX))); } catch (e) {} }
+  function add(q) {
+    const clean = String(q || '').trim();
+    if (clean.length < 3) return;
+    const cur = load();
+    const filtered = cur.filter(x => x.toLowerCase() !== clean.toLowerCase());
+    filtered.unshift(clean);
+    save(filtered);
+  }
+  function remove(q) {
+    save(load().filter(x => x !== q));
+  }
+  function clear() { save([]); }
+  return { load, add, remove, clear };
+})();
+
+// v0.26.2 — Suggestions d'articles correspondant à la recherche
+function searchArticleMatches(q, limit = 5) {
+  if (!q || q.length < 2 || !Array.isArray(articles)) return [];
+  const list = articles.filter(a => a.status === 'published' && !isModerated(a));
+  return list.map(a => {
+    const t = (typeof matchScore === 'function') ? matchScore(q, a.title) * 3 : 0;
+    const s = (typeof matchScore === 'function') ? matchScore(q, a.subtitle) * 2 : 0;
+    const au = (typeof matchScore === 'function') ? matchScore(q, a.authorUsername) * 0.8 : 0;
+    return { article: a, score: t + s + au };
+  }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, limit).map(x => x.article);
+}
+
+function renderSearchRecents() {
+  const dd = document.getElementById('searchDropdown');
+  if (!dd) return;
+  const recents = SEARCH_HISTORY.load();
+  if (recents.length === 0) {
+    dd.classList.remove('on');
+    return;
+  }
+  dd.innerHTML = `
+    <div class="search-recents__head">
+      <span>🕘 Recherches récentes</span>
+      <button type="button" class="search-recents__clear" id="searchRecentsClear">Effacer</button>
+    </div>
+    ${recents.map((r, i) => `
+      <div class="search-sugg search-sugg--recent" data-recent="${escapeHtml(r)}" data-sugg-index="${i}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.55;flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div class="search-sugg__body">
+          <div class="search-sugg__title">${escapeHtml(r)}</div>
+        </div>
+        <button type="button" class="search-sugg__remove" data-recent-remove="${escapeHtml(r)}" aria-label="Retirer cette recherche">×</button>
+      </div>
+    `).join('')}
+  `;
+  dd.classList.add('on');
+  dd.querySelectorAll('[data-recent]:not([data-recent-remove])').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.target.closest('[data-recent-remove]')) return;
+      const q = el.dataset.recent;
+      const input = document.getElementById('search');
+      if (input) { input.value = q; searchQuery = q; }
+      const clearBtn = document.getElementById('searchClear');
+      if (clearBtn) clearBtn.classList.add('on');
+      renderSearchSuggestions();
+      if (currentView === 'articles') renderArticles();
+      else render();
+    });
+  });
+  dd.querySelectorAll('[data-recent-remove]').forEach(b => {
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      SEARCH_HISTORY.remove(b.dataset.recentRemove);
+      renderSearchRecents();
+    });
+  });
+  document.getElementById('searchRecentsClear')?.addEventListener('click', e => {
+    e.stopPropagation();
+    SEARCH_HISTORY.clear();
+    closeSuggestions();
+  });
+}
+
 function renderSearchSuggestions() {
   const dd = document.getElementById('searchDropdown');
-  if (!searchQuery || searchQuery.length < 2) { dd.classList.remove('on'); return; }
+  if (!searchQuery || searchQuery.length < 2) {
+    // v0.26.2 — Si l'input est focus mais vide, on montre les recents
+    if (document.activeElement && document.activeElement.id === 'search') {
+      renderSearchRecents();
+    } else {
+      dd.classList.remove('on');
+    }
+    return;
+  }
   // Score sources et prends le top 5
   const scored = sources.map(s => {
     const titleScore = matchScore(searchQuery, s.title) * 3;
@@ -16671,33 +17199,71 @@ function renderSearchSuggestions() {
     return { source: s, score: total };
   }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
 
-  if (scored.length === 0) {
+  // v0.26.2 — Cherche aussi dans les articles publiés
+  const articleMatches = searchArticleMatches(searchQuery, 4);
+
+  if (scored.length === 0 && articleMatches.length === 0) {
     dd.innerHTML = `<div class="search-sugg__empty">Aucun résultat pour "<strong>${escapeHtml(searchQuery)}</strong>"<br><span style="font-size:0.78rem;color:var(--text-light)">Essaie un autre mot-clé</span></div>`;
     dd.classList.add('on');
     return;
   }
 
-  editorState.currentSuggs = scored.map(x => x.source);
+  // currentSuggs = articles + sources (navigation clavier)
+  editorState.currentSuggs = [...articleMatches.map(a => ({ kind: 'article', article: a })), ...scored.map(x => ({ kind: 'source', source: x.source }))];
   editorState.suggIndex = -1;
 
-  const items = scored.map((x, i) => {
-    const s = x.source;
-    const thumbUrl = s.thumb || ytThumb(s.sourceUrl);
-    const thumb = thumbUrl ? `<img src="${escapeHtml(thumbUrl)}" class="search-sugg__thumb" alt="" onerror="this.style.display='none'"/>` : `<div class="search-sugg__thumb"></div>`;
-    const title = highlightText(s.title, searchQuery);
-    return `<div class="search-sugg" data-sugg-id="${s.id}" data-sugg-index="${i}">
-      ${thumb}
-      <div class="search-sugg__body">
-        <div class="search-sugg__title">${title}</div>
-        <div class="search-sugg__meta">${typeLabel(s.type)} · ${formatDateShort(s.date)}</div>
-      </div>
-    </div>`;
-  }).join('');
+  let html = '';
+  let idx = 0;
+
+  // v0.26.2 — Section articles
+  if (articleMatches.length > 0) {
+    html += `<div class="search-sugg__group">📰 Articles</div>`;
+    html += articleMatches.map(a => {
+      const title = highlightText(a.title, searchQuery);
+      const i = idx++;
+      return `<div class="search-sugg search-sugg--article" data-sugg-article="${escapeHtml(a.slug)}" data-sugg-index="${i}">
+        <div class="search-sugg__thumb-mini">📰</div>
+        <div class="search-sugg__body">
+          <div class="search-sugg__title">${title}</div>
+          <div class="search-sugg__meta">par ${escapeHtml(a.authorUsername || 'Anonyme')} · ${a.readingMinutes || 1} min</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Section sources (existant)
+  if (scored.length > 0) {
+    html += `<div class="search-sugg__group">📎 Sources</div>`;
+    html += scored.map(x => {
+      const s = x.source;
+      const thumbUrl = s.thumb || ytThumb(s.sourceUrl);
+      const thumb = thumbUrl ? `<img src="${escapeHtml(thumbUrl)}" class="search-sugg__thumb" alt="" onerror="this.style.display='none'"/>` : `<div class="search-sugg__thumb"></div>`;
+      const title = highlightText(s.title, searchQuery);
+      const i = idx++;
+      return `<div class="search-sugg" data-sugg-id="${s.id}" data-sugg-index="${i}">
+        ${thumb}
+        <div class="search-sugg__body">
+          <div class="search-sugg__title">${title}</div>
+          <div class="search-sugg__meta">${typeLabel(s.type)} · ${formatDateShort(s.date)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
   const shortcut = `<div class="search-sugg__shortcut"><kbd>↑↓</kbd> naviguer · <kbd>Enter</kbd> ouvrir · <kbd>Esc</kbd> fermer</div>`;
-  dd.innerHTML = items + shortcut;
+  dd.innerHTML = html + shortcut;
   dd.classList.add('on');
-  dd.querySelectorAll('.search-sugg').forEach(el => {
+  // Bind clicks
+  dd.querySelectorAll('[data-sugg-article]').forEach(el => {
     el.addEventListener('click', () => {
+      SEARCH_HISTORY.add(searchQuery);
+      closeSuggestions();
+      openArticlePage(el.dataset.suggArticle);
+    });
+  });
+  dd.querySelectorAll('[data-sugg-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      SEARCH_HISTORY.add(searchQuery);
       closeSuggestions();
       openDetail(el.dataset.suggId);
     });
@@ -19325,6 +19891,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('rgpdBannerOk')?.addEventListener('click', dismissRgpdBanner);
   showRgpdBannerIfNeeded();
 
+  // v0.26.3 — Indicateur online/offline
+  if (typeof OnlineStatus !== 'undefined') OnlineStatus.bindHandlers();
+
   // v0.23.0 — Reading prefs (taille / police) + meta flottante
   if (typeof ReadPrefs !== 'undefined') ReadPrefs.bindHandlers();
 
@@ -19491,6 +20060,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchEl = document.getElementById('search');
   const searchClear = document.getElementById('searchClear');
   let searchDebounce;
+  let searchHistoryDebounce;
   searchEl.addEventListener('input', e => {
     searchQuery = e.target.value;
     articlePage = 1;
@@ -19502,8 +20072,16 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentView === 'articles') renderArticles();
       else render();
     }, 150);
+    // v0.26.2 — Auto-save dans l'historique après 1.5s d'inactivité
+    clearTimeout(searchHistoryDebounce);
+    if (searchQuery.length >= 3) {
+      searchHistoryDebounce = setTimeout(() => SEARCH_HISTORY.add(searchQuery), 1500);
+    }
   });
-  searchEl.addEventListener('focus', () => { if (searchQuery.length >= 2) renderSearchSuggestions(); });
+  searchEl.addEventListener('focus', () => {
+    if (searchQuery.length >= 2) renderSearchSuggestions();
+    else renderSearchRecents(); // v0.26.2 — montre les recherches récentes si input vide
+  });
   searchEl.addEventListener('keydown', e => {
     const dd = document.getElementById('searchDropdown');
     if (!dd.classList.contains('on')) return;
@@ -19513,7 +20091,14 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (e.key === 'Enter' && editorState.suggIndex >= 0) {
       e.preventDefault();
       const s = editorState.currentSuggs[editorState.suggIndex];
-      if (s) { closeSuggestions(); searchEl.blur(); openDetail(s.id); }
+      if (s) {
+        // v0.26.2 — currentSuggs peut contenir { kind:'article', article } ou { kind:'source', source } ou legacy source
+        SEARCH_HISTORY.add(searchQuery);
+        closeSuggestions(); searchEl.blur();
+        if (s.kind === 'article' && s.article) openArticlePage(s.article.slug);
+        else if (s.kind === 'source' && s.source) openDetail(s.source.id);
+        else if (s.id) openDetail(s.id); // legacy fallback
+      }
     } else if (e.key === 'Escape') { closeSuggestions(); searchEl.blur(); }
   });
   searchClear.addEventListener('click', () => { searchEl.value = ''; searchQuery = ''; articlePage = 1; searchClear.classList.remove('on'); closeSuggestions(); if (currentView === 'articles') renderArticles(); else render(); searchEl.focus(); });
@@ -19727,6 +20312,24 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('saveClipDraftBtn')?.addEventListener('click', () => saveClip('draft'));
   document.getElementById('submitClipBtn')?.addEventListener('click', () => saveClip('review'));
+
+  // v0.26.0 — Help section clips (tutoriel)
+  document.getElementById('clipHelpBtn')?.addEventListener('click', () => {
+    if (typeof openModal === 'function') openModal('clipHelpModal');
+  });
+  document.querySelectorAll('[data-help-tab]').forEach(b => {
+    b.addEventListener('click', () => {
+      const t = b.dataset.helpTab;
+      document.querySelectorAll('[data-help-tab]').forEach(x => {
+        const active = x.dataset.helpTab === t;
+        x.classList.toggle('clip-help-tab--active', active);
+        x.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      document.querySelectorAll('[data-help-panel]').forEach(p => {
+        p.style.display = p.dataset.helpPanel === t ? '' : 'none';
+      });
+    });
+  });
 
   // v0.25.0 — Nouveaux contrôles éditeur clip
   document.getElementById('clipHookTemplatesBtn')?.addEventListener('click', () => toggleHookTemplatesPanel());

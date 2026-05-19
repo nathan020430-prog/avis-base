@@ -61,15 +61,6 @@
       "purpose": "maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshot-mobile.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Page d'accueil — Articles vérifiés et sourcés"
-    }
-  ],
   "shortcuts": [
     {
       "name": "Écrire un article",
