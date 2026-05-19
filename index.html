@@ -5422,6 +5422,39 @@ body.is-mobile .notif-bell{width:32px;height:32px}
 }
 
 /* ───────────────────────────────────────────────────────────────
+   v0.22.0 — Section "Mon adhésion" sur /mon-financement
+─────────────────────────────────────────────────────────────── */
+.mf-membership{margin:24px 0;padding:20px 22px;background:linear-gradient(135deg,#FFF8E1 0%,#FFF4D8 100%);border:1px solid #E0B65A;border-radius:4px;color:#7A5800}
+[data-theme="dark"] .mf-membership{background:linear-gradient(135deg,#3D2E12 0%,#5A4014 100%);border-color:#7A5A24;color:#F5D58C}
+.mf-membership__head{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.mf-membership__head h2{color:inherit !important}
+.mf-membership__status{font-family:var(--fb);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.5)}
+[data-theme="dark"] .mf-membership__status{background:rgba(0,0,0,.3)}
+.mf-membership__status--active{background:#5C8A6E;color:#FDFAF3}
+.mf-membership__status--cancelled{background:#B83A2D;color:#FDFAF3}
+.mf-membership__status--past-due{background:#E0B65A;color:#7A5800}
+.mf-membership__status--inactive{background:rgba(0,0,0,.1);color:var(--ink-muted)}
+.mf-membership__body{font-family:var(--fb);font-size:14px;line-height:1.55;margin-bottom:14px;color:inherit}
+.mf-membership__body p{margin:0 0 6px;color:inherit}
+.mf-membership__body strong{font-weight:700;color:inherit}
+.mf-membership__actions{display:flex;gap:10px;flex-wrap:wrap}
+.mf-membership__actions .btn{font-size:13px}
+.mf-membership-tips{margin-top:14px;padding:12px 14px;background:rgba(255,255,255,.4);border-radius:3px;font-size:12.5px}
+[data-theme="dark"] .mf-membership-tips{background:rgba(0,0,0,.2)}
+
+/* ───────────────────────────────────────────────────────────────
+   v0.22.0 — Section "Tips reçus" sur /mon-financement
+─────────────────────────────────────────────────────────────── */
+.mf-tips-received{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.mf-tips-received__row{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:9px 12px;background:var(--paper-2,rgba(0,0,0,.02));border:1px solid var(--rule);border-radius:3px;font-family:var(--fb);font-size:13px}
+.mf-tips-received__label{color:var(--ink);min-width:0}
+.mf-tips-received__label strong{color:var(--ink);font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-tips-received__label small{color:var(--ink-muted);font-size:11.5px;display:block}
+.mf-tips-received__count{color:var(--ink-muted);font-size:12px;font-feature-settings:"tnum"}
+.mf-tips-received__amount{font-family:var(--fd,var(--ff));font-weight:600;color:var(--accent);font-feature-settings:"tnum";min-width:80px;text-align:right}
+.mf-tips-received__empty{padding:16px;text-align:center;font-family:var(--fb);font-size:13px;color:var(--ink-muted);font-style:italic}
+
+/* ───────────────────────────────────────────────────────────────
    v0.21.1 — Page Changelog publique (modale)
 ─────────────────────────────────────────────────────────────── */
 .changelog{display:flex;flex-direction:column;gap:18px;margin:14px 0 18px}
@@ -6104,6 +6137,18 @@ body.is-mobile .rgpd-banner{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
     <h1 class="mf-hero__title">Bonjour <span class="mf-hero__pseudo" id="mfPseudo">@vous</span></h1>
     <div id="mfBadges"></div>
     <p class="mf-hero__sub">Mois en cours : <span id="mfCurrentMonth">—</span></p>
+  </section>
+
+  <!-- v0.22.0 — Mon adhésion Avis Basé+ -->
+  <section class="mf-membership" id="mfMembership" style="display:none">
+    <div class="mf-membership__head">
+      <h2 class="mf-section__title" style="margin:0">💛 Mon adhésion Avis Basé+</h2>
+      <span class="mf-membership__status" id="mfMembershipStatus"></span>
+    </div>
+    <div class="mf-membership__body" id="mfMembershipBody">
+      <p class="mf-section__sub" id="mfMembershipDetails">Chargement…</p>
+    </div>
+    <div class="mf-membership__actions" id="mfMembershipActions"></div>
   </section>
 
   <div class="mf-cards">
@@ -14025,7 +14070,10 @@ const MON_FIN_MOCK = {
     {date:'2026-04-01', amount_cents:2210, status:'completed', stripe_transfer_id:'tr_1NxXyZ2eZvKYlo2C'},
     {date:'2026-03-01', amount_cents:2080, status:'completed', stripe_transfer_id:'tr_1NwXyZ2eZvKYlo2C'},
     {date:'2026-02-01', amount_cents:2430, status:'completed', stripe_transfer_id:'tr_1NvXyZ2eZvKYlo2C'}
-  ]
+  ],
+  // v0.22.0 — Mock: pas membre par défaut pour montrer le CTA
+  membership: null,
+  tips_received: null
 };
 
 const MonFin = {
@@ -14143,6 +14191,134 @@ const MonFin = {
         </tr>`).join('');
       }
     }
+
+    // v0.22.0 — Section Mon adhésion
+    this._renderMembership(M.membership);
+    // v0.22.0 — Tips reçus (intègre dans la section adhésion)
+    this._renderTipsReceived(M.tips_received);
+  },
+
+  // v0.22.0 — Rendu de la section "Mon adhésion Avis Basé+"
+  _renderMembership(mem) {
+    const section = document.getElementById('mfMembership');
+    if (!section) return;
+    // Pas membre du tout → affiche un CTA discret
+    if (!mem || !mem.status || mem.status === 'inactive') {
+      section.style.display = 'block';
+      const status = document.getElementById('mfMembershipStatus');
+      const details = document.getElementById('mfMembershipDetails');
+      const actions = document.getElementById('mfMembershipActions');
+      if (status) { status.textContent = 'Inactif'; status.className = 'mf-membership__status mf-membership__status--inactive'; }
+      if (details) details.innerHTML = `Tu n'es pas encore membre Avis Basé+. Soutenir le média à <strong>5 € par mois</strong>, c'est aussi obtenir le badge 💛 et permettre à 100 % du surplus d'aller aux contributeurs.`;
+      if (actions) actions.innerHTML = `<a href="#devenir-membre" class="btn btn--accent" id="mfMembershipJoinBtn">Devenir membre +</a>`;
+      document.getElementById('mfMembershipJoinBtn')?.addEventListener('click', e => {
+        e.preventDefault();
+        if (typeof switchView === 'function') switchView('membre');
+      });
+      return;
+    }
+
+    section.style.display = 'block';
+    const status = document.getElementById('mfMembershipStatus');
+    const details = document.getElementById('mfMembershipDetails');
+    const actions = document.getElementById('mfMembershipActions');
+
+    const fmtDate = d => d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—';
+    const monthly = this.fmt(mem.amount_cents || 500);
+
+    if (mem.status === 'active') {
+      if (mem.cancel_at_period_end) {
+        if (status) { status.textContent = 'Annulation programmée'; status.className = 'mf-membership__status mf-membership__status--cancelled'; }
+        if (details) details.innerHTML = `Ton abonnement <strong>${monthly}/mois</strong> a été résilié et prendra fin le <strong>${fmtDate(mem.current_period_end)}</strong>. Tu gardes les avantages jusque-là.`;
+      } else {
+        if (status) { status.textContent = 'Active'; status.className = 'mf-membership__status mf-membership__status--active'; }
+        if (details) details.innerHTML = `Membre depuis le <strong>${fmtDate(mem.started_at)}</strong>. Prochain prélèvement de <strong>${monthly}</strong> prévu le <strong>${fmtDate(mem.current_period_end)}</strong>. Merci pour le soutien 💛`;
+      }
+    } else if (mem.status === 'past_due') {
+      if (status) { status.textContent = 'Impayé'; status.className = 'mf-membership__status mf-membership__status--past-due'; }
+      if (details) details.innerHTML = `Ta dernière mensualité de <strong>${monthly}</strong> n'a pas pu être prélevée. Mets à jour ta méthode de paiement via le portail Stripe ci-dessous pour rester membre.`;
+    } else if (mem.status === 'cancelled' || mem.status === 'unpaid') {
+      if (status) { status.textContent = 'Annulée'; status.className = 'mf-membership__status mf-membership__status--cancelled'; }
+      if (details) details.innerHTML = `Ton abonnement a pris fin le <strong>${fmtDate(mem.cancelled_at || mem.current_period_end)}</strong>. Tu peux le réactiver à tout moment.`;
+    } else {
+      // trialing, incomplete
+      if (status) { status.textContent = mem.status; status.className = 'mf-membership__status mf-membership__status--past-due'; }
+      if (details) details.innerHTML = `Statut <strong>${mem.status}</strong>. Vérifie ta méthode de paiement via le portail ci-dessous.`;
+    }
+
+    // Actions
+    if (actions) {
+      const hasCustomer = !!mem.stripe_customer_id;
+      const isExpired = mem.status === 'cancelled' || mem.status === 'unpaid';
+      actions.innerHTML = `
+        ${hasCustomer ? `<button class="btn btn--ghost" id="mfPortalBtn">⚙️ Gérer mon abonnement</button>` : ''}
+        ${isExpired ? `<a href="#devenir-membre" class="btn btn--accent" id="mfMembershipRejoinBtn">Redevenir membre</a>` : ''}
+      `;
+      document.getElementById('mfPortalBtn')?.addEventListener('click', () => MonFin.openStripePortal());
+      document.getElementById('mfMembershipRejoinBtn')?.addEventListener('click', e => {
+        e.preventDefault();
+        if (typeof switchView === 'function') switchView('membre');
+      });
+    }
+  },
+
+  // v0.22.0 — Ouvre le Stripe Billing Portal pour gérer l'abonnement
+  async openStripePortal() {
+    if (typeof fetchEdgeFunction !== 'function') {
+      showToast('Service indisponible', true);
+      return;
+    }
+    const btn = document.getElementById('mfPortalBtn');
+    const original = btn?.textContent;
+    if (btn) { btn.disabled = true; btn.textContent = 'Ouverture…'; }
+    try {
+      const res = await fetchEdgeFunction('create-portal-session', {});
+      if (res && res.url) {
+        window.location.href = res.url;
+        return;
+      }
+      const msg = res?.hint || res?.error || 'Le portail Stripe est indisponible';
+      showToast(msg, true);
+    } catch (e) {
+      showToast('Erreur : ' + (e?.message || 'inconnue'), true);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = original || '⚙️ Gérer mon abonnement'; }
+    }
+  },
+
+  // v0.22.0 — Rendu de l'historique des tips reçus
+  _renderTipsReceived(tipsAgg) {
+    // Inséré dans la section adhésion (en bas) pour les contributeurs qui ont reçu des tips
+    const section = document.getElementById('mfMembership');
+    if (!section) return;
+    // Nettoie un éventuel rendu précédent
+    section.querySelectorAll('.mf-membership-tips').forEach(el => el.remove());
+    if (!tipsAgg || tipsAgg.total_count === 0) return;
+
+    const monthLabel = (m) => {
+      const [y, mm] = m.split('-');
+      const months = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+      return (months[parseInt(mm, 10) - 1] || mm) + ' ' + y;
+    };
+    const wrap = document.createElement('div');
+    wrap.className = 'mf-membership-tips';
+    wrap.innerHTML = `
+      <strong>🎁 Tips reçus en tant que contributeur</strong>
+      <p style="margin:4px 0 8px;font-size:12px;color:inherit">Total <strong>${this.fmt(tipsAgg.total_cents)}</strong> sur ${tipsAgg.total_count} don${tipsAgg.total_count > 1 ? 's' : ''}. Ils sont crédités sur ta cagnotte au prochain calcul mensuel.</p>
+      <div class="mf-tips-received">
+        ${tipsAgg.by_month.map(m => `
+          <div class="mf-tips-received__row">
+            <div class="mf-tips-received__label">
+              <strong>${monthLabel(m.month)}</strong>
+              <small>${m.count} don${m.count > 1 ? 's' : ''}</small>
+            </div>
+            <span class="mf-tips-received__count">${m.count}×</span>
+            <span class="mf-tips-received__amount">${this.fmt(m.cents)}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    section.appendChild(wrap);
   },
   async loadFromSupabase() {
     if (!supa || typeof currentUser === 'undefined' || !currentUser) return;
@@ -14218,12 +14394,61 @@ const MonFin = {
         .eq('user_id', uid)
         .order('requested_at', { ascending: false });
 
-      // v0.18.0 Phase 3 — Statut membre Avis Basé+ pour badge
+      // v0.18.0 Phase 3 + v0.22.0 — Statut membre Avis Basé+ (badge + section)
       let isMember = false;
+      let membershipRow = null;
       try {
-        const { data: mem } = await supa.from('members').select('status').eq('user_id', uid).maybeSingle();
+        const { data: mem } = await supa
+          .from('members')
+          .select('status, stripe_customer_id, started_at, current_period_end, cancel_at_period_end, cancelled_at, amount_cents, display_consent')
+          .eq('user_id', uid)
+          .maybeSingle();
+        membershipRow = mem || null;
         isMember = mem?.status === 'active';
       } catch {}
+
+      // v0.22.0 — Tips reçus en tant que contributeur (target_user_id = moi OU article a moi)
+      let tipsReceivedAgg = null;
+      try {
+        const { data: tipsContrib } = await supa
+          .from('tips')
+          .select('amount_cents, target_type, created_at')
+          .eq('target_user_id', uid)
+          .eq('status', 'succeeded');
+        const { data: tipsArticle } = await supa
+          .from('tips')
+          .select('amount_cents, target_type, created_at, target_article_id')
+          .eq('status', 'succeeded')
+          .in('target_article_id', (myArticles || []).map(a => a.id));
+        // Dedup : si un tip est target_type='contributor' avec mon uid et target_type='article' avec mon article, on garde une seule entree
+        const tipMap = new Map();
+        [...(tipsContrib || []), ...(tipsArticle || [])].forEach(t => {
+          // cle = created_at + amount, suffisamment unique en pratique
+          const key = t.created_at + ':' + t.amount_cents;
+          if (!tipMap.has(key)) tipMap.set(key, t);
+        });
+        const allTips = Array.from(tipMap.values());
+        const totalCents = allTips.reduce((s, t) => s + (t.amount_cents || 0), 0);
+        // Aggregation par mois (YYYY-MM)
+        const byMonth = new Map();
+        allTips.forEach(t => {
+          const m = (t.created_at || '').slice(0, 7);
+          const cur = byMonth.get(m) || { count: 0, cents: 0 };
+          cur.count += 1;
+          cur.cents += t.amount_cents || 0;
+          byMonth.set(m, cur);
+        });
+        tipsReceivedAgg = {
+          total_cents: totalCents,
+          total_count: allTips.length,
+          by_month: Array.from(byMonth.entries())
+            .sort((a, b) => b[0].localeCompare(a[0]))
+            .slice(0, 12)
+            .map(([m, v]) => ({ month: m, count: v.count, cents: v.cents }))
+        };
+      } catch (e) {
+        console.debug('[MonFin] tips received fetch failed', e?.message || e);
+      }
 
       const payouts_history = (payments || []).map(p => ({
         date: (p.completed_at || p.requested_at || '').slice(0, 10),
@@ -14241,6 +14466,8 @@ const MonFin = {
         kyc_completed: !!bal?.kyc_completed,
         public_name_consent: !!bal?.public_name_consent,
         is_member: isMember,
+        membership: membershipRow,
+        tips_received: tipsReceivedAgg,
         my_articles_this_month,
         payouts_history
       };
