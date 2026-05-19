@@ -13,12 +13,13 @@
 - **PWA** : installable iOS/Android, soumise aux App Store + Play Store
 - **Mobile native** : app Expo dans un repo séparé `avis-base-app` (en cours)
 
-## Version actuelle — v0.30.0 (Web Push notifications) — 2026-05-19
+## Version actuelle — v0.30.1 (Hotfix audit & sécurité) — 2026-05-19
 - v0.16.x → App Store ready + masquage articles test
 - v0.17.0 → Économie collaborative complète (frontend + SQL + Edge Functions)
 - v0.17.1 → Banner CTA Avis Basé+ sur la home
 - v0.18.0 → Trust & Identity (compte renforcé + certification rémunérable + crédibilité enrichie)
 - v0.18.1 → Hotfix race conditions tips/payouts + RLS contributor_balance
+- v0.18.2 → Hotfix audit : RLS server-side 7j (`account_can_publish` + policy `articles_insert_auth_and_aged`), frais Stripe via `balance_transactions`, trigger auto-revoke certif si < 3 articles publiés
 - v0.19.0 → Modération avancée (signalement enrichi + masquage auto + peer review + dashboard mod)
 - v0.19.1 → Notifs auteur + charte de modération publique
 - v0.20.0 → Transparence & Identité (/a-propos + /stats + RPCs publiques)
@@ -51,17 +52,18 @@ Le code est mergé mais les migrations doivent être exécutées manuellement da
 2. `v0.18.0-trust-migration.sql` — `contributor_certifications` + 2 RPCs + vue publique
 3. `v0.18.0-credibility-migration.sql` — `cred_score_history` + 3 RPCs
 4. `v0.18.1-hotfix-money-races.sql` — **CRITIQUE** : corrige 3 race conditions sur les flux d'argent (tips + payouts) + ferme une faille RLS sur `contributor_balance`. À appliquer AVANT tout déploiement Stripe en prod.
-5. `v0.19.0-moderation-migration.sql` — étend `reports` + tables `moderation_actions` & `peer_reviews` + colonnes `moderation_state`/`reports_count` sur `articles`/`clips` + RPCs `submit_report`/`submit_peer_review`/`mod_apply_action`/`get_moderation_queue`/`get_peer_review_queue`/`get_user_moderation_summary`. Tant que la migration n'est pas appliquée, le frontend retombe sur l'INSERT direct dans `reports` (compat v0.18 préservée). (✅ appliquée 2026-05-19)
-6. `v0.19.1-moderation-notifs.sql` — étend `notifications.type` avec `content_hidden`/`content_restored` + trigger `notify_on_moderation_change` sur articles et clips. Sans cette migration, les notifs de masquage ne se déclencheront pas (mais aucune erreur côté front).
-7. `v0.20.0-stats-migration.sql` — RPCs publiques `get_public_stats()` + `get_public_top_contributors()` pour la page `/stats`. Sans cette migration, la page affiche "Migration non appliquée" au lieu de crasher.
-8. `v0.22.1-top-tippers-migration.sql` — RPC publique `get_public_top_tippers(limit, days)` pour la section "Top donateurs" sur `/financement`. Sans elle, la section est masquée silencieusement.
-9. `v0.24.0-waitlist-migration.sql` — table `waitlist` + RPC `submit_waitlist()` + vue `waitlist_summary`. Permet de collecter les emails pré-lancement. Sans elle, le form affiche "Migration non appliquée" au lieu de crasher.
-10. `v0.25.1-clip-publications-migration.sql` — table `clip_publications` (multi-plateforme) + trigger sync `clips.status` + vue `clip_publications_by_clip` + backfill TikTok. Sans elle, la modale de publication retombe sur l'ancien comportement (`clips.published_tiktok_url`) avec toast d'info.
-11. `v0.26.1-public-finance-stats-migration.sql` — RPCs publiques `get_public_finance_summary()` + `get_public_finance_history(n)` pour la section "Transparence financière" sur `/stats`. Sans elle, la section est masquée silencieusement.
-12. `v0.26.4-fix-stats-rpc.sql` — **HOTFIX** : la RPC `get_public_stats()` (v0.20.0) plantait en prod (`column reports.validated does not exist`) → page `/stats` cassée. Cette migration recrée la RPC avec un handler `undefined_column` qui retombe gracieusement sur "tous les `resolved` comptent" si la colonne manque. À appliquer après v0.26.1.
-13. `v0.28.0-mutual-followers.sql` — RPC publique `get_mutual_followers(p_target_id, p_limit)` qui retourne les profils suivis à la fois par moi et par la cible (preuve sociale "Suivi par @x, @y et N autres que tu suis" sur la page profil). Sans elle, la section mutual followers est masquée silencieusement.
-14. `v0.29.0-user-interests.sql` — table `user_interests` + 3 RPCs (`set_user_interests`, `get_user_interests`, `get_suggested_authors_by_interest`). Permet à l'utilisateur de choisir 3+ sujets favoris à l'onboarding, alimente le feed "Pour toi" et les suggestions d'auteurs. Sans elle, l'étape onboarding "Choisis tes sujets" enregistre rien et le feed "Pour toi" retombe sur le filtre par auteurs suivis uniquement.
-15. `v0.30.0-push-subscriptions.sql` — table `push_subscriptions` + 4 RPCs (`subscribe_push`, `unsubscribe_push`, `has_push_subscription`, `list_my_push_subscriptions`) + trigger `notify_push_on_notification` sur `notifications` INSERT qui POST vers l'Edge Function `send-push-notification` via `pg_net`. Sans elle, le bouton "Notifications push" reste caché (PushNotif détecte que la RPC manque) et aucun push n'est envoyé. **Setup admin requis** : VAPID keys + secrets Supabase + activation `pg_net` + déploiement Edge Function (voir section ⚠️ Reste à faire ci-dessous).
+5. `v0.18.2-hotfix-audit-rls-and-cert.sql` — **CRITIQUE sécu** (v0.30.1) : `account_can_publish()` + policy `articles_insert_auth_and_aged` (restriction écriture 7j server-side, sinon bypass via clé anon) + trigger `trg_articles_recheck_certification` (auto-revoke certif si articles < 3). À appliquer après v0.18.1.
+6. `v0.19.0-moderation-migration.sql` — étend `reports` + tables `moderation_actions` & `peer_reviews` + colonnes `moderation_state`/`reports_count` sur `articles`/`clips` + RPCs `submit_report`/`submit_peer_review`/`mod_apply_action`/`get_moderation_queue`/`get_peer_review_queue`/`get_user_moderation_summary`. Tant que la migration n'est pas appliquée, le frontend retombe sur l'INSERT direct dans `reports` (compat v0.18 préservée). (✅ appliquée 2026-05-19)
+7. `v0.19.1-moderation-notifs.sql` — étend `notifications.type` avec `content_hidden`/`content_restored` + trigger `notify_on_moderation_change` sur articles et clips. Sans cette migration, les notifs de masquage ne se déclencheront pas (mais aucune erreur côté front).
+8. `v0.20.0-stats-migration.sql` — RPCs publiques `get_public_stats()` + `get_public_top_contributors()` pour la page `/stats`. Sans cette migration, la page affiche "Migration non appliquée" au lieu de crasher.
+9. `v0.22.1-top-tippers-migration.sql` — RPC publique `get_public_top_tippers(limit, days)` pour la section "Top donateurs" sur `/financement`. Sans elle, la section est masquée silencieusement.
+10. `v0.24.0-waitlist-migration.sql` — table `waitlist` + RPC `submit_waitlist()` + vue `waitlist_summary`. Permet de collecter les emails pré-lancement. Sans elle, le form affiche "Migration non appliquée" au lieu de crasher.
+11. `v0.25.1-clip-publications-migration.sql` — table `clip_publications` (multi-plateforme) + trigger sync `clips.status` + vue `clip_publications_by_clip` + backfill TikTok. Sans elle, la modale de publication retombe sur l'ancien comportement (`clips.published_tiktok_url`) avec toast d'info.
+12. `v0.26.1-public-finance-stats-migration.sql` — RPCs publiques `get_public_finance_summary()` + `get_public_finance_history(n)` pour la section "Transparence financière" sur `/stats`. Sans elle, la section est masquée silencieusement.
+13. `v0.26.4-fix-stats-rpc.sql` — **HOTFIX** : la RPC `get_public_stats()` (v0.20.0) plantait en prod (`column reports.validated does not exist`) → page `/stats` cassée. Cette migration recrée la RPC avec un handler `undefined_column` qui retombe gracieusement sur "tous les `resolved` comptent" si la colonne manque. À appliquer après v0.26.1.
+14. `v0.28.0-mutual-followers.sql` — RPC publique `get_mutual_followers(p_target_id, p_limit)` qui retourne les profils suivis à la fois par moi et par la cible (preuve sociale "Suivi par @x, @y et N autres que tu suis" sur la page profil). Sans elle, la section mutual followers est masquée silencieusement.
+15. `v0.29.0-user-interests.sql` — table `user_interests` + 3 RPCs (`set_user_interests`, `get_user_interests`, `get_suggested_authors_by_interest`). Permet à l'utilisateur de choisir 3+ sujets favoris à l'onboarding, alimente le feed "Pour toi" et les suggestions d'auteurs. Sans elle, l'étape onboarding "Choisis tes sujets" enregistre rien et le feed "Pour toi" retombe sur le filtre par auteurs suivis uniquement.
+16. `v0.30.0-push-subscriptions.sql` — table `push_subscriptions` + 4 RPCs (`subscribe_push`, `unsubscribe_push`, `has_push_subscription`, `list_my_push_subscriptions`) + trigger `notify_push_on_notification` sur `notifications` INSERT qui POST vers l'Edge Function `send-push-notification` via `pg_net`. Sans elle, le bouton "Notifications push" reste caché (PushNotif détecte que la RPC manque) et aucun push n'est envoyé. **Setup admin requis** : VAPID keys + secrets Supabase + activation `pg_net` + déploiement Edge Function (voir section ⚠️ Reste à faire ci-dessous).
 
 Les sections UI correspondantes affichent un fallback gracieux ("Migration non appliquée") tant que pas exécutées.
 
@@ -77,7 +79,7 @@ Les sections UI correspondantes affichent un fallback gracieux ("Migration non a
 
 **Auth — Phase 1** :
 1. Supabase Dashboard → Auth → Settings → activer "Confirm email"
-2. (Optionnel) Cloudflare Turnstile → créer site → remplacer la sitekey dans `index.html` (actuellement `1x00000000000000000000AA` de test)
+2. Cloudflare Turnstile : sitekey prod déjà câblée dans `index.html` depuis v0.30.1. Vérifier que la secret key correspondante est bien set côté Supabase Auth → Captcha protection. Si Turnstile est désactivé/cassé, l'app continue (fallback gracieux) — mais sans protection bot.
 
 **Web Push notifications (v0.30.0)** :
 1. Générer VAPID keys : `npx web-push generate-vapid-keys` (laisse couler 2 lignes : public + private)
@@ -86,7 +88,7 @@ Les sections UI correspondantes affichent un fallback gracieux ("Migration non a
    ```
    supabase secrets set VAPID_PUBLIC_KEY=<...> VAPID_PRIVATE_KEY=<...> VAPID_SUBJECT=mailto:contact@avis-base.com
    ```
-4. Déployer l'Edge Function : `supabase functions deploy send-push-notification`
+4. Déployer l'Edge Function : `supabase functions deploy send-push-notification` (v0.30.1+ exige un header `Authorization: Bearer <SERVICE_ROLE_KEY>` — le trigger DB l'attache déjà via pg_net, mais redéployer après le patch de sécurité)
 5. Activer l'extension `pg_net` côté Supabase : `create extension if not exists pg_net;`
 6. Configurer les secrets DB lus par le trigger :
    ```

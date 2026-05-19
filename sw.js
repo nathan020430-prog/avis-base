@@ -2,10 +2,11 @@
 // Strategy: network-first for HTML (so updates apply instantly like big social apps),
 // cache-first for static assets, no caching for Supabase API calls.
 //
-// v0.30.0 — Bump VERSION pour buster les caches a chaque release importante.
-//           Web Push notifications (VAPID, SW push handler, notificationclick).
+// v0.30.1 — Bump VERSION pour buster les caches a chaque release importante.
+//           Hotfix audit & securite (RLS server-side 7j, frais Stripe reels,
+//           auto-revoke certif, send-push auth, CORS lockdown, Turnstile prod).
 
-const VERSION = 'v0.30.0';
+const VERSION = 'v0.30.1';
 const SHELL_CACHE = `avis-shell-${VERSION}`;
 const STATIC_CACHE = `avis-static-${VERSION}`;
 

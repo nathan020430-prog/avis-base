@@ -6,6 +6,17 @@ Historique public des versions. Format inspiré de [Keep a Changelog](https://ke
 - v0.11.0 — Upload vidéo direct (desktop)
 - v0.16.0 — App mobile native iOS + Android (Expo)
 
+## [v0.30.1] — Hotfix audit & sécurité
+- **Sécurité** : Edge Function `send-push-notification` protégée par une garde `Authorization: Bearer <SERVICE_ROLE_KEY>` (401 sinon). Sans cette garde, l'endpoint était ouvert sur internet — un attaquant pouvait POST `{user_id, title, body, url}` et envoyer une push spoof à un user arbitraire (phishing direct).
+- **Sécurité** : CORS `Access-Control-Allow-Origin` ne renvoie plus `*` mais une whitelist (`avis-base.com`, `www.avis-base.com`, + `SITE_URL` env si défini, ou `ALLOWED_ORIGINS` csv pour override). Reflect-origin si match + `Vary: Origin` pour empêcher le cache CDN de croiser les réponses.
+- **Auth** : sitekey Turnstile prod remplace la sitekey de test `1x00000000000000000000AA` (bypassable). Secret correspondant configuré côté Supabase Auth → Captcha protection.
+- **Intègre les 3 fixes de l'audit 2026-05-18 jusqu'ici non mergés sur main** (cf. v0.18.2) :
+  - Restriction écriture (7 jours + email confirmé) déplacée côté Postgres : helper `account_can_publish()` + policy INSERT `articles_insert_auth_and_aged`. Avant ce fix, l'attaquant pouvait écrire directement via la clé anon (la restriction était client-only).
+  - `compute-monthly-payout` : frais Stripe lus depuis `balance_transactions` au lieu d'une estimation 5% hardcodée (fallback transparent si l'API échoue, flag `stripe_fees_estimated` dans la réponse).
+  - Trigger `trg_articles_recheck_certification` : révoque automatiquement la certif d'un auteur si son nombre d'articles publiés tombe sous 3.
+- Migration : `v0.18.2-hotfix-audit-rls-and-cert.sql` (idempotent, à appliquer après v0.18.1-hotfix-money-races.sql).
+- Setup admin : redéployer l'Edge Function `send-push-notification` pour appliquer la garde Bearer. Whitelist CORS ajustable via env `ALLOWED_ORIGINS=<csv>` ou `SITE_URL=...`.
+
 ## [v0.30.0] — Web Push notifications
 - **Backend** :
   - Migration `v0.30.0-push-subscriptions.sql` : table `push_subscriptions(user_id, endpoint, p256dh, auth_key, user_agent, created_at, last_seen_at)` avec unique `(user_id, endpoint)` + RLS user-owned + policy `service_role` pour cleanup
