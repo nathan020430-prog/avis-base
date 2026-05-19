@@ -82,6 +82,7 @@ Devenir **la référence du média collaboratif sourcé** : un mélange entre X 
 | **v0.22.1** | 💰 Finance — Top tippers | RPC `get_public_top_tippers(limit, days)` + section "Top donateurs — 30 derniers jours" sur `/financement` (opt-in via `display_consent`). Confirme que `/financement` est désormais 100 % live data (les vues `public_economy_current` / `public_donor_wall` / `public_article_leaderboard` / `public_monthly_archive` étaient déjà branchées depuis v0.17.0) | ✅ Livré |
 | **v0.23.0** | 📖 UX lecture | Préférences typo (3 tailles + serif/sans-serif, persistance localStorage) + temps de lecture restant dynamique (badge flottant top-right) + 3 articles suggérés en fin d'article (algorithme : même thème + likes + reads, exclusion des articles déjà lus en session) | ✅ Livré |
 | **v0.23.1** | 📣 Citation partageable | Sélection texte dans un article → tooltip flottant avec Twitter / Copier / Partage natif. Format auto : « citation » — auteur + lien article + via @avis_base.nth | ✅ Livré |
+| **v0.23.2** | 🔖 Reprise de lecture | Mémorisation de la position de scroll par article dans localStorage (debounced, cleanup 30j, max 100 entrées). Banner discret "Reprendre à X %" à la réouverture avec choix Reprendre / Recommencer | ✅ Livré |
 | **v0.23.0** | Mobile native | App Expo iOS + Android (lecture/interaction, pas d'écriture) — repo séparé `avis-base-app` | 4-6 semaines |
 | **v1.0.0** | 🚀 **LANCEMENT** | **Polish final + com publique + ouverture massive** | 1-2 semaines |
 
@@ -724,6 +725,32 @@ Phase 1 d'abord et on valide.
 - [ ] Les notifications push arrivent
 - [ ] Les actions de création renvoient bien vers le desktop
 - [ ] L'app est soumise aux stores
+
+---
+
+## 🔖 v0.23.2 — Reprise de lecture ✅
+
+> **Livré le 2026-05-19.** L'utilisateur peut revenir sur un article à mi-parcours et reprendre où il s'était arrêté, sans avoir à scroller manuellement.
+
+**Livré :**
+- Module `ReadResume` qui mémorise la position de scroll (en %) par slug d'article
+- Stockage : `localStorage.avb_reading_positions_v1` (Map slug → {pct, at})
+- Cleanup automatique : entrées > 30 jours purgées au boot, plafond à 100 entrées (les plus récentes gardées)
+- Save debounced (600ms après l'arrêt du scroll) pour éviter de spammer le storage
+- Ignore les positions extrêmes : `< 5 %` (juste ouvert) et `> 95 %` (quasi fini)
+- À la réouverture d'un article avec position mémorisée → banner discret en haut :
+  - **🔖 Tu en étais à 42 % de cet article. Reprendre ?**
+  - 2 boutons : `Recommencer` (purge l'entrée) et `Reprendre →` (scroll smooth à la position)
+- Le banner s'insère juste après le bouton "Retour aux articles"
+- Si l'article est terminé (>95 %), l'entrée est purgée → pas de banner inutile
+
+### ✅ Critères de validation
+- [x] Ouvrir un article, scroller à 50 %, fermer
+- [x] Rouvrir l'article → banner "Reprendre à 50 %" apparaît
+- [x] Cliquer "Reprendre" → scroll smooth à la bonne position
+- [x] Cliquer "Recommencer" → banner disparaît, position oubliée
+- [x] Finir un article (>95 %) → pas de banner à la réouverture
+- [x] Pas d'impact perf : save debounced + cleanup automatique
 
 ---
 

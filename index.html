@@ -3396,6 +3396,37 @@ body.read-prefs--size-l .article-page__body{font-size:1.19rem;line-height:1.75}
 body.read-prefs--font-sans .article-page__body{font-family:'Manrope',system-ui,sans-serif}
 body.read-prefs--font-serif .article-page__body{font-family:'Fraunces','Georgia',serif}
 
+/* v0.23.2 — Banner "Reprendre la lecture" */
+.resume-banner{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;margin:0 0 18px;
+  background:linear-gradient(135deg,var(--accent-soft,rgba(184,58,45,.08)) 0%,var(--paper-2,rgba(0,0,0,.02)) 100%);
+  border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:0 3px 3px 0;
+  font-family:var(--fb);font-size:13px;color:var(--ink);
+  animation:resume-in .25s ease-out;
+}
+@keyframes resume-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.resume-banner__icon{font-size:18px;line-height:1;flex-shrink:0}
+.resume-banner__msg{flex:1;line-height:1.4}
+.resume-banner__msg strong{font-weight:600;color:var(--accent);font-feature-settings:"tnum"}
+.resume-banner__actions{display:flex;gap:6px;flex-shrink:0}
+.resume-banner__btn{
+  padding:5px 11px;font-family:var(--fb);font-size:12px;font-weight:600;
+  border:1px solid var(--rule);background:var(--surface);color:var(--ink);
+  cursor:pointer;border-radius:3px;transition:all .12s;
+}
+.resume-banner__btn:hover{border-color:var(--accent);color:var(--accent)}
+.resume-banner__btn--primary{background:var(--accent);color:#FDFAF3;border-color:var(--accent)}
+.resume-banner__btn--primary:hover{opacity:.92;color:#FDFAF3}
+.resume-banner__btn--ghost{background:none;border-color:transparent;color:var(--ink-muted);font-weight:500}
+.resume-banner__btn--ghost:hover{background:var(--paper-2,rgba(0,0,0,.05));color:var(--ink);border-color:transparent}
+@media (max-width:640px){
+  .resume-banner{flex-wrap:wrap;font-size:12.5px}
+  .resume-banner__msg{flex-basis:100%;order:1}
+  .resume-banner__icon{order:0}
+  .resume-banner__actions{flex-basis:100%;order:2;justify-content:flex-end}
+}
+
 /* v0.23.1 — Tooltip "Citer ce passage" qui apparaît sur sélection texte */
 .quote-tooltip{
   position:fixed;z-index:1104;
@@ -9582,7 +9613,159 @@ function updateReadingProgress() {
 
   // v0.23.0 — Met à jour le temps de lecture restant
   if (typeof ReadPrefs !== 'undefined') ReadPrefs.updateRemaining(pct);
+  // v0.23.2 — Sauve la position de scroll pour la reprise (debounced)
+  if (typeof ReadResume !== 'undefined') ReadResume.debouncedSave(pct);
 }
+
+// ═══════════════════════════════════════════════════════════
+// v0.23.2 — Reprise de lecture (resume reading)
+// ═══════════════════════════════════════════════════════════
+const ReadResume = (() => {
+  const STORAGE_KEY = 'avb_reading_positions_v1';
+  const MAX_ENTRIES = 100;
+  const MAX_AGE_MS  = 30 * 24 * 60 * 60 * 1000; // 30 jours
+  const MIN_RESUME_PCT = 0.05;  // ignore les sub-5% (l'user vient à peine de commencer)
+  const MAX_RESUME_PCT = 0.95;  // ignore les 95%+ (quasi fini, pas la peine)
+  let _currentSlug = null;
+  let _saveTimer = null;
+
+  function _loadAll() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return {};
+      const all = JSON.parse(raw);
+      // Cleanup entrées trop vieilles
+      const now = Date.now();
+      let cleaned = false;
+      Object.keys(all).forEach(slug => {
+        if (!all[slug] || (now - (all[slug].at || 0)) > MAX_AGE_MS) {
+          delete all[slug];
+          cleaned = true;
+        }
+      });
+      if (cleaned) _saveAll(all);
+      return all;
+    } catch (e) { return {}; }
+  }
+
+  function _saveAll(all) {
+    try {
+      // Cap au max d'entrées (les plus récentes)
+      const entries = Object.entries(all)
+        .sort((a, b) => (b[1].at || 0) - (a[1].at || 0))
+        .slice(0, MAX_ENTRIES);
+      const capped = Object.fromEntries(entries);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(capped));
+    } catch (e) {}
+  }
+
+  function get(slug) {
+    if (!slug) return null;
+    const all = _loadAll();
+    const entry = all[slug];
+    if (!entry) return null;
+    return entry;
+  }
+
+  function set(slug, pct) {
+    if (!slug || !Number.isFinite(pct)) return;
+    const all = _loadAll();
+    if (pct < MIN_RESUME_PCT) {
+      // L'user a juste ouvert l'article, ne pas mémoriser
+      if (all[slug]) { delete all[slug]; _saveAll(all); }
+      return;
+    }
+    if (pct > MAX_RESUME_PCT) {
+      // Article quasi-fini, on supprime (pas la peine de proposer la reprise)
+      if (all[slug]) { delete all[slug]; _saveAll(all); }
+      return;
+    }
+    all[slug] = { pct: Math.round(pct * 1000) / 1000, at: Date.now() };
+    _saveAll(all);
+  }
+
+  function clear(slug) {
+    if (!slug) return;
+    const all = _loadAll();
+    if (all[slug]) { delete all[slug]; _saveAll(all); }
+  }
+
+  // Debounced save called from updateReadingProgress
+  function debouncedSave(pct) {
+    if (!_currentSlug) return;
+    clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(() => { set(_currentSlug, pct); }, 600);
+  }
+
+  // À l'ouverture d'un article : déclenche le tracking pour ce slug et,
+  // si une position est mémorisée, propose la reprise via un banner.
+  function onArticleOpen(article) {
+    _currentSlug = article ? article.slug : null;
+    if (!article) return;
+    const saved = get(article.slug);
+    if (!saved || saved.pct < MIN_RESUME_PCT || saved.pct > MAX_RESUME_PCT) {
+      // Pas de reprise pertinente — on retire un éventuel banner précédent
+      _removeBanner();
+      return;
+    }
+    _renderBanner(article, saved);
+  }
+
+  function _removeBanner() {
+    document.querySelectorAll('.resume-banner').forEach(b => b.remove());
+  }
+
+  function _renderBanner(article, saved) {
+    _removeBanner();
+    const body = document.getElementById('articlePageBody');
+    if (!body) return;
+    const pct = Math.round(saved.pct * 100);
+    const banner = document.createElement('div');
+    banner.className = 'resume-banner';
+    banner.setAttribute('role', 'region');
+    banner.setAttribute('aria-label', 'Reprendre la lecture');
+    banner.innerHTML = `
+      <span class="resume-banner__icon" aria-hidden="true">🔖</span>
+      <div class="resume-banner__msg">Tu en étais à <strong>${pct} %</strong> de cet article. Reprendre ?</div>
+      <div class="resume-banner__actions">
+        <button class="resume-banner__btn resume-banner__btn--ghost" type="button" data-resume="dismiss">Recommencer</button>
+        <button class="resume-banner__btn resume-banner__btn--primary" type="button" data-resume="go">Reprendre →</button>
+      </div>
+    `;
+    // Insère juste après le bouton retour (premier enfant) pour visibilité immédiate
+    const backBtn = body.querySelector('.article-page__back');
+    if (backBtn && backBtn.nextSibling) backBtn.parentNode.insertBefore(banner, backBtn.nextSibling);
+    else body.insertBefore(banner, body.firstChild);
+
+    banner.querySelector('[data-resume="go"]')?.addEventListener('click', () => {
+      _scrollToPct(saved.pct);
+      banner.remove();
+    });
+    banner.querySelector('[data-resume="dismiss"]')?.addEventListener('click', () => {
+      clear(article.slug);
+      banner.remove();
+    });
+  }
+
+  function _scrollToPct(pct) {
+    const modal = document.getElementById('articlePageModal');
+    if (!modal) return;
+    const scroller = modal.querySelector('.modal__body') || modal;
+    // Petit délai pour laisser le DOM se stabiliser
+    setTimeout(() => {
+      const max = scroller.scrollHeight - scroller.clientHeight;
+      if (max > 0) {
+        scroller.scrollTo({ top: max * pct, behavior: 'smooth' });
+      }
+    }, 100);
+  }
+
+  // Cleanup au load (purge des entrées trop vieilles)
+  function init() { _loadAll(); }
+
+  return { init, onArticleOpen, debouncedSave, get, set, clear };
+})();
+window.ReadResume = ReadResume;
 
 // ═══════════════════════════════════════════════════════════
 // v0.23.1 — Citation partageable depuis l'article
@@ -10120,6 +10303,8 @@ function renderArticlePage(a) {
   }
   // v0.23.1 — Met à jour l'article courant pour le module QuoteShare
   if (typeof QuoteShare !== 'undefined') QuoteShare.setCurrentArticle(a);
+  // v0.23.2 — Tracking de la position de lecture + banner reprise si applicable
+  if (typeof ReadResume !== 'undefined') ReadResume.onArticleOpen(a);
   // v0.23.0 — Mémorise l'article comme lu dans la session (pour exclure des suggestions)
   try {
     const seen = JSON.parse(sessionStorage.getItem('avb_seen_articles') || '[]');
@@ -18010,6 +18195,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // v0.23.1 — Citation partageable depuis l'article
   if (typeof QuoteShare !== 'undefined') QuoteShare.bindHandlers();
+
+  // v0.23.2 — Reprise de lecture (cleanup au boot)
+  if (typeof ReadResume !== 'undefined') ReadResume.init();
 
   // ═══ v0.7 NAV MENU ═══
   document.getElementById('navMenuBtn')?.addEventListener('click', e => {
